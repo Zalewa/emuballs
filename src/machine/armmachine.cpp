@@ -7,6 +7,11 @@ uint32_t ArmFlags::dump() const
 	return bits.to_ulong();
 }
 
+void ArmFlags::store(uint32_t bitset)
+{
+	bits = std::bitset<32>(bitset);
+}
+
 void ArmFlags::set(Bit bit, bool state)
 {
 	bits.set(bit, state);

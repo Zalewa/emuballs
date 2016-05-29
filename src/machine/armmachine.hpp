@@ -17,7 +17,13 @@ public:
 		Negative = 31 /// N
 	};
 
+	constexpr static auto F_OVERFLOW = 1 << Overflow;
+	constexpr static auto F_CARRY = 1 << Carry;
+	constexpr static auto F_ZERO = 1 << Zero;
+	constexpr static auto F_NEGATIVE = 1 << Negative;
+
 	uint32_t dump() const;
+	void store(uint32_t bitset);
 	void set(Bit bit, bool state);
 	bool test(Bit bit) const;
 
