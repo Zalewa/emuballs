@@ -1,18 +1,19 @@
 #pragma once
 
-#include "opcode.hpp"
 #include <cstdint>
 
 namespace Machine
 {
 
-class ArmOpCode : public OpCode
+class ArmMachine;
+
+class ArmOpCode
 {
 public:
 	ArmOpCode(uint32_t code);
 	virtual ~ArmOpCode() = default;
 
-	void execute(Machine &machine);
+	void execute(ArmMachine &machine);
 
 protected:
 	virtual void run() = 0;

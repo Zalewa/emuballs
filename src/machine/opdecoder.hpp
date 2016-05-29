@@ -5,20 +5,12 @@
 namespace Machine
 {
 
-class OpCode;
+class ArmOpCode;
 
-class OpDecoder
+class ArmOpDecoder
 {
 public:
-	virtual ~OpDecoder() = default;
-
-	virtual OpCode *next(std::istream &) = 0;
-};
-
-class ArmOpDecoder : public OpDecoder
-{
-public:
-	OpCode *next(std::istream &);
+	ArmOpCode *next(std::istream &);
 };
 
 }
