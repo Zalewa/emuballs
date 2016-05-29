@@ -190,4 +190,10 @@ BOOST_AUTO_TEST_CASE(al_always)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(illegal)
+{
+	constexpr auto code = 0b1111;
+	BOOST_CHECK_THROW(execCode(code, noflags), IllegalOpCodeError);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
