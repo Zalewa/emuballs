@@ -5,12 +5,12 @@
 namespace Machine
 {
 
-class ArmOpCode;
+class ArmOpcode;
 
 class ArmOpDecoder
 {
 public:
-	ArmOpCode *next(std::istream &);
+	ArmOpcode *next(std::istream &);
 };
 
 }

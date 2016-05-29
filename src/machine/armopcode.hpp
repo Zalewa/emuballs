@@ -8,17 +8,17 @@ namespace Machine
 
 class ArmMachine;
 
-class IllegalOpCodeError : std::runtime_error
+class IllegalOpcodeError : std::runtime_error
 {
 public:
 	using runtime_error::runtime_error;
 };
 
-class ArmOpCode
+class ArmOpcode
 {
 public:
-	ArmOpCode(uint32_t code);
-	virtual ~ArmOpCode() = default;
+	ArmOpcode(uint32_t code);
+	virtual ~ArmOpcode() = default;
 
 	void execute(ArmMachine &machine);
 

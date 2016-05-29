@@ -63,7 +63,7 @@ public:
 			return flags.test(ArmFlags::Zero)
 				|| (flags.test(ArmFlags::Negative) != flags.test(ArmFlags::Overflow));
 		default:
-			throw IllegalOpCodeError("unknown condition");
+			throw IllegalOpcodeError("unknown condition");
 		}
 	}
 };
@@ -72,12 +72,12 @@ public:
 
 using namespace Machine;
 
-ArmOpCode::ArmOpCode(uint32_t code)
+ArmOpcode::ArmOpcode(uint32_t code)
 {
 	this->code = code;
 }
 
-void ArmOpCode::execute(ArmMachine &machine)
+void ArmOpcode::execute(ArmMachine &machine)
 {
 	auto condition = (code >> 28) & 0xf;
 	if (ArmConditional::met(condition, machine.cpu().flags()))

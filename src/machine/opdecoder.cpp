@@ -2,7 +2,7 @@
 
 using namespace Machine;
 
-ArmOpCode *ArmOpDecoder::next(std::istream &input)
+ArmOpcode *ArmOpDecoder::next(std::istream &input)
 {
 	uint32_t code = 0;
 	input.read(reinterpret_cast<char*>(&code), sizeof(uint32_t));

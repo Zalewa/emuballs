@@ -5,12 +5,12 @@
 
 using namespace Machine;
 
-class FakeCode : public ArmOpCode
+class FakeCode : public ArmOpcode
 {
 public:
 	bool wasRun;
 
-	FakeCode(uint32_t code) : ArmOpCode(code << 28)
+	FakeCode(uint32_t code) : ArmOpcode(code << 28)
 	{
 		wasRun = false;
 	}
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(al_always)
 BOOST_AUTO_TEST_CASE(illegal)
 {
 	constexpr auto code = 0b1111;
-	BOOST_CHECK_THROW(execCode(code, noflags), IllegalOpCodeError);
+	BOOST_CHECK_THROW(execCode(code, noflags), IllegalOpcodeError);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
