@@ -1,5 +1,3 @@
-include(../CMakeFuncs.txt)
-
 function(def_machine_module name units)
 	def_module(${name} ${units})
 	target_link_libraries(${name} machine)

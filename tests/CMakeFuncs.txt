@@ -1,7 +1,0 @@
-function(def_module name units)
-	add_definitions(-DBOOST_TEST_DYN_LINK)
-	add_executable(${name} ${units})
-	include_directories(${CMAKE_SOURCE_DIR})
-	target_link_libraries(${name} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-	add_test(NAME ${name} COMMAND ${name})
-endfunction()
