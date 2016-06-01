@@ -21,13 +21,14 @@ public:
 	ArmOpcode(uint32_t code);
 	virtual ~ArmOpcode() = default;
 
+	uint32_t code() const;
 	void execute(ArmMachine &machine);
 
 protected:
 	virtual void run() = 0;
 
 private:
-	uint32_t code;
+	uint32_t m_code;
 };
 
 typedef std::unique_ptr<ArmOpcode> ArmOpcodePtr;

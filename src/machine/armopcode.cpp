@@ -74,12 +74,17 @@ using namespace Machine;
 
 ArmOpcode::ArmOpcode(uint32_t code)
 {
-	this->code = code;
+	this->m_code = code;
+}
+
+uint32_t ArmOpcode::code() const
+{
+	return m_code;
 }
 
 void ArmOpcode::execute(ArmMachine &machine)
 {
-	auto condition = (code >> 28) & 0xf;
+	auto condition = (m_code >> 28) & 0xf;
 	if (ArmConditional::met(condition, machine.cpu().flags()))
 	{
 		run();
