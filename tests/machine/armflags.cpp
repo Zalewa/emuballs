@@ -1,6 +1,5 @@
 #define BOOST_TEST_MODULE machine_armflags
 #include <boost/test/unit_test.hpp>
-#include <boost/test/parameterized_test.hpp>
 #include <sstream>
 #include "src/machine/armmachine.hpp"
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 
 namespace Machine
@@ -28,5 +29,7 @@ protected:
 private:
 	uint32_t code;
 };
+
+typedef std::unique_ptr<ArmOpcode> ArmOpcodePtr;
 
 }
