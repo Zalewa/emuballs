@@ -12,6 +12,7 @@ ArmOpcodePtr opcodeSingleDataSwap(uint32_t code);
 ArmOpcodePtr opcodeBranchAndExchange(uint32_t code);
 ArmOpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code);
 ArmOpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code);
+ArmOpcodePtr opcodeDoublewordDataTransfer(uint32_t code);
 ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code);
 ArmOpcodePtr opcodeBlockDataTransfer(uint32_t code);
 ArmOpcodePtr opcodeBranch(uint32_t code);
@@ -29,6 +30,7 @@ const OpFactory factories[] =
 	opcodeBranchAndExchange,
 	opcodeHalfwordDataTransferRegisterOffset,
 	opcodeHalfwordDataTransferImmediateOffset,
+	opcodeDoublewordDataTransfer,
 	opcodeSingleDataTransfer,
 	opcodeBlockDataTransfer,
 	opcodeBranch,

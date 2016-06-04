@@ -17,6 +17,7 @@ struct Fixture
 		opcodeBranchAndExchange,
 		opcodeHalfwordDataTransferRegisterOffset,
 		opcodeHalfwordDataTransferImmediateOffset,
+		opcodeDoublewordDataTransfer,
 		opcodeSingleDataTransfer,
 		opcodeBlockDataTransfer,
 		opcodeBranch,
@@ -50,7 +51,6 @@ struct Fixture
 					{0xe0110192}, // muls r1, r2, r1
 					{0xe0203291}, // mla r0, r1, r2, r3
 					{0xe03bc99a}, // mlas fp, sl, r9, ip
-					{0xe0698798}, // mls r9, r8, r7, r8
 						}});
 		codes.emplace(Factory::opcodeMultiplyLong,
 			CodeSet {
@@ -137,16 +137,6 @@ struct Fixture
 					{0xe6510002}, // ldrb r0, [r1], -r2
 					{0xe6d10282}, // ldrb r0, [r1], r2, lsl #5
 					{0xe6510842}, // ldrb r0, [r1], -r2, asr #16
-					{0xe1c200d0}, // ldrd r0, [r2]
-					{0xe1c200d4}, // ldrd r0, [r2, #4]
-					{0xe1e200d4}, // ldrd r0, [r2, #4]!
-					{0xe0c200d4}, // ldrd r0, [r2], #4
-					{0xe18140d2}, // ldrd r4, [r1, r2]
-					{0xe10140d2}, // ldrd r4, [r1, -r2]
-					{0xe1a140d2}, // ldrd r4, [r1, r2]!
-					{0xe12140d2}, // ldrd r4, [r1, -r2]!
-					{0xe08140d2}, // ldrd r4, [r1], r2
-					{0xe00140d2}, // ldrd r4, [r1], -r2
 					{0xe5810000}, // str r0, [r1]
 					{0xe5810004}, // str r0, [r1, #4]
 					{0xe5010004}, // str r0, [r1, #-4]
@@ -204,6 +194,20 @@ struct Fixture
 					{0xe6410002}, // strb r0, [r1], -r2
 					{0xe6c10282}, // strb r0, [r1], r2, lsl #5
 					{0xe6410842}, // strb r0, [r1], -r2, asr #16
+						}});
+		codes.emplace(Factory::opcodeDoublewordDataTransfer,
+			CodeSet {
+				Machine::opcodeDoublewordDataTransfer, std::list<Code> {
+					{0xe1c200d0}, // ldrd r0, [r2]
+					{0xe1c200d4}, // ldrd r0, [r2, #4]
+					{0xe1e200d4}, // ldrd r0, [r2, #4]!
+					{0xe0c200d4}, // ldrd r0, [r2], #4
+					{0xe18140d2}, // ldrd r4, [r1, r2]
+					{0xe10140d2}, // ldrd r4, [r1, -r2]
+					{0xe1a140d2}, // ldrd r4, [r1, r2]!
+					{0xe12140d2}, // ldrd r4, [r1, -r2]!
+					{0xe08140d2}, // ldrd r4, [r1], r2
+					{0xe00140d2}, // ldrd r4, [r1], -r2
 					{0xe1c200f0}, // strd r0, [r2]
 					{0xe1c200f4}, // strd r0, [r2, #4]
 					{0xe1e200f4}, // strd r0, [r2, #4]!
@@ -214,7 +218,7 @@ struct Fixture
 					{0xe12140f2}, // strd r4, [r1, -r2]!
 					{0xe08140f2}, // strd r4, [r1], r2
 					{0xe00140f2}, // strd r4, [r1], -r2
-						}});
+						}}),
 		codes.emplace(Factory::opcodeBlockDataTransfer,
 			CodeSet {
 				Machine::opcodeBlockDataTransfer, std::list<Code> {
@@ -338,52 +342,24 @@ struct Fixture
 		codes.emplace(Factory::opcodeHalfwordDataTransferRegisterOffset,
 			CodeSet {
 				Machine::opcodeHalfwordDataTransferRegisterOffset, std::list<Code> {
-					{0xe1d100d0}, // ldrsb r0, [r1]
-					{0xe1d100d4}, // ldrsb r0, [r1, #4]
-					{0xe15100d4}, // ldrsb r0, [r1, #-4]
-					{0xe1f100d4}, // ldrsb r0, [r1, #4]!
-					{0xe17100d4}, // ldrsb r0, [r1, #-4]!
-					{0xe0d100d4}, // ldrsb r0, [r1], #4
-					{0xe05100d4}, // ldrsb r0, [r1], #-4
 					{0xe19100d2}, // ldrsb r0, [r1, r2]
 					{0xe11100d2}, // ldrsb r0, [r1, -r2]
 					{0xe1b100d2}, // ldrsb r0, [r1, r2]!
 					{0xe13100d2}, // ldrsb r0, [r1, -r2]!
 					{0xe09100d2}, // ldrsb r0, [r1], r2
 					{0xe01100d2}, // ldrsb r0, [r1], -r2
-					{0xe1d100b0}, // ldrh r0, [r1]
-					{0xe1d100b4}, // ldrh r0, [r1, #4]
-					{0xe15100b4}, // ldrh r0, [r1, #-4]
-					{0xe1f100b4}, // ldrh r0, [r1, #4]!
-					{0xe17100b4}, // ldrh r0, [r1, #-4]!
-					{0xe0d100b4}, // ldrh r0, [r1], #4
-					{0xe05100b4}, // ldrh r0, [r1], #-4
 					{0xe19100b2}, // ldrh r0, [r1, r2]
 					{0xe11100b2}, // ldrh r0, [r1, -r2]
 					{0xe1b100b2}, // ldrh r0, [r1, r2]!
 					{0xe13100b2}, // ldrh r0, [r1, -r2]!
 					{0xe09100b2}, // ldrh r0, [r1], r2
 					{0xe01100b2}, // ldrh r0, [r1], -r2
-					{0xe1d100f0}, // ldrsh r0, [r1]
-					{0xe1d100f4}, // ldrsh r0, [r1, #4]
-					{0xe15100f4}, // ldrsh r0, [r1, #-4]
-					{0xe1f100f4}, // ldrsh r0, [r1, #4]!
-					{0xe17100f4}, // ldrsh r0, [r1, #-4]!
-					{0xe0d100f4}, // ldrsh r0, [r1], #4
-					{0xe05100f4}, // ldrsh r0, [r1], #-4
 					{0xe19100f2}, // ldrsh r0, [r1, r2]
 					{0xe11100f2}, // ldrsh r0, [r1, -r2]
 					{0xe1b100f2}, // ldrsh r0, [r1, r2]!
 					{0xe13100f2}, // ldrsh r0, [r1, -r2]!
 					{0xe09100f2}, // ldrsh r0, [r1], r2
 					{0xe01100f2}, // ldrsh r0, [r1], -r2
-					{0xe1c100b0}, // strh r0, [r1]
-					{0xe1c100b4}, // strh r0, [r1, #4]
-					{0xe14100b4}, // strh r0, [r1, #-4]
-					{0xe1e100b4}, // strh r0, [r1, #4]!
-					{0xe16100b4}, // strh r0, [r1, #-4]!
-					{0xe0c100b4}, // strh r0, [r1], #4
-					{0xe04100b4}, // strh r0, [r1], #-4
 					{0xe18100b2}, // strh r0, [r1, r2]
 					{0xe10100b2}, // strh r0, [r1, -r2]
 					{0xe1a100b2}, // strh r0, [r1, r2]!
@@ -394,6 +370,34 @@ struct Fixture
 		codes.emplace(Factory::opcodeHalfwordDataTransferImmediateOffset,
 			CodeSet {
 				Machine::opcodeHalfwordDataTransferImmediateOffset, std::list<Code> {
+					{0xe1d100d0}, // ldrsb r0, [r1]
+					{0xe1d100d4}, // ldrsb r0, [r1, #4]
+					{0xe15100d4}, // ldrsb r0, [r1, #-4]
+					{0xe1f100d4}, // ldrsb r0, [r1, #4]!
+					{0xe17100d4}, // ldrsb r0, [r1, #-4]!
+					{0xe0d100d4}, // ldrsb r0, [r1], #4
+					{0xe05100d4}, // ldrsb r0, [r1], #-4
+					{0xe1d100b0}, // ldrh r0, [r1]
+					{0xe1d100b4}, // ldrh r0, [r1, #4]
+					{0xe15100b4}, // ldrh r0, [r1, #-4]
+					{0xe1f100b4}, // ldrh r0, [r1, #4]!
+					{0xe17100b4}, // ldrh r0, [r1, #-4]!
+					{0xe0d100b4}, // ldrh r0, [r1], #4
+					{0xe05100b4}, // ldrh r0, [r1], #-4
+					{0xe1d100f0}, // ldrsh r0, [r1]
+					{0xe1d100f4}, // ldrsh r0, [r1, #4]
+					{0xe15100f4}, // ldrsh r0, [r1, #-4]
+					{0xe1f100f4}, // ldrsh r0, [r1, #4]!
+					{0xe17100f4}, // ldrsh r0, [r1, #-4]!
+					{0xe0d100f4}, // ldrsh r0, [r1], #4
+					{0xe05100f4}, // ldrsh r0, [r1], #-4
+					{0xe1c100b0}, // strh r0, [r1]
+					{0xe1c100b4}, // strh r0, [r1, #4]
+					{0xe14100b4}, // strh r0, [r1, #-4]
+					{0xe1e100b4}, // strh r0, [r1, #4]!
+					{0xe16100b4}, // strh r0, [r1, #-4]!
+					{0xe0c100b4}, // strh r0, [r1], #4
+					{0xe04100b4}, // strh r0, [r1], #-4
 						}});
 		codes.emplace(Factory::opcodeCoprocessorDataTransfer,
 			CodeSet {
@@ -530,6 +534,8 @@ std::ostream& operator<< (std::ostream & os, Fixture::Factory factory)
 		return os << "opcodeHalfwordDataTransferRegisterOffset";
 	case Fixture::Factory::opcodeHalfwordDataTransferImmediateOffset:
 		return os << "opcodeHalfwordDataTransferImmediateOffset";
+	case Fixture::Factory::opcodeDoublewordDataTransfer:
+		return os << "opcodeDoublewordDataTransfer";
 	case Fixture::Factory::opcodeSingleDataTransfer:
 		return os << "opcodeSingleDataTransfer";
 	case Fixture::Factory::opcodeBlockDataTransfer:

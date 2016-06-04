@@ -76,6 +76,16 @@ protected:
 	}
 };
 
+class DoublewordDataTransfer  : public ArmOpcode
+{
+public:
+	using ArmOpcode::ArmOpcode;
+protected:
+	void run()
+	{
+	}
+};
+
 class SingleDataTransfer : public ArmOpcode
 {
 public:
@@ -169,6 +179,26 @@ static bool isDataProcessingPsrTransfer(uint32_t code)
 	return false;
 }
 
+static bool isSingleDataSwap(uint32_t code)
+{
+	return (code & 0x0fb00ff0) == 0x01000090;
+}
+
+static bool isDoublewordDataTransfer(uint32_t code)
+{
+	return (code & 0x0e1000d0) == 0x000000d0;
+}
+
+static bool isMultiply(uint32_t code)
+{
+	return (code & 0x0fc000f0) == 0x00000090;
+}
+
+static bool isMultiplyLong(uint32_t code)
+{
+	return (code & 0x0f8000f0) == 0x00800090;
+}
+
 ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code)
 {
 	if (isDataProcessingPsrTransfer(code))
@@ -180,16 +210,28 @@ ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code)
 
 ArmOpcodePtr opcodeMultiply(uint32_t code)
 {
+	if (isMultiply(code))
+	{
+		return ArmOpcodePtr(new Multiply(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeMultiplyLong(uint32_t code)
 {
+	if (isMultiplyLong(code))
+	{
+		return ArmOpcodePtr(new MultiplyLong(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeSingleDataSwap(uint32_t code)
 {
+	if (isSingleDataSwap(code))
+	{
+		return ArmOpcodePtr(new SingleDataSwap(code));
+	}
 	return nullptr;
 }
 
@@ -202,23 +244,58 @@ ArmOpcodePtr opcodeBranchAndExchange(uint32_t code)
 	return nullptr;
 }
 
+static bool canBeHalfwordDataTransfer(uint32_t code)
+{
+	return !(isSingleDataSwap(code) || isDoublewordDataTransfer(code) ||
+		isMultiply(code) || isMultiplyLong(code));
+}
+
 ArmOpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code)
 {
+	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400f90) == 0x00000090)
+	{
+		return ArmOpcodePtr(new HalfwordDataTransferRegisterOffset(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code)
 {
+	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400090) == 0x00400090)
+	{
+		return ArmOpcodePtr(new HalfwordDataTransferRegisterOffset(code));
+	}
+	return nullptr;
+}
+
+ArmOpcodePtr opcodeDoublewordDataTransfer(uint32_t code)
+{
+	if (isDoublewordDataTransfer(code))
+	{
+		return ArmOpcodePtr(new DoublewordDataTransfer(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code)
 {
+	if ((code & 0x0e000010) == 0x06000010)
+	{
+		return nullptr;
+	}
+	if ((code & 0x0c000000) == 0x04000000)
+	{
+		return ArmOpcodePtr(new SingleDataTransfer(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeBlockDataTransfer(uint32_t code)
 {
+	if ((code & 0x0e000000) == 0x08000000)
+	{
+		return ArmOpcodePtr(new BlockDataTransfer(code));
+	}
 	return nullptr;
 }
 
