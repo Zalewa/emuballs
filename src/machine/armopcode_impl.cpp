@@ -150,11 +150,14 @@ protected:
 
 using namespace ArmOpcodes;
 
-static constexpr auto bx_magic = 0x012fff10;
+static bool isBxMagic(uint32_t code)
+{
+	return (code & 0x0ffffff0) == 0x012fff10;
+}
 
 static bool isDataProcessingPsrTransfer(uint32_t code)
 {
-	if ((code & bx_magic) == bx_magic)
+	if (isBxMagic(code))
 		return false;
 	if ((code & (0b111 << 25)) == (0b1 << 25))
 		return true;
@@ -192,6 +195,10 @@ ArmOpcodePtr opcodeSingleDataSwap(uint32_t code)
 
 ArmOpcodePtr opcodeBranchAndExchange(uint32_t code)
 {
+	if (isBxMagic(code))
+	{
+		return ArmOpcodePtr(new BranchAndExchange(code));
+	}
 	return nullptr;
 }
 
@@ -226,21 +233,39 @@ ArmOpcodePtr opcodeBranch(uint32_t code)
 
 ArmOpcodePtr opcodeCoprocessorDataTransfer(uint32_t code)
 {
+	if (((code & 0x0e000000) == 0x0c000000) &&
+		((code & 0x0d600000) != 0x0c400000))
+	{
+		return ArmOpcodePtr(new CoprocessorDataTransfer(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeCoprocessorDataOperation(uint32_t code)
 {
+	if ((code & 0x0f000010) == 0x0e000000)
+	{
+		return ArmOpcodePtr(new CoprocessorDataOperation(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code)
 {
+	if (((code & 0x0f000010) == 0x0e000010) ||
+		((code & 0x0d600000) == 0x0c400000))
+	{
+		return ArmOpcodePtr(new CoprocessorRegisterTransfer(code));
+	}
 	return nullptr;
 }
 
 ArmOpcodePtr opcodeSoftwareInterrupt(uint32_t code)
 {
+	if ((code & 0x0f000000) == 0x0f000000)
+	{
+		return ArmOpcodePtr(new SoftwareInterrupt(code));
+	}
 	return nullptr;
 }
 

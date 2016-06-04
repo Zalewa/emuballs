@@ -398,14 +398,6 @@ struct Fixture
 		codes.emplace(Factory::opcodeCoprocessorDataTransfer,
 			CodeSet {
 				Machine::opcodeCoprocessorDataTransfer, std::list<Code> {
-					{0xeef210e3}, // cdp 0, 15, cr1, cr2, cr3, {7}
-					{0xeee2ff83}, // cdp 15, 14, cr15, cr2, cr3, {4}
-					{0xfef210e3}, // cdp2 0, 15, cr1, cr2, cr3, {7}
-					{0xfee2ff83}, // cdp2 15, 14, cr15, cr2, cr3, {4}
-						}});
-		codes.emplace(Factory::opcodeCoprocessorDataOperation,
-			CodeSet {
-				Machine::opcodeCoprocessorDataOperation, std::list<Code> {
 					{0xed932600}, // ldc 6, cr2, [r3]
 					{0xed91f513}, // cfldr32 mvfx15, [r1, #76] ; 0x4c
 					{0xed11f513}, // cfldr32 mvfx15, [r1, #-76] ; 0xffffffb4
@@ -462,6 +454,14 @@ struct Fixture
 					{0xfd61c4e6}, // stc2l 4, cr12, [r1, #-920]! ; 0xfffffc68
 					{0xfce1b3af}, // stc2l 3, cr11, [r1], #700 ; 0x2bc
 					{0xfc61b3af}, // stc2l 3, cr11, [r1], #-700 ; 0xfffffd44
+						}});
+		codes.emplace(Factory::opcodeCoprocessorDataOperation,
+			CodeSet {
+				Machine::opcodeCoprocessorDataOperation, std::list<Code> {
+					{0xeef210e3}, // cdp 0, 15, cr1, cr2, cr3, {7}
+					{0xeee2ff83}, // cdp 15, 14, cr15, cr2, cr3, {4}
+					{0xfef210e3}, // cdp2 0, 15, cr1, cr2, cr3, {7}
+					{0xfee2ff83}, // cdp2 15, 14, cr15, cr2, cr3, {4}
 						}});
 		codes.emplace(Factory::opcodeCoprocessorRegisterTransfer,
 			CodeSet {
