@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
 #include <istream>
 #include "armopcode.hpp"
 
@@ -21,9 +20,7 @@ public:
 class ArmOpDecoder
 {
 public:
-	typedef std::function<ArmOpcodePtr(uint32_t)> OpFactory;
-
-	std::unique_ptr<ArmOpcode> next(std::istream &);
+	ArmOpcodePtr next(std::istream &);
 };
 
 }

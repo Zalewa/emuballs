@@ -1,44 +1,13 @@
 #include "opdecoder.hpp"
 
+#include "armopcode_impl.hpp"
+
 #include <sstream>
 
 using namespace Machine;
 
 namespace Machine
 {
-
-ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code);
-ArmOpcodePtr opcodeMultiply(uint32_t code);
-ArmOpcodePtr opcodeMultiplyLong(uint32_t code);
-ArmOpcodePtr opcodeSingleDataSwap(uint32_t code);
-ArmOpcodePtr opcodeBranchAndExchange(uint32_t code);
-ArmOpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code);
-ArmOpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code);
-ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeBlockDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeBranch(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorDataOperation(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code);
-ArmOpcodePtr opcodeSoftwareInterrupt(uint32_t code);
-
-ArmOpDecoder::OpFactory factories[] =
-{
-	opcodeDataProcessingPsrTransfer,
-	opcodeMultiply,
-	opcodeMultiplyLong,
-	opcodeSingleDataSwap,
-	opcodeBranchAndExchange,
-	opcodeHalfwordDataTransferRegisterOffset,
-	opcodeHalfwordDataTransferImmediateOffset,
-	opcodeSingleDataTransfer,
-	opcodeBlockDataTransfer,
-	opcodeBranch,
-	opcodeCoprocessorDataTransfer,
-	opcodeCoprocessorDataOperation,
-	opcodeCoprocessorRegisterTransfer,
-	opcodeSoftwareInterrupt
-};
 
 }
 

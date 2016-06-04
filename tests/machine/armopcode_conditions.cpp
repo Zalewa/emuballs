@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE machine_armopcode
+#define BOOST_TEST_MODULE machine_armopcode_conditions
 #include <boost/test/unit_test.hpp>
 #include "src/machine/armopcode.hpp"
 #include "src/machine/armmachine.hpp"
