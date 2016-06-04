@@ -294,6 +294,7 @@ struct Fixture
 					{0xe0e10002}, // rsc r0, r1, r2
 					{0xe0f10002}, // rscs r0, r1, r2
 					{0xe0010002}, // and r0, r1, r2
+					{0xe0010080}, // and r0, r1, r0, lsl #1
 					{0xe0100151}, // ands r0, r0, r1, asr r1
 					{0xe0110002}, // ands r0, r1, r2
 					{0xe0210002}, // eor r0, r1, r2
@@ -564,6 +565,19 @@ std::ostream &operator<<(std::ostream &os, const Fixture::Code &code)
 	return os;
 }
 
+std::ostream &operator<<(std::ostream &os, const Machine::ArmOpcodePtr &ptr)
+{
+	if (ptr)
+	{
+		os << typeid(*ptr).name();
+	}
+	else
+	{
+		os << "nullptr";
+	}
+	return os;
+}
+
 BOOST_FIXTURE_TEST_SUITE(armopcode_factory, Fixture)
 
 BOOST_AUTO_TEST_CASE(run)
@@ -587,8 +601,9 @@ BOOST_AUTO_TEST_CASE(run)
 			for (auto const &code : otherbatch.second.codes)
 			{
 				std::stringstream ss;
-				ss << codebatch.first << " <- " << otherbatch.first << " " << code;
 				Machine::ArmOpcodePtr opcode = factory(code.code);
+				ss << codebatch.first << " <- " << otherbatch.first << " "
+					<< code << " is " << opcode;
 				BOOST_CHECK_MESSAGE(opcode == nullptr, ss.str());
 			}
 		}
