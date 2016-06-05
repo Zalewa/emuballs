@@ -28,7 +28,7 @@ public:
 	void execute(Machine &machine);
 
 protected:
-	virtual void run() = 0;
+	virtual void run(Machine &machine) = 0;
 
 private:
 	uint32_t m_code;

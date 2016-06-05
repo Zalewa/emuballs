@@ -1,5 +1,7 @@
 #include "armopcode.hpp"
 
+#include "armmachine.hpp"
+
 namespace Machine
 {
 
@@ -14,7 +16,7 @@ class DataProcessingPsrTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -24,7 +26,7 @@ class Multiply : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -34,7 +36,7 @@ class MultiplyLong : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -44,7 +46,7 @@ class SingleDataSwap : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -54,7 +56,7 @@ class BranchAndExchange : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -64,7 +66,7 @@ class HalfwordDataTransferRegisterOffset  : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -74,7 +76,7 @@ class HalfwordDataTransferImmediateOffset : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -84,7 +86,7 @@ class DoublewordDataTransfer  : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -94,7 +96,7 @@ class SingleDataTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -104,7 +106,7 @@ class BlockDataTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -114,8 +116,18 @@ class Branch : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
+		bool link = (1 << 24) & code();
+		auto masked = 0x00ffffff & code();
+		auto sign = 0x00800000 & code();
+		auto offset = (masked << 2) | (sign ? 0xfc000000 : 0);
+		if (link)
+		{
+			auto pc = machine.cpu().regs().pc();
+			machine.cpu().regs().lr() = pc - PREFETCH_SIZE + INSTRUCTION_SIZE;
+		}
+		machine.cpu().regs().pc() += offset;
 	}
 };
 
@@ -124,7 +136,7 @@ class CoprocessorDataTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -134,7 +146,7 @@ class CoprocessorDataOperation : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -144,7 +156,7 @@ class CoprocessorRegisterTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };
@@ -154,7 +166,7 @@ class SoftwareInterrupt : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run()
+	void run(Machine &machine)
 	{
 	}
 };

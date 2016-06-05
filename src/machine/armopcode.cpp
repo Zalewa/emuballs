@@ -92,6 +92,6 @@ void Opcode::execute(Machine &machine)
 	auto condition = (m_code >> 28) & 0xf;
 	if (Conditional::met(condition, machine.cpu().flags()))
 	{
-		run();
+		run(machine);
 	}
 }

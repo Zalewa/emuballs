@@ -15,7 +15,7 @@ public:
 		wasRun = false;
 	}
 
-	void run()
+	void run(Machine::Arm::Machine &machine)
 	{
 		wasRun = true;
 	}

@@ -4,6 +4,7 @@ function(def_machine_module name units)
 endfunction()
 
 def_machine_module(machine_armflags armflags.cpp)
+def_machine_module(machine_armopcode_branch armopcode_branch.cpp)
 def_machine_module(machine_armopcode_conditions armopcode_conditions.cpp)
 def_machine_module(machine_armopcode_factory armopcode_factory.cpp)
 def_machine_module(machine_memory memory.cpp)

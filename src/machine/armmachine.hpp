@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <vector>
 #include "dptr.hpp"
 
 namespace Machine
@@ -8,6 +9,33 @@ namespace Machine
 
 namespace Arm
 {
+
+constexpr auto PREFETCH_SIZE = 8;
+constexpr auto INSTRUCTION_SIZE = 4;
+
+typedef uint32_t regval;
+
+class RegisterSet
+{
+public:
+	RegisterSet();
+
+	regval &sp();
+	const regval &sp() const;
+
+	regval &lr();
+	const regval &lr() const;
+
+	regval &pc();
+	const regval &pc() const;
+
+	regval &operator[](int idx);
+	const regval &operator[](int idx) const;
+
+private:
+	std::vector<regval> regs;
+};
+
 
 class Flags
 {
@@ -25,8 +53,8 @@ public:
 	constexpr static auto F_ZERO = 1 << Zero;
 	constexpr static auto F_NEGATIVE = 1 << Negative;
 
-	uint32_t dump() const;
-	void store(uint32_t bitset);
+	regval dump() const;
+	void store(regval bitset);
 	void set(Bit bit, bool state);
 	bool test(Bit bit) const;
 
@@ -37,7 +65,11 @@ private:
 class Cpu
 {
 public:
+	const Flags &flags() const;
 	Flags &flags();
+
+	const RegisterSet &regs() const;
+	RegisterSet &regs();
 
 private:
 	DPtr<Cpu> d;
