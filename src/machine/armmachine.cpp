@@ -1,5 +1,9 @@
 #include "armmachine.hpp"
 #include "memory.hpp"
+#include "opdecoder.hpp"
+
+#include <queue>
+#include <sstream>
 
 namespace Machine { namespace Arm {
 
@@ -113,11 +117,51 @@ RegisterSet &Cpu::regs()
 
 ///////////////////////////////////////////////////////////////////////////
 
+namespace Machine { namespace Arm
+{
+class Prefetch
+{
+public:
+	uint32_t next(Machine &machine)
+	{
+		collect(machine);
+		return pop();
+	}
+
+private:
+	std::queue<uint32_t> prefetchedInstructions;
+
+	void collect(Machine &machine)
+	{
+		while (prefetchedInstructions.size() < 2)
+		{
+			auto &pc = machine.cpu().regs().pc();
+			uint32_t instruction = machine.memory().word(pc);
+			prefetchedInstructions.push(instruction);
+			pc += 4;
+		}
+	}
+
+	uint32_t pop()
+	{
+		auto instruction = prefetchedInstructions.front();
+		prefetchedInstructions.pop();
+		return instruction;
+	}
+};
+}}
+
 DClass<Machine::Arm::Machine>
 {
 public:
 	Machine::Arm::Cpu cpu;
 	Machine::Memory memory;
+	Machine::Arm::Prefetch prefetch;
+
+	void flushPrefetch()
+	{
+		prefetch = Machine::Arm::Prefetch();
+	}
 };
 
 DPointered(Machine::Arm::Machine);
@@ -134,5 +178,28 @@ Machine::Memory &Machine::Arm::Machine::memory()
 
 void Machine::Arm::Machine::cycle()
 {
-	cpu().regs().pc() += INSTRUCTION_SIZE;
+	// Prefetch instructions and get next instruction to execute.
+	auto instruction = d->prefetch.next(*this);
+	auto pc = cpu().regs().pc();
+	// Decode opcode.
+	OpDecoder decoder;
+	OpcodePtr opcode;
+	try
+	{
+		opcode = decoder.decode(instruction);
+	}
+	catch (const OpDecodeError &error)
+	{
+		std::stringstream ss;
+		ss << error.what() << "; instruction addr = " << pc - PREFETCH_SIZE;
+		throw OpDecodeError(ss.str());
+	}
+	// Execute opcode.
+	opcode->execute(*this);
+	// Flush prefetched instructions if pc register changed due to opcode
+	// execution.
+	if (pc != cpu().regs().pc())
+	{
+		d->flushPrefetch();
+	}
 }

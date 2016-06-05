@@ -24,6 +24,7 @@ class OpDecoder
 {
 public:
 	OpcodePtr next(std::istream &);
+	OpcodePtr decode(uint32_t instruction);
 };
 
 }

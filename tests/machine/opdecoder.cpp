@@ -19,12 +19,6 @@ struct Fixture
 
 BOOST_FIXTURE_TEST_SUITE(opdecoder, Fixture);
 
-BOOST_AUTO_TEST_CASE(invalidConditional)
-{
-	prepare(0xf0000000);
-	BOOST_CHECK_THROW(decoder.next(io), OpDecodeError);
-}
-
 BOOST_AUTO_TEST_CASE(empty)
 {
 	BOOST_CHECK_THROW(decoder.next(io), std::ios::failure);

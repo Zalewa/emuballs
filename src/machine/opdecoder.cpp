@@ -6,14 +6,14 @@
 
 namespace Machine { namespace Arm {
 
-static void throwDecodeError(const std::string &why, uint32_t code, std::streampos position)
+static OpDecodeError decodeError(const std::string &why, uint32_t code, std::streampos position)
 {
 	std::stringstream ss;
 	ss << why << " " << std::hex << code << " at " << std::dec << position;
-	throw OpDecodeError(ss.str());
+	return OpDecodeError(ss.str());
 }
 
-std::unique_ptr<Opcode> OpDecoder::next(std::istream &input)
+OpcodePtr OpDecoder::next(std::istream &input)
 {
 	auto position = input.tellg();
 	uint32_t code = 0;
@@ -23,16 +23,22 @@ std::unique_ptr<Opcode> OpDecoder::next(std::istream &input)
 	{
 		throw std::istream::failure("buffer read failure");
 	}
-
-	if ((code & 0xf0000000) == 0xf0000000)
+	try
 	{
-		throwDecodeError("invalid conditional in opcode", code, position);
+		return decode(code);
 	}
+	catch (const OpDecodeError &e)
+	{
+		throw decodeError("unknown opcode", code, position);
+	}
+}
 
-	std::unique_ptr<Opcode> opcode = nullptr;
+OpcodePtr OpDecoder::decode(uint32_t instruction)
+{
+	OpcodePtr opcode = nullptr;
 	for (auto factory : factories)
 	{
-		opcode = factory(code);
+		opcode = factory(instruction);
 		if (opcode)
 		{
 			break;
@@ -40,7 +46,7 @@ std::unique_ptr<Opcode> OpDecoder::next(std::istream &input)
 	}
 	if (!opcode)
 	{
-		throwDecodeError("unkown opcode", code, position);
+		throw decodeError("unkown opcode", instruction, 0);
 	}
 
 	return opcode;

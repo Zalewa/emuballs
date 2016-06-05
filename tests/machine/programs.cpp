@@ -32,7 +32,7 @@ struct Fixture
 			machine.memory().putWord(addr, *begin);
 		}
 		machine.cpu().regs().pc() = 0;
-		machine.cpu().regs().lr() = addr;
+		machine.cpu().regs().lr() = addr + PREFETCH_SIZE;
 		snapshot = machine;
 	}
 
