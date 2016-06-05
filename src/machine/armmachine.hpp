@@ -7,6 +7,8 @@
 namespace Machine
 {
 
+class Memory;
+
 namespace Arm
 {
 
@@ -79,6 +81,9 @@ class Machine
 {
 public:
 	Cpu &cpu();
+	Memory &memory();
+
+	void cycle();
 
 private:
 	DPtr<Machine> d;

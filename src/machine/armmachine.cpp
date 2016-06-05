@@ -1,5 +1,7 @@
 #include "armmachine.hpp"
+#include "memory.hpp"
 
+using namespace Machine;
 using namespace Machine::Arm;
 
 RegisterSet::RegisterSet()
@@ -106,11 +108,22 @@ DClass<Machine::Arm::Machine>
 {
 public:
 	Cpu cpu;
+	Memory memory;
 };
 
 DPointered(Machine::Arm::Machine);
 
-Cpu &Machine::Arm::Machine::cpu()
+Machine::Arm::Cpu &Machine::Arm::Machine::cpu()
 {
 	return d->cpu;
+}
+
+Machine::Memory &Machine::Arm::Machine::memory()
+{
+	return d->memory;
+}
+
+void Machine::Arm::Machine::cycle()
+{
+	cpu().regs().pc() += INSTRUCTION_SIZE;
 }
