@@ -6,162 +6,162 @@ namespace Machine
 namespace Arm
 {
 
-namespace Opcode
+namespace OpcodeImpl
 {
 
-class DataProcessingPsrTransfer : public ArmOpcode
+class DataProcessingPsrTransfer : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class Multiply : public ArmOpcode
+class Multiply : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class MultiplyLong : public ArmOpcode
+class MultiplyLong : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class SingleDataSwap : public ArmOpcode
+class SingleDataSwap : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class BranchAndExchange : public ArmOpcode
+class BranchAndExchange : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class HalfwordDataTransferRegisterOffset  : public ArmOpcode
+class HalfwordDataTransferRegisterOffset  : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class HalfwordDataTransferImmediateOffset : public ArmOpcode
+class HalfwordDataTransferImmediateOffset : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class DoublewordDataTransfer  : public ArmOpcode
+class DoublewordDataTransfer  : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class SingleDataTransfer : public ArmOpcode
+class SingleDataTransfer : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class BlockDataTransfer : public ArmOpcode
+class BlockDataTransfer : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class Branch : public ArmOpcode
+class Branch : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class CoprocessorDataTransfer : public ArmOpcode
+class CoprocessorDataTransfer : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class CoprocessorDataOperation : public ArmOpcode
+class CoprocessorDataOperation : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class CoprocessorRegisterTransfer : public ArmOpcode
+class CoprocessorRegisterTransfer : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-class SoftwareInterrupt : public ArmOpcode
+class SoftwareInterrupt : public Opcode
 {
 public:
-	using ArmOpcode::ArmOpcode;
+	using Opcode::Opcode;
 protected:
 	void run()
 	{
 	}
 };
 
-} // namespace Opcode
+} // namespace OpcodeImpl
 
-using namespace Opcode;
+using namespace OpcodeImpl;
 
 static bool isBxMagic(uint32_t code)
 {
@@ -202,47 +202,47 @@ static bool isMultiplyLong(uint32_t code)
 	return (code & 0x0f8000f0) == 0x00800090;
 }
 
-ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code)
+OpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code)
 {
 	if (isDataProcessingPsrTransfer(code))
 	{
-		return ArmOpcodePtr(new DataProcessingPsrTransfer(code));
+		return OpcodePtr(new DataProcessingPsrTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeMultiply(uint32_t code)
+OpcodePtr opcodeMultiply(uint32_t code)
 {
 	if (isMultiply(code))
 	{
-		return ArmOpcodePtr(new Multiply(code));
+		return OpcodePtr(new Multiply(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeMultiplyLong(uint32_t code)
+OpcodePtr opcodeMultiplyLong(uint32_t code)
 {
 	if (isMultiplyLong(code))
 	{
-		return ArmOpcodePtr(new MultiplyLong(code));
+		return OpcodePtr(new MultiplyLong(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeSingleDataSwap(uint32_t code)
+OpcodePtr opcodeSingleDataSwap(uint32_t code)
 {
 	if (isSingleDataSwap(code))
 	{
-		return ArmOpcodePtr(new SingleDataSwap(code));
+		return OpcodePtr(new SingleDataSwap(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeBranchAndExchange(uint32_t code)
+OpcodePtr opcodeBranchAndExchange(uint32_t code)
 {
 	if (isBxMagic(code))
 	{
-		return ArmOpcodePtr(new BranchAndExchange(code));
+		return OpcodePtr(new BranchAndExchange(code));
 	}
 	return nullptr;
 }
@@ -253,34 +253,34 @@ static bool canBeHalfwordDataTransfer(uint32_t code)
 		isMultiply(code) || isMultiplyLong(code));
 }
 
-ArmOpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code)
+OpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code)
 {
 	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400f90) == 0x00000090)
 	{
-		return ArmOpcodePtr(new HalfwordDataTransferRegisterOffset(code));
+		return OpcodePtr(new HalfwordDataTransferRegisterOffset(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code)
+OpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code)
 {
 	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400090) == 0x00400090)
 	{
-		return ArmOpcodePtr(new HalfwordDataTransferRegisterOffset(code));
+		return OpcodePtr(new HalfwordDataTransferRegisterOffset(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeDoublewordDataTransfer(uint32_t code)
+OpcodePtr opcodeDoublewordDataTransfer(uint32_t code)
 {
 	if (isDoublewordDataTransfer(code))
 	{
-		return ArmOpcodePtr(new DoublewordDataTransfer(code));
+		return OpcodePtr(new DoublewordDataTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code)
+OpcodePtr opcodeSingleDataTransfer(uint32_t code)
 {
 	if ((code & 0x0e000010) == 0x06000010)
 	{
@@ -288,67 +288,67 @@ ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code)
 	}
 	if ((code & 0x0c000000) == 0x04000000)
 	{
-		return ArmOpcodePtr(new SingleDataTransfer(code));
+		return OpcodePtr(new SingleDataTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeBlockDataTransfer(uint32_t code)
+OpcodePtr opcodeBlockDataTransfer(uint32_t code)
 {
 	if ((code & 0x0e000000) == 0x08000000)
 	{
-		return ArmOpcodePtr(new BlockDataTransfer(code));
+		return OpcodePtr(new BlockDataTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeBranch(uint32_t code)
+OpcodePtr opcodeBranch(uint32_t code)
 {
 	if ((code & 0x0e000000) == 0x0a000000)
 	{
-		return ArmOpcodePtr(new Branch(code));
+		return OpcodePtr(new Branch(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeCoprocessorDataTransfer(uint32_t code)
+OpcodePtr opcodeCoprocessorDataTransfer(uint32_t code)
 {
 	if (((code & 0x0e000000) == 0x0c000000) &&
 		((code & 0x0d600000) != 0x0c400000))
 	{
-		return ArmOpcodePtr(new CoprocessorDataTransfer(code));
+		return OpcodePtr(new CoprocessorDataTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeCoprocessorDataOperation(uint32_t code)
+OpcodePtr opcodeCoprocessorDataOperation(uint32_t code)
 {
 	if ((code & 0x0f000010) == 0x0e000000)
 	{
-		return ArmOpcodePtr(new CoprocessorDataOperation(code));
+		return OpcodePtr(new CoprocessorDataOperation(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code)
+OpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code)
 {
 	if (((code & 0x0f000010) == 0x0e000010) ||
 		((code & 0x0d600000) == 0x0c400000))
 	{
-		return ArmOpcodePtr(new CoprocessorRegisterTransfer(code));
+		return OpcodePtr(new CoprocessorRegisterTransfer(code));
 	}
 	return nullptr;
 }
 
-ArmOpcodePtr opcodeSoftwareInterrupt(uint32_t code)
+OpcodePtr opcodeSoftwareInterrupt(uint32_t code)
 {
 	if ((code & 0x0f000000) == 0x0f000000)
 	{
-		return ArmOpcodePtr(new SoftwareInterrupt(code));
+		return OpcodePtr(new SoftwareInterrupt(code));
 	}
 	return nullptr;
 }
 
-} // namespace Arm
+} // namespace 
 
 } // namespace Machine

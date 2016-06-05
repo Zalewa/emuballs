@@ -7,7 +7,7 @@ using namespace Machine::Arm;
 
 struct Fixture
 {
-	ArmOpDecoder decoder;
+	OpDecoder decoder;
 	std::stringstream io;
 
 	void prepare(uint32_t code)

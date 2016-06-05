@@ -9,7 +9,7 @@ namespace Machine
 namespace Arm
 {
 
-class ArmFlags
+class Flags
 {
 public:
 	enum Bit
@@ -34,22 +34,22 @@ private:
 	std::bitset<32> bits;
 };
 
-class ArmCpu
+class Cpu
 {
 public:
-	ArmFlags &flags();
+	Flags &flags();
 
 private:
-	DPtr<ArmCpu> d;
+	DPtr<Cpu> d;
 };
 
-class ArmMachine
+class Machine
 {
 public:
-	ArmCpu &cpu();
+	Cpu &cpu();
 
 private:
-	DPtr<ArmMachine> d;
+	DPtr<Machine> d;
 };
 
 } // namespace Arm

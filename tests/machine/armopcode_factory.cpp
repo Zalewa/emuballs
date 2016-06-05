@@ -574,7 +574,7 @@ std::ostream &operator<<(std::ostream &os, const Fixture::Code &code)
 namespace Machine { namespace Arm
 {
 
-std::ostream &operator<<(std::ostream &os, const Machine::Arm::ArmOpcodePtr &ptr)
+std::ostream &operator<<(std::ostream &os, const OpcodePtr &ptr)
 {
 	if (ptr)
 	{
@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(run)
 		{
 			std::stringstream ss;
 			ss << codebatch.first << " " << code;
-			Machine::Arm::ArmOpcodePtr opcode = factory(code.code);
+			Machine::Arm::OpcodePtr opcode = factory(code.code);
 			BOOST_CHECK_MESSAGE(opcode != nullptr, ss.str());
 		}
 		for (auto const &otherbatch : codes)
@@ -612,7 +612,7 @@ BOOST_AUTO_TEST_CASE(run)
 			for (auto const &code : otherbatch.second.codes)
 			{
 				std::stringstream ss;
-				Machine::Arm::ArmOpcodePtr opcode = factory(code.code);
+				Machine::Arm::OpcodePtr opcode = factory(code.code);
 				ss << codebatch.first << " <- " << otherbatch.first << " "
 					<< code << " is " << opcode;
 				BOOST_CHECK_MESSAGE(opcode == nullptr, ss.str());

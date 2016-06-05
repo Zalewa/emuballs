@@ -5,20 +5,20 @@
 
 using namespace Machine::Arm;
 
-static const ArmFlags::Bit bits[] = {
-	ArmFlags::Overflow, ArmFlags::Carry, ArmFlags::Negative, ArmFlags::Zero
+static const Flags::Bit bits[] = {
+	Flags::Overflow, Flags::Carry, Flags::Negative, Flags::Zero
 };
 
-std::string bitName(ArmFlags::Bit bit)
+std::string bitName(Flags::Bit bit)
 {
 	std::stringstream ss;
 	ss << "Bit " << bit;
 	return ss.str();
 }
 
-void testBit(ArmFlags::Bit bit)
+void testBit(Flags::Bit bit)
 {
-	ArmFlags flags;
+	Flags flags;
 	BOOST_CHECK_MESSAGE(!flags.test(bit), bitName(bit));
 	flags.set(bit, true);
 	BOOST_CHECK_MESSAGE(flags.test(bit), bitName(bit));
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(checkBits)
 
 BOOST_AUTO_TEST_CASE(dumpAll)
 {
-	ArmFlags flags;
+	Flags flags;
 	for (auto bit : bits)
 	{
 		flags.set(bit, true);
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(dumpEach)
 {
 	for (auto bit : bits)
 	{
-		ArmFlags flags;
+		Flags flags;
 		flags.set(bit, true);
 		auto dumped = flags.dump();
 		BOOST_CHECK_EQUAL(dumped, 1U << bit);
@@ -58,15 +58,15 @@ BOOST_AUTO_TEST_CASE(dumpEach)
 
 BOOST_AUTO_TEST_CASE(store)
 {
-	ArmFlags flags;
+	Flags flags;
 	flags.store(0xf0000000U);
 	for (auto bit : bits)
 	{
 		BOOST_CHECK_MESSAGE(flags.test(bit), bitName(bit));
 	}
 	flags.store(0x60000000U);
-	BOOST_CHECK(!flags.test(ArmFlags::Overflow));
-	BOOST_CHECK(flags.test(ArmFlags::Carry));
-	BOOST_CHECK(!flags.test(ArmFlags::Negative));
-	BOOST_CHECK(flags.test(ArmFlags::Zero));
+	BOOST_CHECK(!flags.test(Flags::Overflow));
+	BOOST_CHECK(flags.test(Flags::Carry));
+	BOOST_CHECK(!flags.test(Flags::Negative));
+	BOOST_CHECK(flags.test(Flags::Zero));
 }

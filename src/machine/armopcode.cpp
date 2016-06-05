@@ -7,7 +7,7 @@ namespace Machine
 namespace Arm
 {
 
-class ArmConditional
+class Conditional
 {
 public:
 	enum Cond
@@ -29,42 +29,42 @@ public:
 		al
 	};
 
-	static bool met(uint8_t condition, const ArmFlags &flags)
+	static bool met(uint8_t condition, const Flags &flags)
 	{
 		switch (condition)
 		{
 		case al:
 			return true;
 		case eq:
-			return flags.test(ArmFlags::Zero);
+			return flags.test(Flags::Zero);
 		case ne:
-			return !flags.test(ArmFlags::Zero);
+			return !flags.test(Flags::Zero);
 		case cs:
-			return flags.test(ArmFlags::Carry);
+			return flags.test(Flags::Carry);
 		case cc:
-			return !flags.test(ArmFlags::Carry);
+			return !flags.test(Flags::Carry);
 		case mi:
-			return flags.test(ArmFlags::Negative);
+			return flags.test(Flags::Negative);
 		case pl:
-			return !flags.test(ArmFlags::Negative);
+			return !flags.test(Flags::Negative);
 		case vs:
-			return flags.test(ArmFlags::Overflow);
+			return flags.test(Flags::Overflow);
 		case vc:
-			return !flags.test(ArmFlags::Overflow);
+			return !flags.test(Flags::Overflow);
 		case hi:
-			return flags.test(ArmFlags::Carry) && !flags.test(ArmFlags::Zero);
+			return flags.test(Flags::Carry) && !flags.test(Flags::Zero);
 		case ls:
-			return !flags.test(ArmFlags::Carry) || flags.test(ArmFlags::Zero);
+			return !flags.test(Flags::Carry) || flags.test(Flags::Zero);
 		case ge:
-			return flags.test(ArmFlags::Negative) == flags.test(ArmFlags::Overflow);
+			return flags.test(Flags::Negative) == flags.test(Flags::Overflow);
 		case lt:
-			return flags.test(ArmFlags::Negative) != flags.test(ArmFlags::Overflow);
+			return flags.test(Flags::Negative) != flags.test(Flags::Overflow);
 		case gt:
-			return !flags.test(ArmFlags::Zero)
-				&& (flags.test(ArmFlags::Negative) == flags.test(ArmFlags::Overflow));
+			return !flags.test(Flags::Zero)
+				&& (flags.test(Flags::Negative) == flags.test(Flags::Overflow));
 		case le:
-			return flags.test(ArmFlags::Zero)
-				|| (flags.test(ArmFlags::Negative) != flags.test(ArmFlags::Overflow));
+			return flags.test(Flags::Zero)
+				|| (flags.test(Flags::Negative) != flags.test(Flags::Overflow));
 		default:
 			throw IllegalOpcodeError("unknown condition");
 		}
@@ -77,20 +77,20 @@ public:
 
 using namespace Machine::Arm;
 
-ArmOpcode::ArmOpcode(uint32_t code)
+Opcode::Opcode(uint32_t code)
 {
 	this->m_code = code;
 }
 
-uint32_t ArmOpcode::code() const
+uint32_t Opcode::code() const
 {
 	return m_code;
 }
 
-void ArmOpcode::execute(ArmMachine &machine)
+void Opcode::execute(Machine &machine)
 {
 	auto condition = (m_code >> 28) & 0xf;
-	if (ArmConditional::met(condition, machine.cpu().flags()))
+	if (Conditional::met(condition, machine.cpu().flags()))
 	{
 		run();
 	}

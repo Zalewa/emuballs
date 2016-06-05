@@ -9,21 +9,21 @@ namespace Arm
 
 {
 
-ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code);
-ArmOpcodePtr opcodeMultiply(uint32_t code);
-ArmOpcodePtr opcodeMultiplyLong(uint32_t code);
-ArmOpcodePtr opcodeSingleDataSwap(uint32_t code);
-ArmOpcodePtr opcodeBranchAndExchange(uint32_t code);
-ArmOpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code);
-ArmOpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code);
-ArmOpcodePtr opcodeDoublewordDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeSingleDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeBlockDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeBranch(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorDataTransfer(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorDataOperation(uint32_t code);
-ArmOpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code);
-ArmOpcodePtr opcodeSoftwareInterrupt(uint32_t code);
+OpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code);
+OpcodePtr opcodeMultiply(uint32_t code);
+OpcodePtr opcodeMultiplyLong(uint32_t code);
+OpcodePtr opcodeSingleDataSwap(uint32_t code);
+OpcodePtr opcodeBranchAndExchange(uint32_t code);
+OpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code);
+OpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code);
+OpcodePtr opcodeDoublewordDataTransfer(uint32_t code);
+OpcodePtr opcodeSingleDataTransfer(uint32_t code);
+OpcodePtr opcodeBlockDataTransfer(uint32_t code);
+OpcodePtr opcodeBranch(uint32_t code);
+OpcodePtr opcodeCoprocessorDataTransfer(uint32_t code);
+OpcodePtr opcodeCoprocessorDataOperation(uint32_t code);
+OpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code);
+OpcodePtr opcodeSoftwareInterrupt(uint32_t code);
 
 const OpFactory factories[] =
 {

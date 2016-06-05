@@ -10,7 +10,7 @@ namespace Machine
 namespace Arm
 {
 
-class ArmMachine;
+class Machine;
 
 class IllegalOpcodeError : std::runtime_error
 {
@@ -18,14 +18,14 @@ public:
 	using runtime_error::runtime_error;
 };
 
-class ArmOpcode
+class Opcode
 {
 public:
-	ArmOpcode(uint32_t code);
-	virtual ~ArmOpcode() = default;
+	Opcode(uint32_t code);
+	virtual ~Opcode() = default;
 
 	uint32_t code() const;
-	void execute(ArmMachine &machine);
+	void execute(Machine &machine);
 
 protected:
 	virtual void run() = 0;
@@ -34,8 +34,8 @@ private:
 	uint32_t m_code;
 };
 
-typedef std::unique_ptr<ArmOpcode> ArmOpcodePtr;
-typedef std::function<ArmOpcodePtr(uint32_t)> OpFactory;
+typedef std::unique_ptr<Opcode> OpcodePtr;
+typedef std::function<OpcodePtr(uint32_t)> OpFactory;
 
 }
 

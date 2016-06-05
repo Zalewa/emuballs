@@ -13,7 +13,7 @@ static void throwDecodeError(const std::string &why, uint32_t code, std::streamp
 	throw OpDecodeError(ss.str());
 }
 
-std::unique_ptr<ArmOpcode> ArmOpDecoder::next(std::istream &input)
+std::unique_ptr<Opcode> OpDecoder::next(std::istream &input)
 {
 	auto position = input.tellg();
 	uint32_t code = 0;
@@ -29,7 +29,7 @@ std::unique_ptr<ArmOpcode> ArmOpDecoder::next(std::istream &input)
 		throwDecodeError("invalid conditional in opcode", code, position);
 	}
 
-	std::unique_ptr<ArmOpcode> opcode = nullptr;
+	std::unique_ptr<Opcode> opcode = nullptr;
 	for (auto factory : factories)
 	{
 		opcode = factory(code);

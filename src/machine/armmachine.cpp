@@ -2,52 +2,52 @@
 
 using namespace Machine::Arm;
 
-uint32_t ArmFlags::dump() const
+uint32_t Flags::dump() const
 {
 	return bits.to_ulong();
 }
 
-void ArmFlags::store(uint32_t bitset)
+void Flags::store(uint32_t bitset)
 {
 	bits = std::bitset<32>(bitset);
 }
 
-void ArmFlags::set(Bit bit, bool state)
+void Flags::set(Bit bit, bool state)
 {
 	bits.set(bit, state);
 }
 
-bool ArmFlags::test(Bit bit) const
+bool Flags::test(Bit bit) const
 {
 	return bits.test(bit);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-DClass<ArmCpu>
+DClass<Cpu>
 {
 public:
-	ArmFlags flags;
+	Flags flags;
 };
 
-DPointered(ArmCpu);
+DPointered(Cpu);
 
-ArmFlags &ArmCpu::flags()
+Flags &Cpu::flags()
 {
 	return d->flags;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-DClass<ArmMachine>
+DClass<Machine::Arm::Machine>
 {
 public:
-	ArmCpu cpu;
+	Cpu cpu;
 };
 
-DPointered(ArmMachine);
+DPointered(Machine::Arm::Machine);
 
-ArmCpu &ArmMachine::cpu()
+Cpu &Machine::Arm::Machine::cpu()
 {
 	return d->cpu;
 }

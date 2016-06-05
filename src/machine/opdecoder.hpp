@@ -10,7 +10,7 @@ namespace Machine
 namespace Arm
 {
 
-class ArmOpcode;
+class Opcode;
 
 
 class OpDecodeError : public std::runtime_error
@@ -20,10 +20,10 @@ public:
 };
 
 
-class ArmOpDecoder
+class OpDecoder
 {
 public:
-	ArmOpcodePtr next(std::istream &);
+	OpcodePtr next(std::istream &);
 };
 
 }
