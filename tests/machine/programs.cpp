@@ -143,4 +143,21 @@ BOOST_AUTO_TEST_CASE(fibonacci)
 	BOOST_CHECK_EQUAL(r(0), 2);
 }
 
+BOOST_AUTO_TEST_CASE(mul)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <mul>:
+		0xe0000291, // mul	r0, r1, r2
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0);
+	r(1, 4);
+	r(2, 5);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 20);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
