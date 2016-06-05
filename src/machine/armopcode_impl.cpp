@@ -361,6 +361,6 @@ OpcodePtr opcodeSoftwareInterrupt(uint32_t code)
 	return nullptr;
 }
 
-} // namespace 
+} // namespace Arm
 
 } // namespace Machine

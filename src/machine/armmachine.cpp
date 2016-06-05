@@ -1,8 +1,7 @@
 #include "armmachine.hpp"
 #include "memory.hpp"
 
-using namespace Machine;
-using namespace Machine::Arm;
+namespace Machine { namespace Arm {
 
 RegisterSet::RegisterSet()
 {
@@ -49,7 +48,11 @@ auto RegisterSet::operator[](int idx) const -> const regval&
 	return regs[idx];
 }
 
+}}
+
 ///////////////////////////////////////////////////////////////////////////
+
+namespace Machine { namespace Arm {
 
 regval Flags::dump() const
 {
@@ -71,16 +74,20 @@ bool Flags::test(Bit bit) const
 	return bits.test(bit);
 }
 
+}}
+
 ///////////////////////////////////////////////////////////////////////////
 
-DClass<Cpu>
+DClass<Machine::Arm::Cpu>
 {
 public:
-	Flags flags;
-	RegisterSet regs;
+	Machine::Arm::Flags flags;
+	Machine::Arm::RegisterSet regs;
 };
 
-DPointered(Cpu);
+DPointered(Machine::Arm::Cpu);
+
+namespace Machine { namespace Arm {
 
 const Flags &Cpu::flags() const
 {
@@ -102,13 +109,15 @@ RegisterSet &Cpu::regs()
 	return d->regs;
 }
 
+}}
+
 ///////////////////////////////////////////////////////////////////////////
 
 DClass<Machine::Arm::Machine>
 {
 public:
-	Cpu cpu;
-	Memory memory;
+	Machine::Arm::Cpu cpu;
+	Machine::Memory memory;
 };
 
 DPointered(Machine::Arm::Machine);

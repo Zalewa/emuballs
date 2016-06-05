@@ -71,12 +71,6 @@ public:
 	}
 };
 
-} // namespace Arm
-
-} // namespace Machine
-
-using namespace Machine::Arm;
-
 Opcode::Opcode(uint32_t code)
 {
 	this->m_code = code;
@@ -95,3 +89,7 @@ void Opcode::execute(Machine &machine)
 		run(machine);
 	}
 }
+
+} // namespace Arm
+
+} // namespace Machine

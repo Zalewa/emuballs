@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-using namespace Machine::Arm;
+namespace Machine { namespace Arm {
 
 static void throwDecodeError(const std::string &why, uint32_t code, std::streampos position)
 {
@@ -45,3 +45,5 @@ std::unique_ptr<Opcode> OpDecoder::next(std::istream &input)
 
 	return opcode;
 }
+
+}}
