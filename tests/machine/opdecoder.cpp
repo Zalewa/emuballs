@@ -3,7 +3,7 @@
 #include <sstream>
 #include "src/machine/opdecoder.hpp"
 
-using namespace Machine;
+using namespace Machine::Arm;
 
 struct Fixture
 {

@@ -4,13 +4,7 @@
 
 #include <sstream>
 
-using namespace Machine;
-
-namespace Machine
-{
-
-}
-
+using namespace Machine::Arm;
 
 static void throwDecodeError(const std::string &why, uint32_t code, std::streampos position)
 {

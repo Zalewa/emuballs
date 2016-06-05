@@ -3,7 +3,10 @@
 namespace Machine
 {
 
-namespace ArmOpcodes
+namespace Arm
+{
+
+namespace Opcode
 {
 
 class DataProcessingPsrTransfer : public ArmOpcode
@@ -156,9 +159,9 @@ protected:
 	}
 };
 
-}
+} // namespace Opcode
 
-using namespace ArmOpcodes;
+using namespace Opcode;
 
 static bool isBxMagic(uint32_t code)
 {
@@ -346,5 +349,6 @@ ArmOpcodePtr opcodeSoftwareInterrupt(uint32_t code)
 	return nullptr;
 }
 
+} // namespace Arm
 
-}
+} // namespace Machine

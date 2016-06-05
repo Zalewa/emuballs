@@ -34,7 +34,7 @@ struct Fixture
 
 	struct CodeSet
 	{
-		Machine::OpFactory factory;
+		Machine::Arm::OpFactory factory;
 		std::list<Code> codes;
 	};
 
@@ -44,7 +44,7 @@ struct Fixture
 	{
 		codes.emplace(Factory::opcodeMultiply,
 			CodeSet {
-				Machine::opcodeMultiply, std::list<Code> {
+				Machine::Arm::opcodeMultiply, std::list<Code> {
 					{0xe0000291}, // mul r0, r1, r2
 					{0xe0010192}, // mul r1, r2, r1
 					{0xe0100291}, // muls r0, r1, r2
@@ -54,7 +54,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeMultiplyLong,
 			CodeSet {
-				Machine::opcodeMultiplyLong, std::list<Code> {
+				Machine::Arm::opcodeMultiplyLong, std::list<Code> {
 					{0xe0810594}, // umull r0, r1, r4, r5
 					{0xe0932796}, // umulls r2, r3, r6, r7
 					{0xe0a10594}, // umlal r0, r1, r4, r5
@@ -66,20 +66,20 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeBranch,
 			CodeSet {
-				Machine::opcodeBranch, std::list<Code> {
+				Machine::Arm::opcodeBranch, std::list<Code> {
 					{0xeafffffe}, // b 8000
 					{0xebfffffd}, // bl 8000
 						}});
 		codes.emplace(Factory::opcodeBranchAndExchange,
 			CodeSet {
-				Machine::opcodeBranchAndExchange, std::list<Code> {
+				Machine::Arm::opcodeBranchAndExchange, std::list<Code> {
 					{0xe12fff10}, // bx r0
 					{0xe12fff13}, // bx r3
 					{0xe12fff1e}, // bx lr
 						}});
 		codes.emplace(Factory::opcodeSingleDataTransfer,
 			CodeSet {
-				Machine::opcodeSingleDataTransfer, std::list<Code> {
+				Machine::Arm::opcodeSingleDataTransfer, std::list<Code> {
 					{0xe5910000}, // ldr r0, [r1]
 					{0xe5910004}, // ldr r0, [r1, #4]
 					{0xe5110004}, // ldr r0, [r1, #-4]
@@ -197,7 +197,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeDoublewordDataTransfer,
 			CodeSet {
-				Machine::opcodeDoublewordDataTransfer, std::list<Code> {
+				Machine::Arm::opcodeDoublewordDataTransfer, std::list<Code> {
 					{0xe1c200d0}, // ldrd r0, [r2]
 					{0xe1c200d4}, // ldrd r0, [r2, #4]
 					{0xe1e200d4}, // ldrd r0, [r2, #4]!
@@ -221,7 +221,7 @@ struct Fixture
 						}}),
 		codes.emplace(Factory::opcodeBlockDataTransfer,
 			CodeSet {
-				Machine::opcodeBlockDataTransfer, std::list<Code> {
+				Machine::Arm::opcodeBlockDataTransfer, std::list<Code> {
 					{0xe89201c0}, // ldm r2, {r6, r7, r8}
 					{0xe99201c0}, // ldmib r2, {r6, r7, r8}
 					{0xe812ffff}, // ldmda r2, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}
@@ -253,7 +253,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeSingleDataSwap,
 			CodeSet {
-				Machine::opcodeSingleDataSwap, std::list<Code> {
+				Machine::Arm::opcodeSingleDataSwap, std::list<Code> {
 					{0xe1010090}, // swp r0, r0, [r1]
 					{0xe1010092}, // swp r0, r2, [r1]
 					{0xe1410090}, // swpb r0, r0, [r1]
@@ -261,14 +261,14 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeSoftwareInterrupt,
 			CodeSet {
-				Machine::opcodeSoftwareInterrupt, std::list<Code> {
+				Machine::Arm::opcodeSoftwareInterrupt, std::list<Code> {
 					{0xef000001}, // svc 0x00000001
 					{0xefffffff}, // svc 0x00ffffff
 					{0xef00ffff}, // svc 0x0000ffff
 						}});
 		codes.emplace(Factory::opcodeDataProcessingPsrTransfer,
 			CodeSet {
-				Machine::opcodeDataProcessingPsrTransfer, std::list<Code> {
+				Machine::Arm::opcodeDataProcessingPsrTransfer, std::list<Code> {
 					{0xe3100ffe}, // tst r0, #1016 ; 0x3f8
 					{0xe1100001}, // tst r0, r1
 					{0xe1110155}, // tst r1, r5, asr r1
@@ -341,7 +341,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeHalfwordDataTransferRegisterOffset,
 			CodeSet {
-				Machine::opcodeHalfwordDataTransferRegisterOffset, std::list<Code> {
+				Machine::Arm::opcodeHalfwordDataTransferRegisterOffset, std::list<Code> {
 					{0xe19100d2}, // ldrsb r0, [r1, r2]
 					{0xe11100d2}, // ldrsb r0, [r1, -r2]
 					{0xe1b100d2}, // ldrsb r0, [r1, r2]!
@@ -369,7 +369,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeHalfwordDataTransferImmediateOffset,
 			CodeSet {
-				Machine::opcodeHalfwordDataTransferImmediateOffset, std::list<Code> {
+				Machine::Arm::opcodeHalfwordDataTransferImmediateOffset, std::list<Code> {
 					{0xe1d100d0}, // ldrsb r0, [r1]
 					{0xe1d100d4}, // ldrsb r0, [r1, #4]
 					{0xe15100d4}, // ldrsb r0, [r1, #-4]
@@ -401,7 +401,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeCoprocessorDataTransfer,
 			CodeSet {
-				Machine::opcodeCoprocessorDataTransfer, std::list<Code> {
+				Machine::Arm::opcodeCoprocessorDataTransfer, std::list<Code> {
 					{0xed932600}, // ldc 6, cr2, [r3]
 					{0xed91f513}, // cfldr32 mvfx15, [r1, #76] ; 0x4c
 					{0xed11f513}, // cfldr32 mvfx15, [r1, #-76] ; 0xffffffb4
@@ -461,7 +461,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeCoprocessorDataOperation,
 			CodeSet {
-				Machine::opcodeCoprocessorDataOperation, std::list<Code> {
+				Machine::Arm::opcodeCoprocessorDataOperation, std::list<Code> {
 					{0xeef210e3}, // cdp 0, 15, cr1, cr2, cr3, {7}
 					{0xeee2ff83}, // cdp 15, 14, cr15, cr2, cr3, {4}
 					{0xfef210e3}, // cdp2 0, 15, cr1, cr2, cr3, {7}
@@ -469,7 +469,7 @@ struct Fixture
 						}});
 		codes.emplace(Factory::opcodeCoprocessorRegisterTransfer,
 			CodeSet {
-				Machine::opcodeCoprocessorRegisterTransfer, std::list<Code> {
+				Machine::Arm::opcodeCoprocessorRegisterTransfer, std::list<Code> {
 					{0xeee42715}, // mcr 7, 7, r2, cr4, cr5, {0}
 					{0xeee957b2}, // mcr 7, 7, r5, cr9, cr2, {5}
 					{0xfee40415}, // mcr2 4, 7, r0, cr4, cr5, {0}
@@ -571,7 +571,10 @@ std::ostream &operator<<(std::ostream &os, const Fixture::Code &code)
 	return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const Machine::ArmOpcodePtr &ptr)
+namespace Machine { namespace Arm
+{
+
+std::ostream &operator<<(std::ostream &os, const Machine::Arm::ArmOpcodePtr &ptr)
 {
 	if (ptr)
 	{
@@ -584,6 +587,8 @@ std::ostream &operator<<(std::ostream &os, const Machine::ArmOpcodePtr &ptr)
 	return os;
 }
 
+}}
+
 BOOST_FIXTURE_TEST_SUITE(armopcode_factory, Fixture)
 
 BOOST_AUTO_TEST_CASE(run)
@@ -595,7 +600,7 @@ BOOST_AUTO_TEST_CASE(run)
 		{
 			std::stringstream ss;
 			ss << codebatch.first << " " << code;
-			Machine::ArmOpcodePtr opcode = factory(code.code);
+			Machine::Arm::ArmOpcodePtr opcode = factory(code.code);
 			BOOST_CHECK_MESSAGE(opcode != nullptr, ss.str());
 		}
 		for (auto const &otherbatch : codes)
@@ -607,7 +612,7 @@ BOOST_AUTO_TEST_CASE(run)
 			for (auto const &code : otherbatch.second.codes)
 			{
 				std::stringstream ss;
-				Machine::ArmOpcodePtr opcode = factory(code.code);
+				Machine::Arm::ArmOpcodePtr opcode = factory(code.code);
 				ss << codebatch.first << " <- " << otherbatch.first << " "
 					<< code << " is " << opcode;
 				BOOST_CHECK_MESSAGE(opcode == nullptr, ss.str());

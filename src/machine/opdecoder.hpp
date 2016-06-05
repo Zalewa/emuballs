@@ -7,6 +7,9 @@
 namespace Machine
 {
 
+namespace Arm
+{
+
 class ArmOpcode;
 
 
@@ -22,5 +25,7 @@ class ArmOpDecoder
 public:
 	ArmOpcodePtr next(std::istream &);
 };
+
+}
 
 }

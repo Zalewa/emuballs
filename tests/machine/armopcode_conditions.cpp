@@ -3,7 +3,7 @@
 #include "src/machine/armopcode.hpp"
 #include "src/machine/armmachine.hpp"
 
-using namespace Machine;
+using namespace Machine::Arm;
 
 class FakeCode : public ArmOpcode
 {

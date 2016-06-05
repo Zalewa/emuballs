@@ -6,6 +6,9 @@
 namespace Machine
 {
 
+namespace Arm
+{
+
 class ArmFlags
 {
 public:
@@ -49,4 +52,6 @@ private:
 	DPtr<ArmMachine> d;
 };
 
-}
+} // namespace Arm
+
+} // namespace Machine

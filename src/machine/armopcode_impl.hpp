@@ -5,6 +5,10 @@
 namespace Machine
 {
 
+namespace Arm
+
+{
+
 ArmOpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code);
 ArmOpcodePtr opcodeMultiply(uint32_t code);
 ArmOpcodePtr opcodeMultiplyLong(uint32_t code);
@@ -40,5 +44,7 @@ const OpFactory factories[] =
 	opcodeSoftwareInterrupt
 };
 
+
+}
 
 }

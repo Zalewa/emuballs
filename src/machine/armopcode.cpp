@@ -4,6 +4,9 @@
 namespace Machine
 {
 
+namespace Arm
+{
+
 class ArmConditional
 {
 public:
@@ -68,9 +71,11 @@ public:
 	}
 };
 
-}
+} // namespace Arm
 
-using namespace Machine;
+} // namespace Machine
+
+using namespace Machine::Arm;
 
 ArmOpcode::ArmOpcode(uint32_t code)
 {

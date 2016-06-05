@@ -1,6 +1,6 @@
 #include "armmachine.hpp"
 
-using namespace Machine;
+using namespace Machine::Arm;
 
 uint32_t ArmFlags::dump() const
 {

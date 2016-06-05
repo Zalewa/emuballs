@@ -3,7 +3,7 @@
 #include <sstream>
 #include "src/machine/armmachine.hpp"
 
-using namespace Machine;
+using namespace Machine::Arm;
 
 static const ArmFlags::Bit bits[] = {
 	ArmFlags::Overflow, ArmFlags::Carry, ArmFlags::Negative, ArmFlags::Zero

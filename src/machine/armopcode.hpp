@@ -7,6 +7,9 @@
 namespace Machine
 {
 
+namespace Arm
+{
+
 class ArmMachine;
 
 class IllegalOpcodeError : std::runtime_error
@@ -33,5 +36,7 @@ private:
 
 typedef std::unique_ptr<ArmOpcode> ArmOpcodePtr;
 typedef std::function<ArmOpcodePtr(uint32_t)> OpFactory;
+
+}
 
 }
