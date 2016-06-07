@@ -1,6 +1,7 @@
 #include "opdecoder.hpp"
 
 #include "armopcode_impl.hpp"
+#include "errors.hpp"
 
 #include <sstream>
 

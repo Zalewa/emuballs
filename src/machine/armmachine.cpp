@@ -1,6 +1,7 @@
 #include "armmachine.hpp"
 #include "memory.hpp"
 #include "opdecoder.hpp"
+#include "errors.hpp"
 
 #include <queue>
 #include <sstream>

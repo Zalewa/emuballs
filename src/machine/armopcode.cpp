@@ -1,6 +1,8 @@
 #include "armopcode.hpp"
 #include "armmachine.hpp"
 
+#include "errors.hpp"
+
 namespace Machine
 {
 

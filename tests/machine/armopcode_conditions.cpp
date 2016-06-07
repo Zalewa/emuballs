@@ -2,6 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include "src/machine/armopcode.hpp"
 #include "src/machine/armmachine.hpp"
+#include "src/machine/errors.hpp"
 
 using namespace Machine::Arm;
 
@@ -186,5 +187,5 @@ BOOST_AUTO_TEST_CASE(al_always)
 BOOST_AUTO_TEST_CASE(illegal)
 {
 	constexpr auto code = 0b1111;
-	BOOST_CHECK_THROW(execCode(code, noflags), IllegalOpcodeError);
+	BOOST_CHECK_THROW(execCode(code, noflags), Machine::IllegalOpcodeError);
 }

@@ -1,6 +1,8 @@
 #include "armopcode.hpp"
 
 #include "armmachine.hpp"
+#include "errors.hpp"
+#include <algorithm>
 
 namespace Machine
 {
@@ -28,6 +30,36 @@ public:
 protected:
 	void run(Machine &machine)
 	{
+		bool condition = code() & (1 << 20);
+		bool accumulate = code() & (1 << 21);
+		auto rd = (code() >> 16) & 0xf;
+		auto rn = (code() >> 12) & 0xf;
+		auto rs = (code() >> 8) & 0xf;
+		auto rm = code() & 0xf;
+		auto opregs = {rd, rn, rs, rm};
+		if (std::any_of(begin(opregs), end(opregs), [](auto reg){return reg == 15;}))
+		{
+			throw IllegalOpcodeError("mul: register musn't be r15");
+		}
+		if (rd == rm)
+		{
+			throw IllegalOpcodeError("mul: rd musn't be same as rm");
+		}
+		auto &regs = machine.cpu().regs();
+		regs[rd] = regs[rs] * regs[rm];
+		if (accumulate)
+		{
+			regs[rd] += rn;
+		}
+		if (condition)
+		{
+			auto &flags = machine.cpu().flags();
+			flags.set(Flags::Zero, regs[rd] == 0);
+			flags.set(Flags::Negative, regs[rd] & (1 << 31));
+			// "The C (Carry) flag is set to a meaningless value"
+			// ~ ARM7TDMI Data Sheet
+			flags.set(Flags::Carry, regs[rd] & 0x4);
+		}
 	}
 };
 
