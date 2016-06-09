@@ -1,6 +1,7 @@
 #include "armopcode.hpp"
 
 #include "armmachine.hpp"
+#include "armopcode_dataproc_psr.hpp"
 #include "errors.hpp"
 #include <algorithm>
 
@@ -20,6 +21,8 @@ public:
 protected:
 	void run(Machine &machine)
 	{
+		OpcodePtr ptr = decodeDataProcessingPsrTransfer(code());
+		ptr->execute(machine);
 	}
 };
 

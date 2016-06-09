@@ -79,6 +79,56 @@ bool Flags::test(Bit bit) const
 	return bits.test(bit);
 }
 
+bool Flags::carry() const
+{
+	return test(Carry);
+}
+
+bool Flags::carry(bool flag)
+{
+	set(Carry, flag);
+	return flag;
+}
+
+bool Flags::overflow() const
+{
+	return test(Overflow);
+}
+
+bool Flags::overflow(bool flag)
+{
+	set(Overflow, flag);
+	return flag;
+}
+
+bool Flags::zero() const
+{
+	return test(Zero);
+}
+
+bool Flags::zero(bool flag)
+{
+	set(Zero, flag);
+	return flag;
+}
+
+bool Flags::negative() const
+{
+	return test(Negative);
+}
+
+bool Flags::negative(bool flag)
+{
+	set(Negative, flag);
+	return flag;
+}
+
+cpumode Flags::cpuMode() const
+{
+	return dump() & 0x1f;
+}
+
+
 }}
 
 ///////////////////////////////////////////////////////////////////////////
@@ -87,6 +137,7 @@ DClass<Machine::Arm::Cpu>
 {
 public:
 	Machine::Arm::Flags flags;
+	Machine::Arm::Flags storedFlags[32];
 	Machine::Arm::RegisterSet regs;
 };
 
@@ -102,6 +153,28 @@ const Flags &Cpu::flags() const
 Flags &Cpu::flags()
 {
 	return d->flags;
+}
+
+const Flags &Cpu::flagsSpsr() const
+{
+	return flagsSpsr(flags().cpuMode());
+}
+
+Flags &Cpu::flagsSpsr()
+{
+	return flagsSpsr(flags().cpuMode());
+}
+
+const Flags &Cpu::flagsSpsr(cpumode mode) const
+{
+	if (mode >= 32)
+		throw std::out_of_range("cpumode must be <= 31, was: " + std::to_string(mode));
+	return d->storedFlags[mode];
+}
+
+Flags &Cpu::flagsSpsr(cpumode mode)
+{
+	return const_cast<Flags&>( static_cast<const Cpu&>(*this).flagsSpsr(mode) );
 }
 
 const RegisterSet &Cpu::regs() const
@@ -172,7 +245,17 @@ Machine::Arm::Cpu &Machine::Arm::Machine::cpu()
 	return d->cpu;
 }
 
+const Machine::Arm::Cpu &Machine::Arm::Machine::cpu() const
+{
+	return d->cpu;
+}
+
 Machine::Memory &Machine::Arm::Machine::memory()
+{
+	return d->memory;
+}
+
+const Machine::Memory &Machine::Arm::Machine::memory() const
 {
 	return d->memory;
 }

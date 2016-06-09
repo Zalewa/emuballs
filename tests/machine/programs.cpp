@@ -3,58 +3,11 @@
 #include <iterator>
 #include "src/machine/armmachine.hpp"
 #include "src/machine/memory.hpp"
+#include "arm_program_fixture.hpp"
 
 using namespace Machine::Arm;
 
-struct Fixture
-{
-	static constexpr auto STEP_LIMIT = 10000;
-
-	Machine::Arm::Machine machine;
-	Machine::Arm::Machine snapshot;
-
-	regval r(int which)
-	{
-		return machine.cpu().regs()[which];
-	}
-
-	void r(int which, regval val)
-	{
-		machine.cpu().regs()[which] = val;
-	}
-
-	void load(const uint32_t *begin, const uint32_t *end)
-	{
-		machine = Machine::Arm::Machine();
-		auto addr = 0;
-		for (auto addr = 0; begin != end; ++begin, addr += sizeof(*begin))
-		{
-			machine.memory().putWord(addr, *begin);
-		}
-		machine.cpu().regs().pc() = 0;
-		machine.cpu().regs().lr() = addr + PREFETCH_SIZE;
-		snapshot = machine;
-	}
-
-	void reset()
-	{
-		machine = snapshot;
-	}
-
-	void runProgram()
-	{
-		auto endAddress = machine.cpu().regs().lr();
-		auto limit = STEP_LIMIT;
-		for (; limit > 0 && machine.cpu().regs().pc() < endAddress; --limit)
-		{
-			machine.cycle();
-		}
-		BOOST_WARN_EQUAL(machine.cpu().regs().pc(), endAddress);
-		BOOST_REQUIRE_NE(0, limit);
-	}
-};
-
-BOOST_FIXTURE_TEST_SUITE(suite, Fixture);
+BOOST_FIXTURE_TEST_SUITE(suite, ArmProgramFixture);
 
 BOOST_AUTO_TEST_CASE(regclone)
 {
@@ -75,19 +28,30 @@ BOOST_AUTO_TEST_CASE(regclone)
 		0xe1a0f00e, // mov	pc, lr
 	};
 
-	constexpr auto AFFECTED_REGS = 12;
+	constexpr auto AFFECTED_REGS = 13;
 	constexpr auto PARAM = 0xa1b2c3d4;
 	load(std::begin(code), std::end(code));
 	for (auto i = 0; i < AFFECTED_REGS; ++i)
 	{
-		r(i, 0);
+		r(i, 1234);
 	}
 	r(0, PARAM);
 	runProgram();
-	for (auto i = 0; i < AFFECTED_REGS; ++i)
-	{
-		BOOST_CHECK_EQUAL(r(i), PARAM);
-	}
+	BOOST_CHECK_EQUAL(r(0), PARAM);
+	BOOST_CHECK_EQUAL(r(1), PARAM);
+	BOOST_CHECK_EQUAL(r(0), PARAM);
+	BOOST_CHECK_EQUAL(r(2), PARAM);
+	BOOST_CHECK_EQUAL(r(0), PARAM);
+	BOOST_CHECK_EQUAL(r(3), PARAM);
+	BOOST_CHECK_EQUAL(r(4), PARAM);
+	BOOST_CHECK_EQUAL(r(5), PARAM);
+	BOOST_CHECK_EQUAL(r(6), PARAM);
+	BOOST_CHECK_EQUAL(r(7), PARAM);
+	BOOST_CHECK_EQUAL(r(8), PARAM);
+	BOOST_CHECK_EQUAL(r(9), PARAM);
+	BOOST_CHECK_EQUAL(r(10), PARAM);
+	BOOST_CHECK_EQUAL(r(11), PARAM);
+	BOOST_CHECK_EQUAL(r(12), PARAM);
 }
 
 BOOST_AUTO_TEST_CASE(fibonacci)
@@ -159,5 +123,282 @@ BOOST_AUTO_TEST_CASE(mul)
 	BOOST_CHECK_EQUAL(r(0), 20);
 }
 
+BOOST_AUTO_TEST_CASE(lsl)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1a00112, // lsl	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0b11);
+	r(1, 4);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0b110000);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xf0000000);
+		r(1, 1);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0xe0000000);
+		BOOST_CHECK_EQUAL(flags().carry(), carry);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(lsr)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1a00132, // lsr	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0b110000);
+	r(1, 4);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0b11);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0b1111);
+		r(1, 1);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0b111);
+		BOOST_CHECK_EQUAL(flags().carry(), carry);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(asr)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1a00152, // asr	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0x80008000);
+	r(1, 8);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0xff800080);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xff);
+		r(1, 3);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0x1f);
+		BOOST_CHECK_EQUAL(flags().carry(), carry);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(ror)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1a00172, // ror	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0b11);
+	r(1, 4);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x30000000);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xff);
+		r(1, 3);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0xe000001f);
+		BOOST_CHECK_EQUAL(flags().carry(), carry);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(lsls)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1b00112, // lsls	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0b11);
+	r(1, 4);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0b110000);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xf0000000);
+		r(1, 1);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0xe0000000);
+		BOOST_CHECK(flags().carry());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(lsrs)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1b00132, // lsrs	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0b110000);
+	r(1, 4);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0b11);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0b1111);
+		r(1, 1);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0b111);
+		BOOST_CHECK(flags().carry());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(asrs)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1b00152, // asrs	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0x80008000);
+	r(1, 8);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0xff800080);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xff);
+		r(1, 3);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0x1f);
+		BOOST_CHECK(flags().carry());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(rors)
+{
+	constexpr uint32_t code[] = {
+		// 00000000 <BitShift>:
+		0xe1a02000, // mov	r2, r0
+		0xe1b00172, // rors	r0, r2, r1
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0x3);
+	r(1, 8);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x03000000);
+	BOOST_CHECK(!flags().carry());
+
+	for (int initCarry = 0; initCarry <= 1; ++initCarry)
+	{
+		reset();
+		bool carry = initCarry != 0;
+		flags().carry(carry);
+		r(0, 0xff);
+		r(1, 3);
+		runProgram();
+		BOOST_CHECK_EQUAL(r(0), 0xe000001f);
+		BOOST_CHECK(flags().carry());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(rrx)
+{
+	constexpr uint32_t code[] = {
+		// 00000028 <RotateRightExtended>:
+		0xe1a00060, // rrx	r0, r0
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0x3);
+	flags().carry(false);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x1);
+	BOOST_CHECK(!flags().carry());
+
+	reset();
+	r(0, 0x40);
+	flags().carry(true);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x80000020);
+	BOOST_CHECK(flags().carry());
+}
+
+BOOST_AUTO_TEST_CASE(rrxs)
+{
+	constexpr uint32_t code[] = {
+		// 00000028 <RotateRightExtended>:
+		0xe1b00060, // rrxs	r0, r0
+		0xe1a0f00e, // mov	pc, lr
+	};
+
+	load(std::begin(code), std::end(code));
+	r(0, 0x3);
+	flags().carry(false);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x1);
+	BOOST_CHECK(flags().carry());
+
+	reset();
+	r(0, 0x40);
+	flags().carry(true);
+	runProgram();
+	BOOST_CHECK_EQUAL(r(0), 0x80000020);
+	BOOST_CHECK(!flags().carry());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

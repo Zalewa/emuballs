@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <limits>
 #include <vector>
 #include "dptr.hpp"
 
@@ -16,6 +17,10 @@ constexpr auto PREFETCH_SIZE = 8;
 constexpr auto INSTRUCTION_SIZE = 4;
 
 typedef uint32_t regval;
+constexpr regval REGVAL_MAX = std::numeric_limits<regval>::max();
+constexpr regval REGVAL_HIGHBIT = 0x80000000;
+
+typedef uint32_t cpumode;
 
 class RegisterSet
 {
@@ -60,6 +65,20 @@ public:
 	void set(Bit bit, bool state);
 	bool test(Bit bit) const;
 
+	bool carry() const;
+	bool carry(bool);
+
+	bool overflow() const;
+	bool overflow(bool);
+
+	bool zero() const;
+	bool zero(bool);
+
+	bool negative() const;
+	bool negative(bool);
+
+	cpumode cpuMode() const;
+
 private:
 	std::bitset<32> bits;
 };
@@ -67,8 +86,23 @@ private:
 class Cpu
 {
 public:
+	/**
+	 * @brief CPSR flags.
+	 */
 	const Flags &flags() const;
 	Flags &flags();
+
+	/**
+	 * @brief SPSR flags for current cpumode.
+	 */
+	const Flags &flagsSpsr() const;
+	Flags &flagsSpsr();
+
+	/**
+	 * @brief SPSR flags for selected cpumode.
+	 */
+	const Flags &flagsSpsr(cpumode mode) const;
+	Flags &flagsSpsr(cpumode mode);
 
 	const RegisterSet &regs() const;
 	RegisterSet &regs();
@@ -81,7 +115,10 @@ class Machine
 {
 public:
 	Cpu &cpu();
+	const Cpu &cpu() const;
+
 	Memory &memory();
+	const Memory &memory() const;
 
 	void cycle();
 
