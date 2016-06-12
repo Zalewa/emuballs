@@ -162,3 +162,8 @@ BOOST_AUTO_TEST_CASE(rotateRightExtended)
 	BOOST_CHECK_EQUAL(0x80000002, f(0b101, true, &carry));
 	BOOST_CHECK(carry);
 }
+
+BOOST_AUTO_TEST_CASE(badShift)
+{
+	BOOST_CHECK_THROW(Machine::Arm::shifter<uint32_t>(500), std::domain_error);
+}
