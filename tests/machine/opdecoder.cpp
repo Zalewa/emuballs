@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE machine_opdecoder
 #include <boost/test/unit_test.hpp>
 #include <sstream>
+#include "src/machine/errors.hpp"
 #include "src/machine/opdecoder.hpp"
 
 using namespace Machine::Arm;
@@ -36,6 +37,14 @@ BOOST_AUTO_TEST_CASE(misaligned)
 	io.write("\x00\x00\x00\xe0\x00\x00\x00", 7);
 	io.seekg(4);
 	BOOST_CHECK_THROW(decoder.next(io), std::ios::failure);
+}
+
+BOOST_AUTO_TEST_CASE(badOpcode)
+{
+	BOOST_CHECK_THROW(decoder.decode(0xf6000010), Machine::OpDecodeError);
+	io.write("\x10\x00\x00\xf6", 4);
+	io.seekg(0);
+	BOOST_CHECK_THROW(decoder.next(io), Machine::OpDecodeError);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
