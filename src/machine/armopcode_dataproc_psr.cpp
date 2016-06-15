@@ -105,7 +105,7 @@ private:
 			auto rs = (code() >> 8) & 0xf;
 			if (rs == 15)
 			{
-				throw IllegalOpcodeError("shift register cannot be R15");
+				throw IllegalOpcodeError("shift register cannot be r15");
 			}
 			shiftAmount = machine.cpu().regs()[rs] & 0xff;
 		}

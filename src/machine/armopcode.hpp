@@ -20,6 +20,7 @@ public:
 
 	uint32_t code() const;
 	void execute(Machine &machine);
+	virtual void validate();
 
 protected:
 	virtual void run(Machine &machine) = 0;

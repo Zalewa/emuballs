@@ -42,6 +42,7 @@ OpcodePtr OpDecoder::decode(uint32_t instruction)
 		opcode = factory(instruction);
 		if (opcode)
 		{
+			opcode->validate();
 			break;
 		}
 	}

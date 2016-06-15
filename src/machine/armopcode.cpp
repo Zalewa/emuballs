@@ -92,6 +92,10 @@ void Opcode::execute(Machine &machine)
 	}
 }
 
+void Opcode::validate()
+{
+}
+
 } // namespace Arm
 
 } // namespace Machine

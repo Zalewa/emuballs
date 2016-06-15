@@ -47,4 +47,12 @@ BOOST_AUTO_TEST_CASE(badOpcode)
 	BOOST_CHECK_THROW(decoder.next(io), Machine::OpDecodeError);
 }
 
+BOOST_AUTO_TEST_CASE(goodOpcodeButBadCombination)
+{
+	BOOST_CHECK_THROW(decoder.decode(0xe791008f), Machine::IllegalOpcodeError);
+	io.write("\x8f\x00\x91\xe7", 4);
+	io.seekg(0);
+	BOOST_CHECK_THROW(decoder.next(io), Machine::IllegalOpcodeError);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
