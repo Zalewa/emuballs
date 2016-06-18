@@ -33,48 +33,138 @@ class Multiply : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
+	void validate()
+	{
+		auto opregs = {rd(), rn(), rs(), rm()};
+		if (std::any_of(begin(opregs), end(opregs), [](auto reg){return reg == 15;}))
+			throw IllegalOpcodeError("mul: register musn't be r15");
+		if (rd() == rm())
+			throw IllegalOpcodeError("mul: rd musn't be same as rm");
+	}
+
 	void run(Machine &machine)
 	{
 		bool condition = code() & (1 << 20);
 		bool accumulate = code() & (1 << 21);
-		auto rd = (code() >> 16) & 0xf;
-		auto rn = (code() >> 12) & 0xf;
-		auto rs = (code() >> 8) & 0xf;
-		auto rm = code() & 0xf;
-		auto opregs = {rd, rn, rs, rm};
-		if (std::any_of(begin(opregs), end(opregs), [](auto reg){return reg == 15;}))
-		{
-			throw IllegalOpcodeError("mul: register musn't be r15");
-		}
-		if (rd == rm)
-		{
-			throw IllegalOpcodeError("mul: rd musn't be same as rm");
-		}
 		auto &regs = machine.cpu().regs();
-		regs[rd] = regs[rs] * regs[rm];
+		regs[rd()] = regs[rs()] * regs[rm()];
 		if (accumulate)
 		{
-			regs[rd] += rn;
+			regs[rd()] += regs[rn()];
 		}
 		if (condition)
 		{
 			auto &flags = machine.cpu().flags();
-			flags.set(Flags::Zero, regs[rd] == 0);
-			flags.set(Flags::Negative, regs[rd] & (1 << 31));
+			flags.set(Flags::Zero, regs[rd()] == 0);
+			flags.set(Flags::Negative, regs[rd()] & (1 << 31));
 			// "The C (Carry) flag is set to a meaningless value"
 			// ~ ARM7TDMI Data Sheet
-			flags.set(Flags::Carry, regs[rd] & 0x4);
+			flags.set(Flags::Carry, regs[rd()] & 0x4);
 		}
 	}
+
+private:
+	int rd() const
+	{
+		return (code() >> 16) & 0xf;
+	}
+
+	int rn() const
+	{
+		return (code() >> 12) & 0xf;
+	}
+
+	int rs() const
+	{
+		return (code() >> 8) & 0xf;
+	}
+
+	int rm() const
+	{
+		return code() & 0xf;
+	}
+
 };
 
 class MultiplyLong : public Opcode
 {
 public:
 	using Opcode::Opcode;
+
 protected:
+	void validate()
+	{
+		auto regs = { rs(), rm(), rdHi(), rdLo() };
+		if (std::any_of(begin(regs), end(regs), [](auto reg){return reg == 15;}))
+			throw IllegalOpcodeError("mull: register cannot be 15");
+		if (rdHi() == rdLo() || rdHi() == rm() || rdLo() == rm())
+			throw IllegalOpcodeError("mull: registers rdHi, rdLo and rm must be different");
+	}
+
 	void run(Machine &machine)
 	{
+		bool condition = code() & (1 << 20);
+		bool accumulate = code() & (1 << 21);
+		bool signedOperands = code() & (1 << 22);
+		auto &regs = machine.cpu().regs();
+		uint64_t endResult = 0;
+		if (signedOperands)
+		{
+			int64_t accumulated = 0;
+			if (accumulate)
+			{
+				accumulated |= static_cast<uint64_t>(regs[rdHi()]) << 32;
+				accumulated |= regs[rdLo()];
+			}
+			int64_t a = static_cast<int32_t>(regs[rm()]);
+			int64_t b = static_cast<int32_t>(regs[rs()]);
+			endResult = static_cast<uint64_t>(accumulated + (a * b));
+		}
+		else
+		{
+			uint64_t accumulated = 0;
+			if (accumulate)
+			{
+				accumulated |= static_cast<uint64_t>(regs[rdHi()]) << 32;
+				accumulated |= regs[rdLo()];
+			}
+			uint64_t a = regs[rm()];
+			uint64_t b = regs[rs()];
+			endResult = static_cast<uint64_t>(accumulated + (a * b));
+		}
+		regs[rdLo()] = static_cast<uint32_t>(endResult & 0xffffffff);
+		regs[rdHi()] = static_cast<uint32_t>((endResult >> 32) & 0xffffffff);
+		if (condition)
+		{
+			auto &flags = machine.cpu().flags();
+			flags.set(Flags::Zero, endResult == 0);
+			flags.set(Flags::Negative, endResult & (1ULL << 63));
+			// "Both the C and V flags are set to meaningless values."
+			// ~ ARM7TDMI Data Sheet
+			flags.set(Flags::Carry, regs[rdLo()] & 0x4);
+			flags.set(Flags::Overflow, regs[rdLo()] & 0x400);
+		}
+	}
+
+private:
+	int rs() const
+	{
+		return (code() >> 8) & 0xf;
+	}
+
+	int rm() const
+	{
+		return code() & 0xf;
+	}
+
+	int rdHi() const
+	{
+		return (code() >> 16) & 0xf;
+	}
+
+	int rdLo() const
+	{
+		return (code() >> 12) & 0xf;
 	}
 };
 
