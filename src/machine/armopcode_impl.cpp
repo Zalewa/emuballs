@@ -83,8 +83,49 @@ class SingleDataSwap : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
+	void validate()
+	{
+		if (rd() == 15 || rm() == 15 || rn() == 15)
+		{
+			throw IllegalOpcodeError("swp: register musn't be r15");
+		}
+	}
+
 	void run(Machine &machine)
 	{
+		bool transferByte = code() & (1 << 22);
+		auto rn = this->rn();
+		auto rd = this->rd();
+		auto rm = this->rm();
+		auto addr = machine.cpu().regs()[rn];
+		if (transferByte)
+		{
+			regval val = machine.memory().byte(addr);
+			machine.memory().putByte(addr, machine.cpu().regs()[rm] & 0xff);
+			machine.cpu().regs()[rd] = val;
+		}
+		else
+		{
+			regval val = machine.memory().word(addr);
+			machine.memory().putWord(addr, machine.cpu().regs()[rm]);
+			machine.cpu().regs()[rd] = val;
+		}
+	}
+
+private:
+	int rn() const
+	{
+		return (code() >> 16) & 0xf;
+	}
+
+	int rd() const
+	{
+		return (code() >> 12) & 0xf;
+	}
+
+	int rm() const
+	{
+		return code() & 0xf;
 	}
 };
 
