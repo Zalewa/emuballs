@@ -226,6 +226,17 @@ public:
 protected:
 	void run(Machine &machine)
 	{
+		auto rn = code() & 0xf;
+		auto address = machine.cpu().regs()[rn];
+		bool thumb = address & 1;
+		// Pipeline flush is performed by the machine itself everytime when 'pc'
+		// value changes.
+		if (thumb)
+			throw "bx: branching to thumb is not implemented";
+		else
+		{
+			machine.cpu().regs().pc() = address;
+		}
 	}
 };
 
