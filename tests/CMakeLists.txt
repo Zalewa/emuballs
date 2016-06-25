@@ -11,4 +11,6 @@ function(def_module name units)
 endfunction()
 
 enable_testing()
-add_subdirectory("machine")
+add_subdirectory("emuballs")
+
+def_module(strings "strings.cpp;../src/strings.cpp")
