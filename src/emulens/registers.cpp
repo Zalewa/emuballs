@@ -16,32 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Emulens.  If not, see <http://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "registers.hpp"
 
-#include <QAction>
-#include <QList>
-#include <QMdiArea>
-#include "dptr.hpp"
+#include "ui_registers.h"
 
-namespace Emulens
+using namespace Emulens;
+
+DClass<Registers> : public Ui::Registers
 {
-
-class Device : public QMdiArea
-{
-	Q_OBJECT
-
-public:
-	Device(QWidget *parent);
-
-	QList<QAction*> windowActions();
-
-private:
-	DPtr<Device> d;
-
-	void addSubWindow(QWidget *widget);
-
-private slots:
-	void updateActiveWindowAction();
 };
 
+DPointeredNoCopy(Registers)
+
+Registers::Registers(QWidget *parent)
+	: QWidget(parent)
+{
+	d->setupUi(this);
+	setStyleSheet("background-color: red;");
 }

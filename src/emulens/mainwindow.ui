@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Emulens</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -52,7 +52,17 @@
     </property>
     <addaction name="actionAboutQt"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="actionCascade"/>
+    <addaction name="actionTile"/>
+    <addaction name="actionCloseAll"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -72,6 +82,21 @@
   <action name="actionAboutQt">
    <property name="text">
     <string>About &amp;Qt</string>
+   </property>
+  </action>
+  <action name="actionCascade">
+   <property name="text">
+    <string>C&amp;ascade</string>
+   </property>
+  </action>
+  <action name="actionTile">
+   <property name="text">
+    <string>&amp;Tile</string>
+   </property>
+  </action>
+  <action name="actionCloseAll">
+   <property name="text">
+    <string>&amp;Close All</string>
    </property>
   </action>
  </widget>
@@ -109,8 +134,59 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionCascade</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>cascadeSubWindows()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCloseAll</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>closeAllSubWindows()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTile</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>tileSubWindows()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showDeviceChange()</slot>
+  <slot>cascadeSubWindows()</slot>
+  <slot>tileSubWindows()</slot>
+  <slot>closeAllSubWindows()</slot>
  </slots>
 </ui>

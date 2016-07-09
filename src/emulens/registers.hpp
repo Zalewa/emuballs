@@ -18,30 +18,19 @@
  */
 #pragma once
 
-#include <QAction>
-#include <QList>
-#include <QMdiArea>
+#include <QWidget>
 #include "dptr.hpp"
 
 namespace Emulens
 {
 
-class Device : public QMdiArea
+class Registers : public QWidget
 {
-	Q_OBJECT
-
 public:
-	Device(QWidget *parent);
-
-	QList<QAction*> windowActions();
+	Registers(QWidget *parent);
 
 private:
-	DPtr<Device> d;
-
-	void addSubWindow(QWidget *widget);
-
-private slots:
-	void updateActiveWindowAction();
+	DPtr<Registers> d;
 };
 
 }

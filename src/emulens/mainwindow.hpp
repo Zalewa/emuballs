@@ -42,8 +42,13 @@ private:
 	DPtr<MainWindow> d;
 
 	void switchToDevice(Emuballs::DeviceFactory &factory);
+	void updateWindowsList();
 
 private slots:
+	void cascadeSubWindows();
+	void closeAllSubWindows();
+	void tileSubWindows();
+
 	bool showDeviceChange();
 	void showDeviceInitSelect();
 };

@@ -10,6 +10,7 @@ set(SOURCES
 	device.cpp
 	main.cpp
 	mainwindow.cpp
+	registers.cpp
 	pickdevice.cpp
 	version.cpp
 	)

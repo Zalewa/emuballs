@@ -19,7 +19,9 @@
 #include "mainwindow.hpp"
 
 #include "ui_mainwindow.h"
+#include <QAction>
 #include <QApplication>
+#include <QList>
 #include <QMessageBox>
 #include <QTimer>
 #include <emuballs/device.hpp>
@@ -31,6 +33,7 @@ using namespace Emulens;
 DClass<MainWindow> : public Ui::MainWindow
 {
 public:
+	QList<QAction*> windowActions;
 	Emuballs::DevicePtr device;
 	Emulens::Device *deviceLens;
 };
@@ -86,4 +89,36 @@ void MainWindow::switchToDevice(Emuballs::DeviceFactory &factory)
 		delete d->deviceLens;
 	d->deviceLens = new Emulens::Device(this);
 	d->centralwidget->layout()->addWidget(d->deviceLens);
+	updateWindowsList();
+}
+
+void MainWindow::cascadeSubWindows()
+{
+	if (d->deviceLens)
+		d->deviceLens->cascadeSubWindows();
+}
+
+void MainWindow::closeAllSubWindows()
+{
+	if (d->deviceLens)
+		d->deviceLens->closeAllSubWindows();
+}
+
+void MainWindow::tileSubWindows()
+{
+	if (d->deviceLens)
+		d->deviceLens->tileSubWindows();
+}
+
+void MainWindow::updateWindowsList()
+{
+	d->windowActions.clear();
+	if (d->deviceLens)
+	{
+		for (QAction *action : d->deviceLens->windowActions())
+		{
+			d->menuWindow->addAction(action);
+			d->windowActions << action;
+		}
+	}
 }
