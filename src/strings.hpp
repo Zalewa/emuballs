@@ -17,8 +17,37 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 namespace Strings
 {
 int compareCaseInsensitive(std::string a, std::string b);
+
+template<class Range, class Type, class Concatenator>
+Type concat(const Range &range, const Type &delim)
+{
+	Concatenator c;
+	for (const Type &element : range)
+	{
+		c << element;
+		c << delim;
+	}
+	Type str = c.str();
+	if (str.size() >= delim.size())
+		str.resize(str.size() - delim.size());
+	return str;
+}
+
+template<class Range>
+std::string concat(const Range &range, std::string delim)
+{
+	return concat<Range, std::string, std::ostringstream>(range, delim);
+}
+
+template<class Range>
+std::wstring concat(const Range &range, std::wstring delim)
+{
+	return concat<Range, std::wstring, std::wostringstream>(range, delim);
+}
+
 }

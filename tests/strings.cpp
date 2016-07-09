@@ -61,3 +61,83 @@ BOOST_AUTO_TEST_CASE(_compareCaseInsensitive)
 			"-=\\|+_1234567890!@#$%^&*()[]{};:\"',.<>/?",
 			"-=\\|+_1234567899!@#$%^&*()[]{};:\"',.<>/?"), 0);
 }
+
+BOOST_AUTO_TEST_CASE(concat_string)
+{
+	{
+		std::list<std::string> strList = { "Jane", "has", "a", "cat"};
+		BOOST_CHECK_EQUAL("Jane has a cat", Strings::concat(strList, " "));
+	}
+	{
+		std::list<std::string> strList;
+		BOOST_CHECK_EQUAL("", Strings::concat(strList, " "));
+	}
+	{
+		std::list<std::string> strList = { " Four words, one string " };
+		BOOST_CHECK_EQUAL(" Four words, one string ", Strings::concat(strList, " "));
+	}
+	{
+		std::list<std::string> strList = { "Jane", "", "Cat" };
+		BOOST_CHECK_EQUAL("Jane  Cat", Strings::concat(strList, " "));
+	}
+	{
+		std::list<std::string> strList = { "Jane", " ", "Cat" };
+		BOOST_CHECK_EQUAL("Jane   Cat", Strings::concat(strList, " "));
+	}
+	{
+		std::list<std::string> strList = { "Jane", "has", "a", "cat"};
+		BOOST_CHECK_EQUAL("Jane---has---a---cat", Strings::concat(strList, "---"));
+	}
+	{
+		std::vector<std::string> strList = { "Jane", "has", "a", "cat" };
+		BOOST_CHECK_EQUAL("Jane has a cat", Strings::concat(strList, " "));
+	}
+	{
+		std::vector<std::string> strList = { "Jane", "has", "a", "cat" };
+		BOOST_CHECK_EQUAL("Janehasacat", Strings::concat(strList, ""));
+	}
+	{
+		std::string strList[] = { "Jane", "has", "a", "cat" };
+		BOOST_CHECK_EQUAL("Jane has a cat", Strings::concat(strList, " "));
+	}
+}
+
+BOOST_AUTO_TEST_CASE(concat_wstring)
+{
+	{
+		std::list<std::wstring> strList = { L"Jane", L"has", L"a", L"cat"};
+		BOOST_CHECK_EQUAL(L"Jane has a cat", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::list<std::wstring> strList;
+		BOOST_CHECK_EQUAL(L"", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::list<std::wstring> strList = { L" Four words, one string " };
+		BOOST_CHECK_EQUAL(L" Four words, one string ", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::list<std::wstring> strList = { L"Jane", L"", L"Cat" };
+		BOOST_CHECK_EQUAL(L"Jane  Cat", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::list<std::wstring> strList = { L"Jane", L" ", L"Cat" };
+		BOOST_CHECK_EQUAL(L"Jane   Cat", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::list<std::wstring> strList = { L"Jane", L"has", L"a", L"cat"};
+		BOOST_CHECK_EQUAL(L"Jane---has---a---cat", Strings::concat(strList, L"---").c_str());
+	}
+	{
+		std::vector<std::wstring> strList = { L"Jane", L"has", L"a", L"cat" };
+		BOOST_CHECK_EQUAL(L"Jane has a cat", Strings::concat(strList, L" ").c_str());
+	}
+	{
+		std::vector<std::wstring> strList = { L"Jane", L"has", L"a", L"cat" };
+		BOOST_CHECK_EQUAL(L"Janehasacat", Strings::concat(strList, L"").c_str());
+	}
+	{
+		std::wstring strList[] = { L"Jane", L"has", L"a", L"cat" };
+		BOOST_CHECK_EQUAL(L"Jane has a cat", Strings::concat(strList, L" ").c_str());
+	}
+}
