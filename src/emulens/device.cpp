@@ -28,6 +28,37 @@
 
 using namespace Emulens;
 
+class TrackableMdiWindow : public QMdiSubWindow
+{
+	Q_OBJECT
+
+public:
+	TrackableMdiWindow(QWidget *parent) : QMdiSubWindow(parent) {}
+
+signals:
+	void stateChanged();
+
+protected:
+	void closeEvent(QCloseEvent *event) override
+	{
+		emit stateChanged();
+		QMdiSubWindow::closeEvent(event);
+	}
+
+	void hideEvent(QHideEvent *event) override
+	{
+		emit stateChanged();
+		QMdiSubWindow::hideEvent(event);
+	}
+
+	void showEvent(QShowEvent *event) override
+	{
+		emit stateChanged();
+		QMdiSubWindow::showEvent(event);
+	}
+};
+
+
 DClass<Device> : public Ui::Device
 {
 public:
@@ -48,14 +79,17 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	addSubWindow(d->registers);
 
 	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);
+	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);
 
 	QTimer::singleShot(0, this, &Device::updateActiveWindowAction);
 }
 
 void Device::addSubWindow(QWidget *widget)
 {
-	auto *window = new QMdiSubWindow(this);
+	auto *window = new TrackableMdiWindow(this);
 	window->setWidget(widget);
+
+	connect(window, &TrackableMdiWindow::stateChanged, this, &Device::updateActiveWindowAction);
 
 	auto *action = new QAction(window->windowTitle(), this);
 	action->setCheckable(true);
@@ -63,6 +97,7 @@ void Device::addSubWindow(QWidget *widget)
 			window->show();
 			window->widget()->show();
 			setActiveSubWindow(window);
+			updateActiveWindowAction();
 		});
 
 	int ordinal = d->actions.size() + 1;
@@ -90,3 +125,5 @@ QList<QAction*> Device::windowActions()
 {
 	return d->actions.keys();
 }
+
+#include "device.moc"
