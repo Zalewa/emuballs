@@ -18,28 +18,21 @@
  */
 #pragma once
 
-#include "dptr.hpp"
-
-#include <QWidget>
-#include <emuballs/device.hpp>
+#include <stdexcept>
 
 namespace Emulens
 {
 
-class Registers : public QWidget
+class DuplicateIdError : public std::logic_error
 {
-	Q_OBJECT
-
 public:
-	Registers(std::shared_ptr<Emuballs::Device> device, QWidget *parent);
+	using logic_error::logic_error;
+};
 
-	void update();
-
-private:
-	DPtr<Registers> d;
-
-private slots:
-	void setRegisterToHex(const QString &regName, const QString &hexValue);
+class KeyError : public std::logic_error
+{
+public:
+	using logic_error::logic_error;
 };
 
 }

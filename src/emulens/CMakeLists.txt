@@ -8,6 +8,7 @@ find_package(Qt5Widgets REQUIRED)
 
 set(SOURCES
 	device.cpp
+	editarray.cpp
 	main.cpp
 	mainwindow.cpp
 	registers.cpp

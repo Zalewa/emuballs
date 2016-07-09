@@ -20,16 +20,68 @@
 
 #include "ui_registers.h"
 
+#include <emuballs/registerset.hpp>
+#include <emuballs/regval.hpp>
+#include <strings.hpp>
+#include <QDebug>
+
 using namespace Emulens;
 
 DClass<Registers> : public Ui::Registers
 {
+public:
+	std::shared_ptr<Emuballs::Device> device;
+
+	QString regId(const Emuballs::NamedRegister &reg)
+	{
+		return QString::fromStdString(reg.names().front());
+	}
 };
 
 DPointeredNoCopy(Registers)
 
-Registers::Registers(QWidget *parent)
+Registers::Registers(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	: QWidget(parent)
 {
 	d->setupUi(this);
+
+	d->device = device;
+
+	d->editArray->setInputMask("hhhhhhhh");
+	Emuballs::RegisterSet &regs = d->device->registers();
+	for (const Emuballs::NamedRegister &reg : regs.registers())
+	{
+		d->editArray->addEditor(
+			QString::fromStdString(Strings::concat(reg.names(), ",")),
+			d->regId(reg));
+	}
+	update();
+}
+
+void Registers::setRegisterToHex(const QString &regName, const QString &hexValue)
+{
+	Emuballs::RegisterSet &regs = d->device->registers();
+	bool ok = false;
+	auto value = hexValue.toUInt(&ok, 16);
+	qDebug() << "Emulens::Registers - setting register" << regName << " to " << hexValue;
+	if (ok)
+	{
+		regs.setReg(regName.toStdString(), value);
+		update();
+	}
+	else
+	{
+		qDebug() << "Emulens::Registers - wrong hex value" << hexValue;
+	}
+}
+
+void Registers::update()
+{
+	Emuballs::RegisterSet &regs = d->device->registers();
+	for (const Emuballs::NamedRegister &reg : regs.registers())
+	{
+		QString hexValue = QString::number(reg.value(), 16);
+		hexValue = hexValue.rightJustified(8, '0');
+		d->editArray->setValue(d->regId(reg), hexValue);
+	}
 }

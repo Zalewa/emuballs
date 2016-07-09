@@ -26,7 +26,8 @@
 #include <QMdiSubWindow>
 #include <QTimer>
 
-using namespace Emulens;
+namespace Emulens
+{
 
 class TrackableMdiWindow : public QMdiSubWindow
 {
@@ -58,6 +59,10 @@ protected:
 	}
 };
 
+}
+
+using namespace Emulens;
+
 
 DClass<Device> : public Ui::Device
 {
@@ -75,7 +80,7 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	d->setupUi(this);
 
 	d->device = device;
-	d->registers = new Registers(this);
+	d->registers = new Registers(device, this);
 	addSubWindow(d->registers);
 
 	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);

@@ -13,16 +13,55 @@
   <property name="windowTitle">
    <string>Registers</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Silly register text.</string>
-     </property>
-    </widget>
+    <widget class="Emulens::EditArray" name="editArray" native="true"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Emulens::EditArray</class>
+   <extends>QWidget</extends>
+   <header>editarray.hpp</header>
+   <container>1</container>
+   <slots>
+    <signal>valueEdited(QString,QString)</signal>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>editArray</sender>
+   <signal>valueEdited(QString,QString)</signal>
+   <receiver>Registers</receiver>
+   <slot>setRegisterToHex(QString,QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setRegisterToHex(QString,QString)</slot>
+ </slots>
 </ui>
