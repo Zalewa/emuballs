@@ -18,15 +18,18 @@
  */
 #include "mainwindow.hpp"
 
+#include "device.hpp"
+#include "pickdevice.hpp"
+
 #include "ui_mainwindow.h"
+
 #include <QAction>
 #include <QApplication>
 #include <QList>
 #include <QMessageBox>
 #include <QTimer>
 #include <emuballs/device.hpp>
-#include "device.hpp"
-#include "pickdevice.hpp"
+#include <memory>
 
 using namespace Emulens;
 
@@ -34,7 +37,6 @@ DClass<MainWindow> : public Ui::MainWindow
 {
 public:
 	QList<QAction*> windowActions;
-	Emuballs::DevicePtr device;
 	Emulens::Device *deviceLens;
 };
 
@@ -44,7 +46,6 @@ MainWindow::MainWindow()
 {
 	d->setupUi(this);
 
-	d->device = nullptr;
 	d->deviceLens = nullptr;
 
 	connect(d->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -59,7 +60,7 @@ void MainWindow::showDeviceInitSelect()
 {
 	while (showDeviceChange())
 	{
-		if (d->device != nullptr)
+		if (d->deviceLens != nullptr)
 		{
 			show();
 			return;
@@ -82,12 +83,15 @@ bool MainWindow::showDeviceChange()
 
 void MainWindow::switchToDevice(Emuballs::DeviceFactory &factory)
 {
-	d->device = factory.create();
-	if (d->device == nullptr)
+	Emuballs::DevicePtr device = factory.create();
+	if (device == nullptr)
+	{
 		QMessageBox::critical(this, tr("Emulens"), tr("This device is invalid."));
+		return;
+	}
 	if (d->deviceLens)
 		delete d->deviceLens;
-	d->deviceLens = new Emulens::Device(this);
+	d->deviceLens = new Emulens::Device(std::shared_ptr<Emuballs::Device>(device.release()), this);
 	d->centralwidget->layout()->addWidget(d->deviceLens);
 	updateWindowsList();
 }

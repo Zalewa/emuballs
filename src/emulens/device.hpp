@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include <emuballs/device.hpp>
+
+#include <memory>
 #include <QAction>
 #include <QList>
 #include <QMdiArea>
@@ -31,7 +34,7 @@ class Device : public QMdiArea
 	Q_OBJECT
 
 public:
-	Device(QWidget *parent);
+	Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent);
 
 	QList<QAction*> windowActions();
 

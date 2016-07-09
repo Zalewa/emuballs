@@ -26,6 +26,8 @@ namespace Emulens
 
 class Registers : public QWidget
 {
+	Q_OBJECT
+
 public:
 	Registers(QWidget *parent);
 

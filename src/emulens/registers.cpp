@@ -32,5 +32,4 @@ Registers::Registers(QWidget *parent)
 	: QWidget(parent)
 {
 	d->setupUi(this);
-	setStyleSheet("background-color: red;");
 }

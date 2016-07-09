@@ -20,6 +20,7 @@
 
 #include "registers.hpp"
 
+#include <emuballs/device.hpp>
 #include "ui_device.h"
 #include <QMap>
 #include <QMdiSubWindow>
@@ -32,15 +33,17 @@ DClass<Device> : public Ui::Device
 public:
 	QMap<QAction*, QMdiSubWindow*> actions;
 	Registers *registers;
+	std::shared_ptr<Emuballs::Device> device;
 };
 
-DPointered(Device);
+DPointeredNoCopy(Device);
 
-Device::Device(QWidget *parent)
+Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	: QMdiArea(parent)
 {
 	d->setupUi(this);
 
+	d->device = device;
 	d->registers = new Registers(this);
 	addSubWindow(d->registers);
 
