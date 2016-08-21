@@ -21,45 +21,10 @@
 #include "registers.hpp"
 
 #include <emuballs/device.hpp>
+#include "trackablemdiwindow.hpp"
 #include "ui_device.h"
 #include <QMap>
-#include <QMdiSubWindow>
 #include <QTimer>
-
-namespace Emulens
-{
-
-class TrackableMdiWindow : public QMdiSubWindow
-{
-	Q_OBJECT
-
-public:
-	TrackableMdiWindow(QWidget *parent) : QMdiSubWindow(parent) {}
-
-signals:
-	void stateChanged();
-
-protected:
-	void closeEvent(QCloseEvent *event) override
-	{
-		emit stateChanged();
-		QMdiSubWindow::closeEvent(event);
-	}
-
-	void hideEvent(QHideEvent *event) override
-	{
-		emit stateChanged();
-		QMdiSubWindow::hideEvent(event);
-	}
-
-	void showEvent(QShowEvent *event) override
-	{
-		emit stateChanged();
-		QMdiSubWindow::showEvent(event);
-	}
-};
-
-}
 
 using namespace Emulens;
 
@@ -130,5 +95,3 @@ QList<QAction*> Device::windowActions()
 {
 	return d->actions.keys();
 }
-
-#include "device.moc"

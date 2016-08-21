@@ -12,6 +12,7 @@ set(SOURCES
 	main.cpp
 	mainwindow.cpp
 	registers.cpp
+	trackablemdiwindow.cpp
 	pickdevice.cpp
 	version.cpp
 	)
