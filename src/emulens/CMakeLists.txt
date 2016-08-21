@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Widgets REQUIRED)
 
 set(SOURCES
+	cycler.cpp
 	device.cpp
 	editarray.cpp
 	main.cpp

@@ -23,9 +23,11 @@
 #include <emuballs/device.hpp>
 #include <emuballs/errors.hpp>
 #include <emuballs/programmer.hpp>
+#include "cycler.hpp"
 #include "trackablemdiwindow.hpp"
 #include "ui_device.h"
 #include <fstream>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QMap>
 #include <QMessageBox>
@@ -44,8 +46,11 @@ DClass<Emulens::Device> : public Ui::Device
 {
 public:
 	QMap<QAction*, QMdiSubWindow*> actions;
+	std::unique_ptr<Cycler> cycler;
+	QString lastLoadedProgramPath;
 	Registers *registers;
 	std::shared_ptr<Emuballs::Device> device;
+	std::unique_ptr<DeviceToolBar> toolBar;
 };
 
 DPointeredNoCopy(Device);
@@ -56,10 +61,13 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	d->setupUi(this);
 
 	d->device = device;
+	d->cycler.reset(new Cycler(device, this));
 	d->registers = new Registers(device, this);
+
+	setupToolBar();
+
 	addSubWindow(d->registers);
 
-	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);
 	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);
 
 	QTimer::singleShot(0, this, &Device::updateActiveWindowAction);
@@ -93,6 +101,26 @@ void Device::addSubWindow(QWidget *widget)
 	QMdiArea::addSubWindow(window);
 }
 
+void Device::showLoadProgram()
+{
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Load Program"));
+	if (!filePath.isEmpty())
+		loadProgram(filePath);
+}
+
+void Device::restartLastProgram()
+{
+	if (!d->lastLoadedProgramPath.isEmpty())
+	{
+		loadProgram(d->lastLoadedProgramPath);
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("Restart Program"),
+			tr("No program was started, yet. Nothing to restart."));
+	}
+}
+
 void Device::loadProgram(const QString &path)
 {
 	std::ifstream stream(path.toStdString(), std::ios::in | std::ios::binary);
@@ -109,6 +137,7 @@ void Device::loadProgram(const QString &path)
 		try
 		{
 			d->device->programmer().load(stream);
+			d->lastLoadedProgramPath = path;
 		}
 		catch (const Emuballs::ProgramLoadError &e)
 		{
@@ -127,6 +156,26 @@ bool Device::checkProgramSize(size_t size)
 			SANE_FILE_SIZE_HUMAN_READABLE));
 }
 
+void Device::setupToolBar()
+{
+	d->toolBar.reset(new DeviceToolBar(this));
+	connect(d->toolBar->loadProgramAction, &QAction::triggered,
+		this, &Device::showLoadProgram);
+	connect(d->toolBar->restartAction, &QAction::triggered,
+		this, &Device::restartLastProgram);
+	connect(d->toolBar->startRunAction, &QAction::triggered,
+		d->cycler.get(), &Cycler::startAutoRun);
+	connect(d->toolBar->pauseAction, &QAction::triggered,
+		d->cycler.get(), &Cycler::pauseAutoRun);
+	connect(d->toolBar->stepAction, &QAction::triggered,
+		d->cycler.get(), &Cycler::cycle);
+}
+
+QToolBar *Device::toolBar()
+{
+	return d->toolBar.get();
+}
+
 void Device::updateActiveWindowAction()
 {
 	for (auto *action : d->actions.keys())
@@ -139,4 +188,27 @@ void Device::updateActiveWindowAction()
 QList<QAction*> Device::windowActions()
 {
 	return d->actions.keys();
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+DClass<DeviceToolBar>
+{
+public:
+	Device *device;
+};
+
+DPointeredNoCopy(DeviceToolBar);
+
+DeviceToolBar::DeviceToolBar(Device *device)
+	: QToolBar(device)
+{
+	d->device = device;
+
+	loadProgramAction = addAction(tr("Load program"));
+	restartAction = addAction(tr("Reset device"));
+	addSeparator();
+	startRunAction = addAction(tr("Run"));
+	pauseAction = addAction(tr("Pause"));
+	stepAction = addAction(tr("Step"));
 }

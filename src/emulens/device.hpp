@@ -25,6 +25,7 @@
 #include <QIODevice>
 #include <QList>
 #include <QMdiArea>
+#include <QToolBar>
 #include "dptr.hpp"
 
 namespace Emulens
@@ -41,15 +42,41 @@ public:
 
 	void loadProgram(const QString &path);
 	QList<QAction*> windowActions();
+	QToolBar *toolBar();
+
+public slots:
+	void showLoadProgram();
 
 private:
 	DPtr<Device> d;
 
 	void addSubWindow(QWidget *widget);
 	bool checkProgramSize(size_t size);
+	void setupCycler();
+	void setupToolBar();
 
 private slots:
+	void restartLastProgram();
 	void updateActiveWindowAction();
+};
+
+class DeviceToolBar : public QToolBar
+{
+	Q_OBJECT
+
+	friend class Device;
+
+public:
+	DeviceToolBar(Device *device);
+
+private:
+	DPtr<DeviceToolBar> d;
+
+	QAction *loadProgramAction;
+	QAction *restartAction;
+	QAction *startRunAction;
+	QAction *pauseAction;
+	QAction *stepAction;
 };
 
 }

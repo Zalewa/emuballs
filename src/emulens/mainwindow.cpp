@@ -25,7 +25,6 @@
 
 #include <QAction>
 #include <QApplication>
-#include <QFileDialog>
 #include <QList>
 #include <QMessageBox>
 #include <QTimer>
@@ -84,8 +83,7 @@ bool MainWindow::showDeviceChange()
 
 void MainWindow::showLoadProgram()
 {
-	QString filePath = QFileDialog::getOpenFileName(this, tr("Load Program"));
-	d->deviceLens->loadProgram(filePath);
+	d->deviceLens->showLoadProgram();
 }
 
 void MainWindow::switchToDevice(Emuballs::DeviceFactory &factory)
@@ -99,6 +97,7 @@ void MainWindow::switchToDevice(Emuballs::DeviceFactory &factory)
 	if (d->deviceLens)
 		delete d->deviceLens;
 	d->deviceLens = new Emulens::Device(std::shared_ptr<Emuballs::Device>(device.release()), this);
+	addToolBar(d->deviceLens->toolBar());
 	d->centralwidget->layout()->addWidget(d->deviceLens);
 	updateWindowsList();
 }
