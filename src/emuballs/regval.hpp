@@ -25,7 +25,7 @@
 namespace Emuballs
 {
 
-class MACHINE_API RegVal
+class EMUBALLS_API RegVal
 {
 public:
 	RegVal();

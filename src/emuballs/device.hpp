@@ -32,7 +32,7 @@ class Canvas;
 class Memory;
 class RegisterSet;
 
-class MACHINE_API Device
+class EMUBALLS_API Device
 {
 public:
 	Device() = default;
@@ -52,7 +52,7 @@ private:
 typedef std::unique_ptr<Device> DevicePtr;
 typedef std::function<DevicePtr()> device_factory;
 
-class MACHINE_API DeviceFactory
+class EMUBALLS_API DeviceFactory
 {
 public:
 	/**

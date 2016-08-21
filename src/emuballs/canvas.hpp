@@ -26,7 +26,7 @@ namespace Emuballs
 
 class Picture;
 
-class MACHINE_API Canvas
+class EMUBALLS_API Canvas
 {
 public:
 	virtual ~Canvas();

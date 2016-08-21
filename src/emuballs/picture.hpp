@@ -29,7 +29,7 @@ namespace Emuballs
 /**
  * Raw picture structure.
  */
-class MACHINE_API Picture
+class EMUBALLS_API Picture
 {
 public:
 	Picture();

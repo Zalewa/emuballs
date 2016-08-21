@@ -29,7 +29,7 @@ namespace Emuballs
 
 class RegVal;
 
-class MACHINE_API NamedRegister
+class EMUBALLS_API NamedRegister
 {
 public:
 	NamedRegister();
@@ -49,7 +49,7 @@ private:
 /**
  * CPU register set collection; bases itself on unique names.
  */
-class MACHINE_API RegisterSet
+class EMUBALLS_API RegisterSet
 {
 public:
 	RegisterSet();

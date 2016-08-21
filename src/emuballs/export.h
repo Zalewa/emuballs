@@ -20,14 +20,14 @@
 
 #ifdef _WIN32
 
-#ifdef MACHINE_API_EXPORT
-#define MACHINE_API __declspec(dllexport)
+#ifdef EMUBALLS_API_EXPORT
+#define EMUBALLS_API __declspec(dllexport)
 #else
-#define MACHINE_API __declspec(dllimport)
+#define EMUBALLS_API __declspec(dllimport)
 #endif
 
 #else // _WIN32
 
-#define MACHINE_API
+#define EMUBALLS_API
 
 #endif // _WIN32
