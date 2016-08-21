@@ -30,13 +30,13 @@ public:
 	using runtime_error::runtime_error;
 };
 
-class IllegalOpcodeError : public std::runtime_error
+class EMUBALLS_API IllegalOpcodeError : public std::runtime_error
 {
 public:
 	using runtime_error::runtime_error;
 };
 
-class OpDecodeError : public std::runtime_error
+class EMUBALLS_API OpDecodeError : public std::runtime_error
 {
 public:
 	using runtime_error::runtime_error;
