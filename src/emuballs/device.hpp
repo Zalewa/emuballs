@@ -30,12 +30,13 @@ namespace Emuballs
 
 class Canvas;
 class Memory;
+class Programmer;
 class RegisterSet;
 
 class EMUBALLS_API Device
 {
 public:
-	Device() = default;
+	Device();
 	Device(const Device &other) = delete;
 	Device &operator=(const Device &other) = delete;
 	virtual ~Device();
@@ -43,7 +44,11 @@ public:
 	virtual void cycle() = 0;
 	virtual void draw(Canvas &canvas) = 0;
 	virtual Memory &memory() = 0;
+	virtual Programmer &programmer();
 	virtual RegisterSet &registers() = 0;
+
+protected:
+	void setProgrammer(std::shared_ptr<Programmer> programmer);
 
 private:
 	DPtr<Device> d;

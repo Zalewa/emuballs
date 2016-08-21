@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <QAction>
+#include <QIODevice>
 #include <QList>
 #include <QMdiArea>
 #include "dptr.hpp"
@@ -35,13 +36,17 @@ class Device : public QMdiArea
 
 public:
 	Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent);
+	Device(const Device &other) = delete;
+	Device &operator=(const Device &other) = delete;
 
+	void loadProgram(const QString &path);
 	QList<QAction*> windowActions();
 
 private:
 	DPtr<Device> d;
 
 	void addSubWindow(QWidget *widget);
+	bool checkProgramSize(size_t size);
 
 private slots:
 	void updateActiveWindowAction();

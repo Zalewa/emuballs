@@ -27,6 +27,8 @@ set(SOURCES
 	memory.cpp
 	opdecoder.cpp
 	picture.cpp
+	programmer.cpp
+	programmer_pi.cpp
 	registerset.cpp
 	regval.cpp
 	../strings.cpp

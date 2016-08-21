@@ -16,42 +16,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "programmer.hpp"
 
-#include <stdexcept>
-#include "export.h"
+#include "errors.hpp"
+#include "device.hpp"
 
-namespace Emuballs
-{
+using namespace Emuballs;
 
-class EMUBALLS_API ProgramLoadError : public std::runtime_error
-{
-public:
-	using runtime_error::runtime_error;
-};
-
-class IllegalOpcodeError : public std::runtime_error
+DClass<Programmer>
 {
 public:
-	using runtime_error::runtime_error;
+	Device *device;
 };
 
-class OpDecodeError : public std::runtime_error
+DPointeredNoCopy(Programmer);
+
+Programmer::Programmer(Device &device)
 {
-public:
-	using runtime_error::runtime_error;
-};
+	d->device = &device;
+}
 
-class UnhandledCaseError : public std::logic_error
+Programmer::~Programmer()
 {
-public:
-	using logic_error::logic_error;
-};
+}
 
-class UnknownRegisterError : public std::runtime_error
+Device &Programmer::device()
 {
-public:
-	using runtime_error::runtime_error;
-};
+	return *d->device;
+}
 
+///////////////////////////////////////////////////////////////////////////
+
+void NoProgrammer::load(std::istream &in)
+{
+	throw ProgramLoadError("programming not supported for this device");
 }

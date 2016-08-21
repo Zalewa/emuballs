@@ -51,6 +51,7 @@ private slots:
 
 	bool showDeviceChange();
 	void showDeviceInitSelect();
+	void showLoadProgram();
 };
 
 }

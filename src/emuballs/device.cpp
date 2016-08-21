@@ -19,17 +19,34 @@
 #include "device.hpp"
 
 #include "device_pi.hpp"
+#include "programmer.hpp"
 
 using namespace Emuballs;
 
 DClass<Device>
 {
 public:
+	std::shared_ptr<Programmer> programmer;
 };
 
 DPointeredNoCopy(Device)
 
+Device::Device()
+{
+	d->programmer.reset(new NoProgrammer(*this));
+}
+
 Device::~Device() {}
+
+Programmer &Device::programmer()
+{
+	return *d->programmer;
+}
+
+void Device::setProgrammer(std::shared_ptr<Programmer> programmer)
+{
+	d->programmer = programmer;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 

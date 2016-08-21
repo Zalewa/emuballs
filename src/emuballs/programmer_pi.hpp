@@ -18,40 +18,17 @@
  */
 #pragma once
 
-#include <stdexcept>
-#include "export.h"
+#include "programmer.hpp"
 
 namespace Emuballs
 {
 
-class EMUBALLS_API ProgramLoadError : public std::runtime_error
+class ProgrammerPi : public Programmer
 {
 public:
-	using runtime_error::runtime_error;
-};
+	ProgrammerPi(Device &device) : Programmer(device) {}
 
-class IllegalOpcodeError : public std::runtime_error
-{
-public:
-	using runtime_error::runtime_error;
-};
-
-class OpDecodeError : public std::runtime_error
-{
-public:
-	using runtime_error::runtime_error;
-};
-
-class UnhandledCaseError : public std::logic_error
-{
-public:
-	using logic_error::logic_error;
-};
-
-class UnknownRegisterError : public std::runtime_error
-{
-public:
-	using runtime_error::runtime_error;
+	void load(std::istream &in) override;
 };
 
 }

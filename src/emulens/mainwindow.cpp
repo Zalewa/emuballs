@@ -25,6 +25,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QFileDialog>
 #include <QList>
 #include <QMessageBox>
 #include <QTimer>
@@ -79,6 +80,12 @@ bool MainWindow::showDeviceChange()
 		return true;
 	}
 	return false;
+}
+
+void MainWindow::showLoadProgram()
+{
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Load Program"));
+	d->deviceLens->loadProgram(filePath);
 }
 
 void MainWindow::switchToDevice(Emuballs::DeviceFactory &factory)

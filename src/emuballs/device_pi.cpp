@@ -21,6 +21,7 @@
 #include "armmachine.hpp"
 #include "armregisterset.hpp"
 #include "armgpu.hpp"
+#include "programmer_pi.hpp"
 #include <memory>
 
 using namespace Emuballs;
@@ -56,6 +57,7 @@ DPointeredNoCopy(Pi);
 Pi::Pi(const PiDef &definition)
 {
 	d->definition = definition;
+	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 
 void Pi::cycle()

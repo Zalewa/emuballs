@@ -35,13 +35,14 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>19</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionLoadProgram"/>
     <addaction name="actionChangeDevice"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -99,6 +100,14 @@
     <string>&amp;Close All</string>
    </property>
   </action>
+  <action name="actionLoadProgram">
+   <property name="text">
+    <string>&amp;Load program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -141,8 +150,8 @@
    <slot>cascadeSubWindows()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>299</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -182,11 +191,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLoadProgram</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showLoadProgram()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showDeviceChange()</slot>
   <slot>cascadeSubWindows()</slot>
   <slot>tileSubWindows()</slot>
   <slot>closeAllSubWindows()</slot>
+  <slot>showLoadProgram()</slot>
  </slots>
 </ui>

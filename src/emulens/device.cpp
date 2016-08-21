@@ -21,15 +21,26 @@
 #include "registers.hpp"
 
 #include <emuballs/device.hpp>
+#include <emuballs/errors.hpp>
+#include <emuballs/programmer.hpp>
 #include "trackablemdiwindow.hpp"
 #include "ui_device.h"
+#include <fstream>
+#include <QFileInfo>
 #include <QMap>
+#include <QMessageBox>
 #include <QTimer>
+
+namespace Emulens
+{
+static const auto SANE_FILE_SIZE = 64 * 1024 * 1024;
+static const QString SANE_FILE_SIZE_HUMAN_READABLE = "64 MB";
+}
 
 using namespace Emulens;
 
 
-DClass<Device> : public Ui::Device
+DClass<Emulens::Device> : public Ui::Device
 {
 public:
 	QMap<QAction*, QMdiSubWindow*> actions;
@@ -80,6 +91,40 @@ void Device::addSubWindow(QWidget *widget)
 
 	d->actions.insert(action, window);
 	QMdiArea::addSubWindow(window);
+}
+
+void Device::loadProgram(const QString &path)
+{
+	std::ifstream stream(path.toStdString(), std::ios::in | std::ios::binary);
+	if (!stream.is_open())
+	{
+		QMessageBox::critical(this, tr("Load Program Error"),
+			tr("Failed to open file '%1'.").arg(path));
+		return;
+	}
+
+	QFileInfo file(path);
+	if (checkProgramSize(file.size()))
+	{
+		try
+		{
+			d->device->programmer().load(stream);
+		}
+		catch (const Emuballs::ProgramLoadError &e)
+		{
+			QMessageBox::critical(this, tr("Load Program Error"),
+				tr("Couldn't load program: %1").arg(e.what()));
+		}
+	}
+}
+
+bool Device::checkProgramSize(size_t size)
+{
+	if (size <= SANE_FILE_SIZE)
+		return true;
+	return QMessageBox::Yes == QMessageBox::question(this, tr("Load Program Warning"),
+		tr("Trying to load a file larger than %1. Proceed?").arg(
+			SANE_FILE_SIZE_HUMAN_READABLE));
 }
 
 void Device::updateActiveWindowAction()
