@@ -60,6 +60,8 @@ PickDevice::PickDevice(QWidget *parent)
 {
 	d->setupUi(this);
 	d->loadDevices();
+	d->devicesList->setFocus();
+	d->devicesList->setCurrentRow(0);
 }
 
 void PickDevice::accept()
