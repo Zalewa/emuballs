@@ -57,7 +57,9 @@ private:
 
 private slots:
 	void restartLastProgram();
+	void showProgramRuntimeError(const QString &error);
 	void updateActiveWindowAction();
+	void updateViews();
 };
 
 class DeviceToolBar : public QToolBar

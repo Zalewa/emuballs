@@ -24,23 +24,36 @@
 namespace Emuballs
 {
 
+// API
+
 class EMUBALLS_API ProgramLoadError : public std::runtime_error
 {
 public:
 	using runtime_error::runtime_error;
 };
 
-class EMUBALLS_API IllegalOpcodeError : public std::runtime_error
+/////////////////////////
+
+class EMUBALLS_API ProgramRuntimeError : public std::runtime_error
 {
 public:
 	using runtime_error::runtime_error;
 };
 
-class EMUBALLS_API OpDecodeError : public std::runtime_error
+class EMUBALLS_API IllegalOpcodeError : public ProgramRuntimeError
 {
 public:
-	using runtime_error::runtime_error;
+	using ProgramRuntimeError::ProgramRuntimeError;
 };
+
+class EMUBALLS_API OpDecodeError : public ProgramRuntimeError
+{
+public:
+	using ProgramRuntimeError::ProgramRuntimeError;
+};
+
+///////////////////////////////////////////////////////////////////////////
+// PRIVATE
 
 class UnhandledCaseError : public std::logic_error
 {

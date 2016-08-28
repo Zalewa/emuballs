@@ -44,8 +44,10 @@ public:
 	virtual void cycle() = 0;
 	virtual void draw(Canvas &canvas) = 0;
 	virtual Memory &memory() = 0;
-	virtual Programmer &programmer();
+	virtual void reset() = 0;
 	virtual RegisterSet &registers() = 0;
+
+	Programmer &programmer();
 
 protected:
 	void setProgrammer(std::shared_ptr<Programmer> programmer);

@@ -16,50 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Emulens.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "cycler.hpp"
+#pragma once
 
-#include <emuballs/errors.hpp>
-#include <QTimer>
+namespace Emulens
+{
 
-using namespace Emulens;
-
-DClass<Cycler>
+class Updateable
 {
 public:
-	QTimer cycleTimer;
-	std::shared_ptr<Emuballs::Device> device;
+	virtual void update() = 0;
 };
 
-DPointeredNoCopy(Cycler);
-
-Cycler::Cycler(std::shared_ptr<Emuballs::Device> device, QObject *parent)
-	: QObject(parent)
-{
-	d->device = device;
-	this->connect(&d->cycleTimer, &QTimer::timeout, this, &Cycler::cycle);
-}
-
-void Cycler::cycle()
-{
-	try
-	{
-		d->device->cycle();
-		emit updated();
-	}
-	catch (const Emuballs::ProgramRuntimeError &e)
-	{
-		pauseAutoRun();
-		emit error(QString("%1").arg(e.what()));
-		emit updated();
-	}
-}
-
-void Cycler::pauseAutoRun()
-{
-	d->cycleTimer.stop();
-}
-
-void Cycler::startAutoRun()
-{
-	d->cycleTimer.start();
 }

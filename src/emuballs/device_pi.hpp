@@ -44,10 +44,11 @@ class Pi : public Device
 public:
 	Pi(const PiDef &definition);
 
-	void cycle();
-	void draw(Canvas &canvas);
-	Memory &memory();
-	RegisterSet &registers();
+	void cycle() override;
+	void draw(Canvas &canvas) override;
+	Memory &memory() override;
+	void reset() override;
+	RegisterSet &registers() override;
 
 private:
 	DPtr<Pi> d;

@@ -22,18 +22,19 @@
 
 #include <QWidget>
 #include <emuballs/device.hpp>
+#include "updateable.hpp"
 
 namespace Emulens
 {
 
-class Registers : public QWidget
+class Registers : public QWidget, public Updateable
 {
 	Q_OBJECT
 
 public:
 	Registers(std::shared_ptr<Emuballs::Device> device, QWidget *parent);
 
-	void update();
+	void update() override;
 
 private:
 	DPtr<Registers> d;

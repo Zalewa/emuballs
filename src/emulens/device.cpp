@@ -65,6 +65,7 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	d->registers = new Registers(device, this);
 
 	setupToolBar();
+	setupCycler();
 
 	addSubWindow(d->registers);
 
@@ -101,6 +102,11 @@ void Device::addSubWindow(QWidget *widget)
 	QMdiArea::addSubWindow(window);
 }
 
+void Device::showProgramRuntimeError(const QString &error)
+{
+	QMessageBox::critical(this, tr("Program Runtime Error"), error);
+}
+
 void Device::showLoadProgram()
 {
 	QString filePath = QFileDialog::getOpenFileName(this, tr("Load Program"));
@@ -134,6 +140,7 @@ void Device::loadProgram(const QString &path)
 	QFileInfo file(path);
 	if (checkProgramSize(file.size()))
 	{
+		d->device->reset();
 		try
 		{
 			d->device->programmer().load(stream);
@@ -144,6 +151,7 @@ void Device::loadProgram(const QString &path)
 			QMessageBox::critical(this, tr("Load Program Error"),
 				tr("Couldn't load program: %1").arg(e.what()));
 		}
+		updateViews();
 	}
 }
 
@@ -154,6 +162,14 @@ bool Device::checkProgramSize(size_t size)
 	return QMessageBox::Yes == QMessageBox::question(this, tr("Load Program Warning"),
 		tr("Trying to load a file larger than %1. Proceed?").arg(
 			SANE_FILE_SIZE_HUMAN_READABLE));
+}
+
+void Device::setupCycler()
+{
+	connect(d->cycler.get(), &Cycler::updated,
+		this, &Device::updateViews);
+	connect(d->cycler.get(), &Cycler::error,
+		this, &Device::showProgramRuntimeError);
 }
 
 void Device::setupToolBar()
@@ -183,6 +199,13 @@ void Device::updateActiveWindowAction()
 		auto *window = d->actions[action];
 		action->setChecked(window == activeSubWindow());
 	}
+}
+
+void Device::updateViews()
+{
+	Updateable* views[] = { d->registers };
+	for (auto *view : views)
+		view->update();
 }
 
 QList<QAction*> Device::windowActions()

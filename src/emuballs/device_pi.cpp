@@ -75,6 +75,11 @@ Memory &Pi::memory()
 	return d->machine.memory();
 }
 
+void Pi::reset()
+{
+	d->machine.cpu().regs().pc() = 0;
+}
+
 RegisterSet &Pi::registers()
 {
 	return *d->regs;

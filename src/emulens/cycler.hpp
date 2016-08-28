@@ -37,6 +37,10 @@ public slots:
 	void pauseAutoRun();
 	void startAutoRun();
 
+signals:
+	void error(const QString &e);
+	void updated();
+
 private:
 	DPtr<Cycler> d;
 };
