@@ -2,6 +2,7 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${Boost_INCLUDE_DIR})
 
 function(def_module name units)
 	add_executable(${name} ${units})

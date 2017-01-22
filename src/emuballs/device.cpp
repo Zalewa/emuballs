@@ -59,10 +59,26 @@ public:
 
 DPointered(DeviceFactory)
 
+DeviceFactory::DeviceFactory()
+{
+}
+
 DeviceFactory::DeviceFactory(const std::wstring &name, device_factory &factory)
 {
 	d->name = name;
 	d->factory = factory;
+}
+
+DeviceFactory::DeviceFactory(const DeviceFactory &other)
+{
+	d = other.d;
+}
+
+const DeviceFactory &DeviceFactory::operator=(const DeviceFactory &other)
+{
+	if (this != &other)
+		d = other.d;
+	return *this;
 }
 
 DeviceFactory::~DeviceFactory()

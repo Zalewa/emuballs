@@ -36,3 +36,5 @@ set(SOURCES
 
 add_library(emuballs_static STATIC ${SOURCES})
 add_library(emuballs SHARED ${SOURCES})
+target_compile_definitions(emuballs PUBLIC EMUBALLS_API_SHARED)
+target_compile_definitions(emuballs PRIVATE EMUBALLS_API_EXPORT)

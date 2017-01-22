@@ -65,11 +65,13 @@ public:
 	/**
 	 * @brief Creates invalid factory.
 	 */
-	DeviceFactory() = default;
+	DeviceFactory();
 	/**
 	 * @brief Creates factory with human-readable name and factory function.
 	 */
 	DeviceFactory(const std::wstring &name, device_factory &factory);
+	DeviceFactory(const DeviceFactory &other);
+	const DeviceFactory &operator=(const DeviceFactory &other);
 	virtual ~DeviceFactory();
 
 	/**
@@ -92,6 +94,6 @@ private:
 	DPtr<DeviceFactory> d;
 };
 
-std::list<DeviceFactory> listDevices();
+std::list<DeviceFactory> EMUBALLS_API listDevices();
 
 }

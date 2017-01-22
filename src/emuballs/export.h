@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#ifdef _WIN32
+#if defined _WIN32 && defined EMUBALLS_API_SHARED
 
 #ifdef EMUBALLS_API_EXPORT
 #define EMUBALLS_API __declspec(dllexport)
@@ -26,7 +26,7 @@
 #define EMUBALLS_API __declspec(dllimport)
 #endif
 
-#else // _WIN32
+#else // _WIN32 && SHARED
 
 #define EMUBALLS_API
 

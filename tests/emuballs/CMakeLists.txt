@@ -16,7 +16,13 @@
 # along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
 function(def_emuballs_module name units)
 	def_module(${name} ${units})
-	target_link_libraries(${name} emuballs)
+	target_link_libraries(${name} emuballs_static)
+endfunction()
+
+function(def_emuballs_module_shared name units)
+	set(target_name ${name}_shared)
+	def_module(${target_name} ${units})
+	target_link_libraries(${target_name} emuballs)
 endfunction()
 
 def_emuballs_module(emuballs_arm_arithmetic_carry_overflow arm_arithmetic_carry_overflow.cpp)
@@ -30,6 +36,7 @@ def_emuballs_module(emuballs_armopcode_single_data_transfer armopcode_single_dat
 def_emuballs_module(emuballs_armopcode_single_data_swap armopcode_single_data_swap.cpp)
 def_emuballs_module(emuballs_armregisterset armregisterset.cpp)
 def_emuballs_module(emuballs_device_factory device_factory.cpp)
+def_emuballs_module_shared(emuballs_device_factory device_factory.cpp)
 def_emuballs_module(emuballs_memory memory.cpp)
 def_emuballs_module(emuballs_namedregister namedregister.cpp)
 def_emuballs_module(emuballs_opdecoder opdecoder.cpp)

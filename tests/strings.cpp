@@ -102,6 +102,9 @@ BOOST_AUTO_TEST_CASE(concat_string)
 	}
 }
 
+// I can't get the Boost Unit Testing Framework to compile with wchar_t*
+// comparison functions.
+#ifndef _WIN32
 BOOST_AUTO_TEST_CASE(concat_wstring)
 {
 	{
@@ -141,3 +144,4 @@ BOOST_AUTO_TEST_CASE(concat_wstring)
 		BOOST_CHECK_EQUAL(L"Jane has a cat", Strings::concat(strList, L" ").c_str());
 	}
 }
+#endif
