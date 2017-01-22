@@ -63,7 +63,7 @@ void EditArray::addEditor(const QString &displayName, const QString &id)
 {
 	if (d->editors.contains(id))
 	{
-		throw new DuplicateIdError("editor with id " + displayName.toStdString()
+		throw DuplicateIdError("editor with id " + displayName.toStdString()
 			+ " already exists");
 	}
 

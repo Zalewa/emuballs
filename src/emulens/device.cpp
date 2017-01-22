@@ -18,15 +18,16 @@
  */
 #include "device.hpp"
 
+#include "cycler.hpp"
+#include "display.hpp"
 #include "memory.hpp"
 #include "registers.hpp"
+#include "trackablemdiwindow.hpp"
+#include "ui_device.h"
 
 #include <emuballs/device.hpp>
 #include <emuballs/errors.hpp>
 #include <emuballs/programmer.hpp>
-#include "cycler.hpp"
-#include "trackablemdiwindow.hpp"
-#include "ui_device.h"
 #include <fstream>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -48,8 +49,11 @@ DClass<Emulens::Device> : public Ui::Device
 public:
 	QMap<QAction*, QMdiSubWindow*> actions;
 	std::unique_ptr<Cycler> cycler;
+	Display *display;
+	TrackableMdiWindow *displayWindow;
 	QString lastLoadedProgramPath;
 	Memory *memory;
+	bool postInit;
 	Registers *registers;
 	std::shared_ptr<Emuballs::Device> device;
 	std::unique_ptr<DeviceToolBar> toolBar;
@@ -62,14 +66,17 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 {
 	d->setupUi(this);
 
+	d->postInit = false;
 	d->device = device;
 	d->cycler.reset(new Cycler(device, this));
 	d->registers = new Registers(device, this);
 	d->memory = new Memory(device, this);
+	d->display = new Display(device, this);
 
 	setupToolBar();
 	setupCycler();
 
+	d->displayWindow = addSubWindow(d->display);
 	addSubWindow(d->registers);
 	addSubWindow(d->memory);
 
@@ -78,7 +85,7 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	QTimer::singleShot(0, this, &Device::updateActiveWindowAction);
 }
 
-void Device::addSubWindow(QWidget *widget)
+TrackableMdiWindow *Device::addSubWindow(QWidget *widget)
 {
 	auto *window = new TrackableMdiWindow(this);
 	window->setWidget(widget);
@@ -104,6 +111,7 @@ void Device::addSubWindow(QWidget *widget)
 
 	d->actions.insert(action, window);
 	QMdiArea::addSubWindow(window);
+	return window;
 }
 
 void Device::showProgramRuntimeError(const QString &error)
@@ -191,6 +199,23 @@ void Device::setupToolBar()
 		d->cycler.get(), &Cycler::cycle);
 }
 
+void Device::showEvent(QShowEvent *event)
+{
+	if (!d->postInit)
+	{
+		postInit();
+		d->postInit = true;
+	}
+	QMdiArea::showEvent(event);
+}
+
+#include <QDebug>
+void Device::postInit()
+{
+	qDebug() << " o co tu chodzi? " << frameGeometry() << width() << height();
+	d->displayWindow->resize(width(), height());
+}
+
 QToolBar *Device::toolBar()
 {
 	return d->toolBar.get();
@@ -207,7 +232,7 @@ void Device::updateActiveWindowAction()
 
 void Device::updateViews()
 {
-	Updateable* views[] = { d->registers, d->memory };
+	Updateable* views[] = { d->registers, d->memory, d->display };
 	for (auto *view : views)
 		view->update();
 }

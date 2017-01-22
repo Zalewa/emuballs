@@ -36,6 +36,9 @@ public:
 
 	void update() override;
 
+protected:
+	virtual void resizeEvent(QResizeEvent *event) override;
+
 private:
 	DPtr<Display> d;
 };

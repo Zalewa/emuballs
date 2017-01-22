@@ -63,6 +63,7 @@ Pi::Pi(const PiDef &definition)
 void Pi::cycle()
 {
 	d->machine.cycle();
+	d->gpu->cycle();
 }
 
 void Pi::draw(Canvas &canvas)

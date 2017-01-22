@@ -33,15 +33,11 @@ class EMUBALLS_API Picture
 {
 public:
 	Picture();
-	Picture(size_t width, size_t height, size_t bpp);
+	Picture(size_t width, size_t height);
 	virtual ~Picture();
 
-	size_t bpp() const;
 	size_t height() const;
 	size_t width() const;
-
-	const std::vector<uint8_t> &data() const;
-	std::vector<uint8_t> &data();
 
 	bool valid() const;
 

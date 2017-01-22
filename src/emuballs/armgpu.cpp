@@ -18,6 +18,10 @@
  */
 #include "armgpu.hpp"
 
+#include "canvas.hpp"
+#include "color.hpp"
+#include "picture.hpp"
+
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
@@ -40,5 +44,15 @@ void Gpu::cycle()
 
 void Gpu::draw(Canvas &canvas)
 {
-	throw "Arm::Gpu::draw not implemented yet";
+	canvas.begin();
+	canvas.setPicture(Picture(640, 480));
+	for (int x = 0; x < 640; ++x)
+	{
+		for (int y = 0; y < 480; ++y)
+		{
+			canvas.drawPixel(x, y, Color(x % 255, 0, y % 255));
+		}
+	}
+	canvas.drawPixel(0, 0, Color(255, 0, 255));
+	canvas.end();
 }

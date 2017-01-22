@@ -24,17 +24,23 @@
 namespace Emuballs
 {
 
+struct Color;
 class Picture;
 
 class EMUBALLS_API Canvas
 {
 public:
+	Canvas();
 	virtual ~Canvas();
 
+	virtual void begin() = 0;
+	virtual void end() = 0;
+
+	virtual void drawPixel(int x, int y, const Color &color) = 0;
 	virtual void setPicture(const Picture &picture) = 0;
 
 private:
-	class DPtr<Canvas> d;
+	DPtr<Canvas> d;
 };
 
 }

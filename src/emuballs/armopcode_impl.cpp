@@ -250,7 +250,9 @@ protected:
 		// Pipeline flush is performed by the machine itself everytime when 'pc'
 		// value changes.
 		if (thumb)
-			throw "bx: branching to thumb is not implemented";
+		{
+			throw IllegalOpcodeError("bx: branching to thumb is not implemented");
+		}
 		else
 		{
 			machine.cpu().regs().pc() = address;

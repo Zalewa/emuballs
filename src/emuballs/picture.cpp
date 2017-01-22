@@ -23,36 +23,26 @@ using namespace Emuballs;
 DClass<Picture>
 {
 public:
-	size_t bpp;
 	size_t width;
 	size_t height;
-	std::vector<uint8_t> data;
 };
 
 DPointered(Picture)
 
 Picture::Picture()
 {
-	d->bpp = 0;
 	d->width = 0;
 	d->height = 0;
 }
 
-Picture::Picture(size_t width, size_t height, size_t bpp)
+Picture::Picture(size_t width, size_t height)
 {
-	d->bpp = bpp;
 	d->width = width;
 	d->height = height;
-	d->data.resize(width * height * bpp);
 }
 
 Picture::~Picture()
 {
-}
-
-size_t Picture::bpp() const
-{
-	return d->bpp;
 }
 
 size_t Picture::height() const
@@ -65,17 +55,7 @@ size_t Picture::width() const
 	return d->width;
 }
 
-const std::vector<uint8_t> &Picture::data() const
-{
-	return d->data;
-}
-
-std::vector<uint8_t> &Picture::data()
-{
-	return d->data;
-}
-
 bool Picture::valid() const
 {
-	return d->bpp > 0 && d->height > 0 && d->width > 0;
+	return d->height > 0 && d->width > 0;
 }

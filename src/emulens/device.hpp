@@ -31,6 +31,8 @@
 namespace Emulens
 {
 
+class TrackableMdiWindow;
+
 class Device : public QMdiArea
 {
 	Q_OBJECT
@@ -47,11 +49,15 @@ public:
 public slots:
 	void showLoadProgram();
 
+protected:
+	virtual void showEvent(QShowEvent *event) override;
+
 private:
 	DPtr<Device> d;
 
-	void addSubWindow(QWidget *widget);
+	TrackableMdiWindow *addSubWindow(QWidget *widget);
 	bool checkProgramSize(size_t size);
+	void postInit();
 	void setupCycler();
 	void setupToolBar();
 

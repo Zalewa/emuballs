@@ -23,6 +23,7 @@ set(SOURCES
 	hexedit/paint/qhexpainter.cpp
 	cycler.cpp
 	device.cpp
+	display.cpp
 	editarray.cpp
 	main.cpp
 	mainwindow.cpp

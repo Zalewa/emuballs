@@ -22,4 +22,5 @@ using namespace Emuballs;
 
 DClass<Canvas> {};
 DPointered(Canvas);
+Canvas::Canvas() {}
 Canvas::~Canvas() {}
