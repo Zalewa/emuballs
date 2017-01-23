@@ -26,3 +26,15 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(${NAME} ${SOURCES})
 target_link_libraries(${NAME} emuballs Qt5::Widgets)
+
+if (WIN32)
+	# Disable console window in Windows release builds.
+	if (MSVC)
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+	else ()
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,windows")
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,windows")
+	endif ()
+endif ()
