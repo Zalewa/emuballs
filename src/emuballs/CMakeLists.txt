@@ -34,7 +34,17 @@ set(SOURCES
 	../strings.cpp
 	)
 
+# static
 add_library(emuballs_static STATIC ${SOURCES})
+
+# shared
 add_library(emuballs SHARED ${SOURCES})
 target_compile_definitions(emuballs PUBLIC EMUBALLS_API_SHARED)
 target_compile_definitions(emuballs PRIVATE EMUBALLS_API_EXPORT)
+
+# common
+if (WIN32)
+	# remove "lib" prefix
+	SET_TARGET_PROPERTIES(emuballs_static PROPERTIES PREFIX "")
+	SET_TARGET_PROPERTIES(emuballs PROPERTIES PREFIX "")
+endif ()
