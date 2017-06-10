@@ -18,10 +18,6 @@ set(SOURCES
 	version.cpp
 	)
 
-set(UI
-	pickdevice.ui
-	)
-
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(${NAME} ${SOURCES})
