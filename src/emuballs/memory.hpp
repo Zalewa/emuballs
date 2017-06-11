@@ -21,49 +21,57 @@
 #include <cstdint>
 #include <map>
 #include <vector>
+#include "dptr.hpp"
+#include "export.h"
 
 namespace Emuballs
 {
+typedef size_t memsize;
+
 class Page
 {
 public:
-	Page(size_t size = 0);
+	Page(memsize size = 0);
 
-	const uint8_t &operator[](size_t index) const;
-	uint8_t &operator[](size_t index)
+	const uint8_t &operator[](memsize index) const;
+	uint8_t &operator[](memsize index)
 	{
 		return const_cast<uint8_t&>( static_cast<const Page&>(*this)[index] );
 	}
 
-	size_t size() const;
+	const std::vector<uint8_t> &contents() const;
+	memsize size() const;
 
 private:
 	std::vector<uint8_t> bytes;
 };
 
-class Memory
+class EMUBALLS_API Memory
 {
 public:
-	Memory(size_t totalSize = SIZE_MAX, size_t pageSize = 4096);
+	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
 
-	void putByte(uint32_t address, uint8_t value);
-	uint8_t byte(uint32_t address) const;
+	std::vector<memsize> allocatedPages() const;
+	std::vector<uint8_t> chunk(memsize address, memsize length) const;
 
-	void putWord(uint32_t address, uint32_t value);
-	uint32_t word(uint32_t address) const;
+	void putByte(memsize address, uint8_t value);
+	uint8_t byte(memsize address) const;
+
+	void putWord(memsize address, uint32_t value);
+	uint32_t word(memsize address) const;
+
+	memsize size() const;
 
 private:
-	const Page &page(uint32_t address) const;
-	Page &page(uint32_t address)
+	DPtr<Memory> d;
+
+	const Page &page(memsize address) const;
+	Page &page(memsize address)
 	{
 		return const_cast<Page&>( static_cast<const Memory&>(*this).page(address) );
 	}
 
-	uint32_t pageAddress(uint32_t memAddress) const;
-	uint32_t pageOffset(uint32_t memAddress) const;
-
-	size_t size;
-	size_t pageSize;
-	mutable std::map<uint32_t, Page> pages;
+	memsize pageAddress(memsize memAddress) const;
+	memsize pageOffset(memsize memAddress) const;
 };
 }

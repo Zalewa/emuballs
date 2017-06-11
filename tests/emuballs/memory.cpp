@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(pageOutOfRangeWrite)
 BOOST_AUTO_TEST_CASE(pageOutOfRangeRead)
 {
 	Page p(512);
-	BOOST_CHECK_THROW(uint8_t byte = p[p.size()], std::out_of_range);
+	BOOST_CHECK_THROW(p[p.size()], std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(memoryPutByte)
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(memoryPutWordOnBoundary)
 {
 	Memory m(1024, 512);
 	m.putWord(511, 0x1289afbe);
-	BOOST_CHECK_EQUAL(m.word(511), 0x1289afbe);
+	BOOST_CHECK_EQUAL(m.word(511), 0x1289afbeUL);
 }
 
 BOOST_AUTO_TEST_CASE(memoryMaxSize)

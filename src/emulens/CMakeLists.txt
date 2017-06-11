@@ -7,11 +7,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Widgets REQUIRED)
 
 set(SOURCES
+	hexview/hexview.cpp
 	cycler.cpp
 	device.cpp
 	editarray.cpp
 	main.cpp
 	mainwindow.cpp
+	memory.cpp
 	registers.cpp
 	trackablemdiwindow.cpp
 	pickdevice.cpp
@@ -30,6 +32,7 @@ if (WIN32)
 		set_target_properties(emulens PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
 		set_target_properties(emulens PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 	else ()
+		set_target_properties(emulens PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,console")
 		set_target_properties(emulens PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,windows")
 		set_target_properties(emulens PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,windows")
 	endif ()

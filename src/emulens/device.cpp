@@ -18,6 +18,7 @@
  */
 #include "device.hpp"
 
+#include "memory.hpp"
 #include "registers.hpp"
 
 #include <emuballs/device.hpp>
@@ -48,6 +49,7 @@ public:
 	QMap<QAction*, QMdiSubWindow*> actions;
 	std::unique_ptr<Cycler> cycler;
 	QString lastLoadedProgramPath;
+	Memory *memory;
 	Registers *registers;
 	std::shared_ptr<Emuballs::Device> device;
 	std::unique_ptr<DeviceToolBar> toolBar;
@@ -63,11 +65,13 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	d->device = device;
 	d->cycler.reset(new Cycler(device, this));
 	d->registers = new Registers(device, this);
+	d->memory = new Memory(device, this);
 
 	setupToolBar();
 	setupCycler();
 
 	addSubWindow(d->registers);
+	addSubWindow(d->memory);
 
 	connect(this, &QMdiArea::subWindowActivated, this, &Device::updateActiveWindowAction);
 
@@ -203,7 +207,7 @@ void Device::updateActiveWindowAction()
 
 void Device::updateViews()
 {
-	Updateable* views[] = { d->registers };
+	Updateable* views[] = { d->registers, d->memory };
 	for (auto *view : views)
 		view->update();
 }
