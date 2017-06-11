@@ -21,32 +21,69 @@
 #include "ui_memory.h"
 
 #include <emuballs/memory.hpp>
-
 namespace Emulens
 {
-class DataStorageMemory : public HexView::DataStorage
+class MemoryIo : public QIODevice
 {
 public:
-	DataStorageMemory(Emuballs::Memory &memory)
-		: memory(memory)
+	MemoryIo(Emuballs::Memory &memory, Emuballs::memsize baseOffset, Emuballs::memsize length)
+		: memory(memory), _base(baseOffset), _length(length)
 	{
+		_pos = 0;
 	}
 
-	virtual QByteArray getData(std::size_t position, std::size_t length)
+	bool open(OpenMode mode) override
 	{
-		std::vector<uint8_t> chunk = memory.chunk(position, length);
-		if (position + length > memory.size())
-			length = memory.size() - position;
-		return QByteArray(reinterpret_cast<const char*>(chunk.data()), chunk.size());
+		_pos = 0;
+		return QIODevice::open(mode);
 	}
 
-	virtual std::size_t size()
+	qint64 pos() const override
 	{
-		return memory.size();
+		return _pos;
+	}
+
+	bool reset() override
+	{
+		_pos = 0;
+		return QIODevice::reset();
+	}
+
+	qint64 size() const override
+	{
+		return _length;
+	}
+
+	bool isSequential() const override
+	{
+		return false;
+	}
+
+protected:
+	qint64 readData(char *data, qint64 maxSize) override
+	{
+		std::vector<uint8_t> chunk = memory.chunk(_base + _pos, maxSize);
+		_pos += chunk.size();
+		memcpy(data, chunk.data(), chunk.size());
+		return chunk.size();
+	}
+
+	qint64 writeData(const char *data, qint64 maxSize) override
+	{
+		qint64 written = 0;
+		std::vector<uint8_t> chunk(
+			reinterpret_cast<const uint8_t*>(data),
+			reinterpret_cast<const uint8_t*>(data + maxSize));
+		written = memory.putChunk(_base + _pos, chunk);
+		_pos += written;
+		return written;
 	}
 
 private:
 	Emuballs::Memory &memory;
+	qint64 _pos;
+	qint64 _base;
+	qint64 _length;
 };
 }
 
@@ -54,7 +91,22 @@ DClass<Emulens::Memory> : public Ui::Memory
 {
 public:
 	std::shared_ptr<Emuballs::Device> device;
-	std::unique_ptr<Emulens::DataStorageMemory> memoryOverlay;
+	Emuballs::memsize offset = 0;
+	QHexDocument *document;
+
+	std::shared_ptr<QIODevice> io()
+	{
+		auto io = std::shared_ptr<QIODevice>(new Emulens::MemoryIo(
+				device->memory(), offset, device->memory().pageSize() - 3));
+		io->open(QIODevice::ReadWrite);
+		return io;
+	}
+
+	std::shared_ptr<QIODevice> io(Emuballs::memsize offset)
+	{
+		this->offset = offset;
+		return io();
+	}
 };
 
 using namespace Emulens;
@@ -66,15 +118,26 @@ Memory::Memory(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 {
 	d->setupUi(this);
 	d->device = device;
-	d->memoryOverlay.reset(new DataStorageMemory(device->memory()));
-	d->hexView->setData(d->memoryOverlay.get());
-	d->hexView->showFromOffset(0);
+}
+
+void Memory::savePage()
+{
+	// TODO: Writing at the end of editor induces a crash
+	// due to an uncaught exception. Resolve this somehow.
+	std::shared_ptr<QIODevice> device = d->io();
+	d->document->saveTo(device.get());
 }
 
 void Memory::showOffsetFromListItem(QListWidgetItem *item)
 {
-	Emuballs::memsize offset = item->text().toULongLong();
-	d->hexView->showFromOffset(offset);
+	Emuballs::memsize offset = item->text().toULongLong(Q_NULLPTR, 16);
+	// TODO: Something wicked is going on here: I can't find any place
+	// where document is deleted. It should be investigated further.
+	std::shared_ptr<QIODevice> device = d->io(offset);
+	d->document = QHexDocument::fromDevice(device.get());
+	d->document->setBaseAddress(offset);
+	connect(d->document, &QHexDocument::documentChanged, this, &Memory::savePage);
+	d->hexEdit->setDocument(d->document);
 }
 
 void Memory::update()

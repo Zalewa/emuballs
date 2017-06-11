@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="HexView" name="hexView">
+    <widget class="QHexEdit" name="hexEdit">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -62,9 +62,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>HexView</class>
+   <class>QHexEdit</class>
    <extends>QFrame</extends>
-   <header>hexview/hexview.hpp</header>
+   <header>hexedit/qhexedit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

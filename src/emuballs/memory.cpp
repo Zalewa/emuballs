@@ -42,6 +42,19 @@ const std::vector<uint8_t> &Page::contents() const
 	return bytes;
 }
 
+void Page::setContents(memsize offset, const std::vector<uint8_t> &bytes)
+{
+	if (offset + bytes.size() > size())
+		throw std::out_of_range("contents must be within page size");
+	else if (offset == 0 && bytes.size() == size())
+		this->bytes = bytes;
+	else
+	{
+		for (size_t idx = 0; idx < bytes.size(); ++idx)
+			this->bytes[offset + idx] = bytes[idx];
+	}
+}
+
 memsize Page::size() const
 {
 	return bytes.size();
@@ -54,9 +67,47 @@ memsize Page::size() const
 DClass<Emuballs::Memory>
 {
 public:
+
 	Emuballs::memsize size;
 	Emuballs::memsize pageSize;
 	mutable std::map<Emuballs::memsize, Emuballs::Page> pages;
+	Emuballs::Page falsePage;
+
+	const Emuballs::Page &page(Emuballs::memsize address) const
+	{
+		if (address >= size)
+			throw std::out_of_range("address too big");
+		Emuballs::memsize page = pageAddress(address);
+		if (!isPageAllocated(page))
+			allocatePage(page);
+		return pages[page];
+	}
+
+
+	Emuballs::Page &page(Emuballs::memsize address)
+	{
+		return const_cast<Emuballs::Page&>( static_cast<const PrivData<Emuballs::Memory> &>(*this).page(address) );
+	}
+
+	Emuballs::memsize pageAddress(Emuballs::memsize memAddress) const
+	{
+		return (memAddress / pageSize) * pageSize;
+	}
+
+	Emuballs::memsize pageOffset(Emuballs::memsize memAddress) const
+	{
+		return memAddress % pageSize;
+	}
+
+	bool isPageAllocated(Emuballs::memsize address) const
+	{
+		return pages.find(pageAddress(address)) != pages.end();
+	}
+
+	void allocatePage(Emuballs::memsize address) const
+	{
+		pages[pageAddress(address)] = Emuballs::Page(pageSize);
+	}
 };
 
 DPointered(Emuballs::Memory);
@@ -68,6 +119,7 @@ Memory::Memory(memsize totalSize, memsize pageSize)
 {
 	d->size = totalSize;
 	d->pageSize = pageSize;
+	d->falsePage = Page(pageSize);
 }
 
 std::vector<memsize> Memory::allocatedPages() const
@@ -78,40 +130,72 @@ std::vector<memsize> Memory::allocatedPages() const
 	return pages;
 }
 
+memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
+{
+	memsize totalInsertCount = 0;
+	memsize currentPageAddress = d->pageAddress(address);
+	memsize currentPageOffset = d->pageOffset(address);
+	for (memsize offset = 0;
+		 currentPageAddress < size() && offset < chunk.size();
+		 currentPageAddress += d->pageSize)
+	{
+		memsize insertCount = std::min(d->pageSize - currentPageOffset, chunk.size() - offset);
+		totalInsertCount += insertCount;
+		Page &p = d->page(currentPageAddress);
+		p.setContents(currentPageOffset, std::vector<uint8_t>(
+				chunk.begin() + offset,
+				chunk.begin() + offset + insertCount));
+		offset += insertCount;
+		currentPageOffset = 0;
+	}
+	return totalInsertCount;
+}
+
 std::vector<uint8_t> Memory::chunk(memsize address, memsize length) const
 {
-	memsize currentPageAddress = pageAddress(address);
-	std::vector<uint8_t> bytes(length);
-	for (; currentPageAddress < length; currentPageAddress += d->pageSize)
+	memsize currentPageAddress = d->pageAddress(address);
+	memsize currentPageOffset = d->pageOffset(address);
+	std::vector<uint8_t> bytes;
+	if (length > d->pageSize)
+		bytes.reserve(length);
+	memsize remainingLength = length;
+	for (; currentPageAddress < size() && remainingLength > 0;
+		 currentPageAddress += d->pageSize)
 	{
-		memsize insertCount = std::min(length - currentPageAddress, d->pageSize);
-		const Page &p = page(address);
+		memsize insertCount = std::min(remainingLength, d->pageSize - currentPageOffset);
+		const Page &p = d->isPageAllocated(currentPageAddress) ?
+			d->page(currentPageAddress) :
+			d->falsePage;
 		const std::vector<uint8_t> &pageBytes = p.contents();
-		bytes.insert(bytes.end(), pageBytes.begin(), pageBytes.begin() + insertCount);
+		bytes.insert(bytes.end(),
+			pageBytes.begin() + currentPageOffset,
+			pageBytes.begin() + currentPageOffset + insertCount);
+		remainingLength -= insertCount;
+		currentPageOffset = 0;
 	}
 	return bytes;
 }
 
 void Memory::putByte(memsize address, uint8_t value)
 {
-	page(address)[pageOffset(address)] = value;
+	d->page(address)[d->pageOffset(address)] = value;
 }
 
 uint8_t Memory::byte(memsize address) const
 {
-	return page(address)[pageOffset(address)];
+	return d->page(address)[d->pageOffset(address)];
 }
 
 void Memory::putWord(memsize address, uint32_t value)
 {
-	Page *p = &page(address);
-	memsize offset = pageOffset(address);
+	Page *p = &d->page(address);
+	memsize offset = d->pageOffset(address);
 	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++address)
 	{
 		if (offset >= p->size())
 		{
-			p = &page(address);
-			offset = pageOffset(address);
+			p = &d->page(address);
+			offset = d->pageOffset(address);
 		}
 		(*p)[offset] = static_cast<uint8_t>(value >> (8 * i));
 	}
@@ -119,43 +203,24 @@ void Memory::putWord(memsize address, uint32_t value)
 
 uint32_t Memory::word(memsize address) const
 {
-	const Page *p = &page(address);
-	memsize offset = pageOffset(address);
+	const Page *p = &d->page(address);
+	memsize offset = d->pageOffset(address);
 	uint32_t value = 0;
 	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++address)
 	{
 		if (offset >= p->size())
 		{
-			p = &page(address);
-			offset = pageOffset(address);
+			p = &d->page(address);
+			offset = d->pageOffset(address);
 		}
 		value |= static_cast<uint32_t>((*p)[offset]) << (8 * i);
 	}
 	return value;
 }
 
-const Page &Memory::page(memsize address) const
+memsize Memory::pageSize() const
 {
-	if (address >= d->size)
-	{
-		throw std::out_of_range("address too big");
-	}
-	memsize page = pageAddress(address);
-	if (d->pages.find(page) == d->pages.end())
-	{
-		d->pages[page] = Page(d->pageSize);
-	}
-	return d->pages[page];
-}
-
-memsize Memory::pageAddress(memsize memAddress) const
-{
-	return (memAddress / d->pageSize) * d->pageSize;
-}
-
-memsize Memory::pageOffset(memsize memAddress) const
-{
-	return memAddress % d->pageSize;
+	return d->pageSize;
 }
 
 memsize Memory::size() const

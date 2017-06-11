@@ -41,6 +41,7 @@ private:
 
 private slots:
 	void showOffsetFromListItem(QListWidgetItem *item);
+	void savePage();
 };
 
 }

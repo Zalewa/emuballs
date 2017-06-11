@@ -62,6 +62,43 @@ BOOST_AUTO_TEST_CASE(pageOutOfRangeRead)
 	BOOST_CHECK_THROW(p[p.size()], std::out_of_range);
 }
 
+BOOST_AUTO_TEST_CASE(pageSetContentsExact)
+{
+	Page p(8);
+	std::vector<uint8_t> emptyExpected(8, 0);
+	auto emptyContents = p.contents();
+	BOOST_CHECK_EQUAL_COLLECTIONS(
+		emptyExpected.begin(), emptyExpected.end(),
+		emptyContents.begin(), emptyContents.end());
+	std::vector<uint8_t> payload = {0xca, 0xfe, 0xba, 0xbe, 0x11, 0x22, 0x33, 0x44};
+	p.setContents(0, payload);
+	auto filledContents = p.contents();
+	BOOST_CHECK_EQUAL_COLLECTIONS(
+		payload.begin(), payload.end(),
+		filledContents.begin(), filledContents.end());
+}
+
+BOOST_AUTO_TEST_CASE(pageSetContentsOffset)
+{
+	Page p(8);
+	std::vector<uint8_t> payload = {0xca, 0xfe};
+	p.setContents(5, payload);
+	auto filledContents = p.contents();
+	std::vector<uint8_t> expected(8, 0);
+	expected[5] = 0xca;
+	expected[6] = 0xfe;
+	BOOST_CHECK_EQUAL_COLLECTIONS(
+		expected.begin(), expected.end(),
+		filledContents.begin(), filledContents.end());
+}
+
+BOOST_AUTO_TEST_CASE(pageSetContentsTooMuch)
+{
+	Page p(8);
+	std::vector<uint8_t> payload = {0xca, 0xfe, 0xde, 0xad};
+	BOOST_CHECK_THROW(p.setContents(7, payload), std::out_of_range);
+}
+
 BOOST_AUTO_TEST_CASE(memoryPutByte)
 {
 	Memory m;
@@ -81,6 +118,84 @@ BOOST_AUTO_TEST_CASE(memoryPutWordOnBoundary)
 	Memory m(1024, 512);
 	m.putWord(511, 0x1289afbe);
 	BOOST_CHECK_EQUAL(m.word(511), 0x1289afbeUL);
+	BOOST_CHECK_EQUAL(2, m.allocatedPages().size());
+}
+
+BOOST_AUTO_TEST_CASE(memoryPutChunk)
+{
+	const memsize OFFSET = 508;
+
+	Memory m(1024, 512);
+	BOOST_CHECK_EQUAL(0, m.allocatedPages().size());
+
+	std::vector<uint8_t> payload = {0xca, 0xfe, 0xba, 0xbe, 0x11, 0x22, 0x33, 0x44};
+	size_t putAmount = m.putChunk(OFFSET, payload);
+	BOOST_CHECK_EQUAL(8, putAmount);
+	BOOST_CHECK_EQUAL(2, m.allocatedPages().size());
+
+	std::vector<uint8_t> stored = m.chunk(OFFSET, 8);
+	BOOST_CHECK_EQUAL(2, m.allocatedPages().size());
+
+	BOOST_CHECK_EQUAL(stored.size(), payload.size());
+	for (size_t idx = 0; idx < payload.size(); ++idx)
+	{
+		BOOST_CHECK_EQUAL(stored[idx], payload[idx]);
+		BOOST_CHECK_EQUAL(stored[idx], m.byte(OFFSET + idx));
+	}
+}
+
+BOOST_AUTO_TEST_CASE(memoryPutMoreThanMemoryChunk)
+{
+	const memsize MEMSIZE = 1024;
+	const memsize OFFSET = 250;
+
+	Memory m(MEMSIZE, 128);
+	std::vector<uint8_t> payload(MEMSIZE * 2, 0xcc);
+	payload[MEMSIZE - OFFSET - 1] = 0x40;
+	memsize putAmount = m.putChunk(OFFSET, payload);
+
+	BOOST_CHECK_EQUAL(MEMSIZE - OFFSET, putAmount);
+	BOOST_CHECK_EQUAL(7, m.allocatedPages().size());
+	BOOST_CHECK_EQUAL(0x40, m.byte(MEMSIZE - 1));
+}
+
+/** Extraction of chunk should not allocate pages */
+BOOST_AUTO_TEST_CASE(memoryChunkSize)
+{
+	const memsize MEMSIZE = 1024;
+	const memsize PAGESIZE = 128;
+
+	Memory m(MEMSIZE, PAGESIZE);
+	BOOST_CHECK_EQUAL(0, m.allocatedPages().size());
+
+	std::vector<uint8_t> chunk = m.chunk(0, MEMSIZE);
+	BOOST_CHECK_EQUAL(0, m.allocatedPages().size());
+	BOOST_CHECK_EQUAL(MEMSIZE, chunk.size());
+
+	std::vector<uint8_t> chunkLarger = m.chunk(512, MEMSIZE * 2);
+	BOOST_CHECK_EQUAL(0, m.allocatedPages().size());
+	BOOST_CHECK_EQUAL(MEMSIZE - 512, chunkLarger.size());
+}
+
+BOOST_AUTO_TEST_CASE(memoryChunk)
+{
+	Memory m(1024, 128);
+	m.putByte(0, 0x40);
+	std::vector<uint8_t> chunk = m.chunk(0, 1);
+	BOOST_CHECK_EQUAL(1, chunk.size());
+	BOOST_CHECK_EQUAL(chunk[0], 0x40);
+
+	m.putByte(128, 0x71);
+	std::vector<uint8_t> chunk2 = m.chunk(128, 1);
+	BOOST_CHECK_EQUAL(1, chunk2.size());
+	BOOST_CHECK_EQUAL(chunk2[0], 0x71);
+
+	m.putByte(1000, 0xfe);
+	m.putByte(1001, 0xed);
+	std::vector<uint8_t> chunk3 = m.chunk(1000, 2);
+	BOOST_CHECK_EQUAL(2, chunk3.size());
+	BOOST_CHECK_EQUAL(chunk3[0], 0xfe);
+	BOOST_CHECK_EQUAL(chunk3[1], 0xed);
 }
 
 BOOST_AUTO_TEST_CASE(memoryMaxSize)

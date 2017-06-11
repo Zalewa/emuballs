@@ -40,6 +40,8 @@ public:
 	}
 
 	const std::vector<uint8_t> &contents() const;
+	void setContents(memsize offset, const std::vector<uint8_t> &bytes);
+
 	memsize size() const;
 
 private:
@@ -52,6 +54,11 @@ public:
 	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
 
 	std::vector<memsize> allocatedPages() const;
+
+	/**
+	 * @return Amount of data actually put; can't exceed `size() - address`.
+	 */
+	memsize putChunk(memsize address, const std::vector<uint8_t> &chunk);
 	std::vector<uint8_t> chunk(memsize address, memsize length) const;
 
 	void putByte(memsize address, uint8_t value);
@@ -60,18 +67,10 @@ public:
 	void putWord(memsize address, uint32_t value);
 	uint32_t word(memsize address) const;
 
+	memsize pageSize() const;
 	memsize size() const;
 
 private:
 	DPtr<Memory> d;
-
-	const Page &page(memsize address) const;
-	Page &page(memsize address)
-	{
-		return const_cast<Page&>( static_cast<const Memory&>(*this).page(address) );
-	}
-
-	memsize pageAddress(memsize memAddress) const;
-	memsize pageOffset(memsize memAddress) const;
 };
 }

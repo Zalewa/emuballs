@@ -7,7 +7,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Widgets REQUIRED)
 
 set(SOURCES
-	hexview/hexview.cpp
+	hexedit/qhexedit.cpp
+	hexedit/qhexeditprivate.cpp
+	hexedit/document/gapbuffer.cpp
+	hexedit/document/qhexcursor.cpp
+	hexedit/document/qhexdocument.cpp
+	hexedit/document/qhextheme.cpp
+	hexedit/document/commands/hexcommand.cpp
+	hexedit/document/commands/insertcommand.cpp
+	hexedit/document/commands/removecommand.cpp
+	hexedit/document/commands/replacecommand.cpp
+	hexedit/document/metadata/qhexmetadata.cpp
+	hexedit/document/metadata/qhexmetadataitem.cpp
+	hexedit/paint/qhexmetrics.cpp
+	hexedit/paint/qhexpainter.cpp
 	cycler.cpp
 	device.cpp
 	editarray.cpp
