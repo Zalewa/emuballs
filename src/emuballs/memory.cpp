@@ -18,8 +18,43 @@
  */
 #include "memory.hpp"
 
+#include <atomic>
+#include <list>
+
+bitmask_enum(Emuballs::Memory::EventFlag);
+
 namespace Emuballs
 {
+
+struct MemObserveZone
+{
+	memobserver_id id;
+	memsize offset;
+	memsize length;
+	memobserver observer;
+	Memory::EventFlag flags;
+
+	bool isRead()
+	{
+		return static_cast<bool>(flags & Memory::EventFlag::Read);
+	}
+
+	bool isWrite()
+	{
+		return static_cast<bool>(flags & Memory::EventFlag::Write);
+	}
+
+	bool isInZone(memsize address)
+	{
+		return address >= offset && address < offset + length;
+	}
+
+	void execute(memsize address)
+	{
+		observer(address);
+	}
+};
+
 
 static const int WORD_SIZE = 4;
 
@@ -67,11 +102,13 @@ memsize Page::size() const
 DClass<Emuballs::Memory>
 {
 public:
-
 	Emuballs::memsize size;
 	Emuballs::memsize pageSize;
 	mutable std::map<Emuballs::memsize, Emuballs::Page> pages;
 	Emuballs::Page falsePage;
+	//std::atomic<Emuballs::memobserver_id> observeId;
+	Emuballs::memobserver_id observeId;
+	std::list<Emuballs::MemObserveZone> observers;
 
 	const Emuballs::Page &page(Emuballs::memsize address) const
 	{
@@ -120,6 +157,7 @@ Memory::Memory(memsize totalSize, memsize pageSize)
 	d->size = totalSize;
 	d->pageSize = pageSize;
 	d->falsePage = Page(pageSize);
+	d->observeId = 0;
 }
 
 std::vector<memsize> Memory::allocatedPages() const
@@ -226,6 +264,59 @@ memsize Memory::pageSize() const
 memsize Memory::size() const
 {
 	return d->size;
+}
+
+memobserver_id Memory::observe(memsize offset, memsize length, memobserver observer, EventFlag flags)
+{
+	memobserver_id id = d->observeId++;
+	MemObserveZone observerDescriptor {
+		.id = id,
+		.offset = offset,
+		.length = length,
+		.observer = observer,
+		.flags = flags
+	};
+	d->observers.emplace_back(observerDescriptor);
+	return id;
+}
+
+void Memory::unobserve(memobserver_id id)
+{
+	for (auto it = d->observers.begin(); it != d->observers.end(); ++it)
+	{
+		if (it->id == id)
+		{
+			d->observers.erase(it);
+			break;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MemoryStreamReader::MemoryStreamReader(const Memory &memory, memsize startOffset)
+	: memory(memory), _offset(startOffset)
+{
+}
+
+uint32_t MemoryStreamReader::readUint32()
+{
+	uint32_t val = memory.word(_offset);
+	_offset += sizeof(uint32_t);
+	return val;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MemoryStreamWriter::MemoryStreamWriter(Memory &memory, memsize startOffset)
+	: memory(memory), _offset(startOffset)
+{
+}
+
+void MemoryStreamWriter::writeUint32(uint32_t val)
+{
+	memory.putWord(_offset, val);
+	_offset += sizeof(uint32_t);
 }
 
 }

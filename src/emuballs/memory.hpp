@@ -21,12 +21,15 @@
 #include <cstdint>
 #include <map>
 #include <vector>
-#include "dptr.hpp"
+#include <dptr.hpp>
+#include <bitmask_enum.hpp>
 #include "export.h"
 
 namespace Emuballs
 {
 typedef size_t memsize;
+typedef std::function<void(memsize)> memobserver;
+typedef uint32_t memobserver_id;
 
 class Page
 {
@@ -51,6 +54,12 @@ private:
 class EMUBALLS_API Memory
 {
 public:
+	enum class EventFlag : int
+	{
+		Read = 0x1,
+		Write = 0x2
+	};
+
 	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
 
 	std::vector<memsize> allocatedPages() const;
@@ -70,7 +79,36 @@ public:
 	memsize pageSize() const;
 	memsize size() const;
 
+	memobserver_id observe(memsize offset, memsize length, memobserver observer, EventFlag flags);
+	void unobserve(memobserver_id id);
+
 private:
 	DPtr<Memory> d;
 };
+
+class MemoryStreamReader
+{
+public:
+	MemoryStreamReader(const Memory &memory, memsize startOffset = 0);
+
+	uint32_t readUint32();
+
+private:
+	const Memory &memory;
+	memsize _offset;
+};
+
+class MemoryStreamWriter
+{
+public:
+	MemoryStreamWriter(Memory &memory, memsize startOffset = 0);
+
+	void writeUint32(uint32_t value);
+
+private:
+	Memory &memory;
+	memsize _offset;
+};
+
+
 }

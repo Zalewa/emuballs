@@ -19,6 +19,7 @@
 #pragma once
 
 #include "dptr.hpp"
+#include "memory.hpp"
 
 namespace Emuballs
 {
@@ -36,6 +37,7 @@ public:
 
 	void cycle();
 	void draw(Canvas &canvas);
+	void setMailboxAddress(memsize address);
 
 private:
 	DPtr<Gpu> d;

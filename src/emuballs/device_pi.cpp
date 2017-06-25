@@ -57,6 +57,7 @@ DPointeredNoCopy(Pi);
 Pi::Pi(const PiDef &definition)
 {
 	d->definition = definition;
+	d->gpu->setMailboxAddress(definition.gpuMailboxAddress);
 	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 
