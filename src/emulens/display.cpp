@@ -20,7 +20,6 @@
 
 #include <emuballs/canvas.hpp>
 #include <emuballs/color.hpp>
-#include <emuballs/picture.hpp>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QVBoxLayout>
@@ -54,9 +53,9 @@ public:
 			static_cast<uint32_t>(color.b));
 	}
 
-	void setPicture(const Emuballs::Picture &picture) override
+	void changeSize(int width, int height) override
 	{
-		image = QImage(picture.width(), picture.height(), QImage::Format_RGB32);
+		image = QImage(width, height, QImage::Format_RGB32);
 	}
 
 private:

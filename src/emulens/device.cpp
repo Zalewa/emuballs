@@ -209,10 +209,8 @@ void Device::showEvent(QShowEvent *event)
 	QMdiArea::showEvent(event);
 }
 
-#include <QDebug>
 void Device::postInit()
 {
-	qDebug() << " o co tu chodzi? " << frameGeometry() << width() << height();
 	d->displayWindow->resize(width(), height());
 }
 

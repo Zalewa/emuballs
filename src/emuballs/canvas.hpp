@@ -31,13 +31,15 @@ class EMUBALLS_API Canvas
 {
 public:
 	Canvas();
+	Canvas(const Canvas &other) = delete;
+	Canvas &operator=(const Canvas &other) = delete;
 	virtual ~Canvas();
 
 	virtual void begin() = 0;
 	virtual void end() = 0;
 
 	virtual void drawPixel(int x, int y, const Color &color) = 0;
-	virtual void setPicture(const Picture &picture) = 0;
+	virtual void changeSize(int width, int height) = 0;
 
 private:
 	DPtr<Canvas> d;

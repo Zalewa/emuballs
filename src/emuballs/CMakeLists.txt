@@ -26,7 +26,6 @@ set(SOURCES
 	device_pi.cpp
 	memory.cpp
 	opdecoder.cpp
-	picture.cpp
 	programmer.cpp
 	programmer_pi.cpp
 	registerset.cpp

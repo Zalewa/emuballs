@@ -20,8 +20,6 @@
 
 #include "canvas.hpp"
 #include "color.hpp"
-#include "picture.hpp"
-
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
@@ -29,6 +27,7 @@ DClass<Gpu>
 {
 public:
 	Memory *memory;
+	int shift = 0;
 };
 
 DPointered(Gpu)
@@ -40,17 +39,18 @@ Gpu::Gpu(Memory &memory)
 
 void Gpu::cycle()
 {
+	++d->shift;
 }
 
 void Gpu::draw(Canvas &canvas)
 {
 	canvas.begin();
-	canvas.setPicture(Picture(640, 480));
+	canvas.changeSize(640, 480);
 	for (int x = 0; x < 640; ++x)
 	{
 		for (int y = 0; y < 480; ++y)
 		{
-			canvas.drawPixel(x, y, Color(x % 255, 0, y % 255));
+			canvas.drawPixel(x, y, Color((x + d->shift) % 255, 128, y % 255));
 		}
 	}
 	canvas.drawPixel(0, 0, Color(255, 0, 255));
