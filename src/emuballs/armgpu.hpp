@@ -34,6 +34,7 @@ class Gpu
 {
 public:
 	Gpu(Memory &memory);
+	~Gpu();
 
 	void cycle();
 	void draw(Canvas &canvas);

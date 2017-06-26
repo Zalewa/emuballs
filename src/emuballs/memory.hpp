@@ -23,12 +23,13 @@
 #include <vector>
 #include <dptr.hpp>
 #include <bitmask_enum.hpp>
+#include "access.hpp"
 #include "export.h"
 
 namespace Emuballs
 {
 typedef size_t memsize;
-typedef std::function<void(memsize)> memobserver;
+typedef std::function<void(memsize, Access)> memobserver;
 typedef uint32_t memobserver_id;
 
 class Page
@@ -54,12 +55,6 @@ private:
 class EMUBALLS_API Memory
 {
 public:
-	enum class EventFlag : int
-	{
-		Read = 0x1,
-		Write = 0x2
-	};
-
 	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
 
 	std::vector<memsize> allocatedPages() const;
@@ -79,7 +74,9 @@ public:
 	memsize pageSize() const;
 	memsize size() const;
 
-	memobserver_id observe(memsize offset, memsize length, memobserver observer, EventFlag flags);
+	// TODO: this pattern will probably fit in a separate class.
+	memobserver_id observe(memsize address, memsize length, memobserver observer, Access events);
+	void blockObservation(memobserver_id id, bool block);
 	void unobserve(memobserver_id id);
 
 private:
@@ -92,6 +89,7 @@ public:
 	MemoryStreamReader(const Memory &memory, memsize startOffset = 0);
 
 	uint32_t readUint32();
+	void skip(memsize amount);
 
 private:
 	const Memory &memory;
@@ -104,6 +102,7 @@ public:
 	MemoryStreamWriter(Memory &memory, memsize startOffset = 0);
 
 	void writeUint32(uint32_t value);
+	void skip(memsize amount);
 
 private:
 	Memory &memory;

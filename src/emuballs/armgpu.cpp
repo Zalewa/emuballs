@@ -20,6 +20,8 @@
 
 #include "canvas.hpp"
 #include "color.hpp"
+#include <functional>
+#include <iostream>
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
@@ -57,19 +59,30 @@ struct Mail
 struct Mailbox
 {
 	/** Receiving mail. */
-	Mail read;
-	/** Receive without retrieving. */
+	uint32_t read;
+	uint32_t reserved[4];
+	/** Receive without retrieving; value of `read` is written to memory. */
 	uint32_t poll;
 	/** Sender information. */
 	uint32_t sender;
 	uint32_t status;
 	uint32_t configuration;
 	/** Sending mail. */
-	Mail write;
+	uint32_t write;
+
+	bool isReadReady() const
+	{
+		return (status & readyBit(StatusBit::ReadReady, true)) != 0;
+	}
 
 	void readReady(bool ready)
 	{
 		status &= readyBit(StatusBit::ReadReady, ready);
+	}
+
+	bool isWriteReady() const
+	{
+		return (status & readyBit(StatusBit::WriteReady, true)) != 0;
 	}
 
 	void writeReady(bool ready)
@@ -78,7 +91,7 @@ struct Mailbox
 	}
 
 private:
-	uint32_t readyBit(StatusBit bit, bool ready)
+	static uint32_t readyBit(StatusBit bit, bool ready)
 	{
 		return ready ? ~static_cast<uint32_t>(bit) : static_cast<uint32_t>(bit);
 	}
@@ -88,32 +101,110 @@ private:
 DClass<Gpu>
 {
 public:
+	constexpr static const memsize INVALID_MAILBOX = static_cast<memsize>(-1);
+
 	Memory *memory;
 	int shift = 0;
-	memsize mailboxAddress;
+	memsize mailboxAddress = INVALID_MAILBOX;
+	memobserver_id observerId = 0;
+	bool hasMail = false;
+	bool isInit = false;
+
+	void init()
+	{
+		if (mailboxAddress == INVALID_MAILBOX)
+			throw std::logic_error("GPU mailbox address not set");
+		observe();
+		Mailbox mailbox;
+		mailbox.readReady(false);
+		mailbox.writeReady(true);
+		writeMailbox(mailbox);
+	}
 
 	Mailbox readMailbox()
 	{
+		memory->blockObservation(observerId, true);
 		MemoryStreamReader reader(*memory, mailboxAddress);
 		Mailbox mailbox = {0};
 		mailbox.read = Mail(reader.readUint32());
+		reader.skip(sizeof(mailbox.reserved));
 		mailbox.poll = reader.readUint32();
 		mailbox.sender = reader.readUint32();
 		mailbox.status = reader.readUint32();
 		mailbox.configuration = reader.readUint32();
 		mailbox.write = Mail(reader.readUint32());
+		memory->blockObservation(observerId, false);
 		return mailbox;
 	}
 
 	void writeMailbox(const Mailbox &mailbox)
 	{
+		memory->blockObservation(observerId, true);
 		MemoryStreamWriter writer(*memory, mailboxAddress);
 		writer.writeUint32(mailbox.read);
-		writer.writeUint32(mailbox.poll);
+		writer.skip(sizeof(mailbox.reserved));
+		writer.writeUint32(mailbox.read);
 		writer.writeUint32(mailbox.sender);
 		writer.writeUint32(mailbox.status);
 		writer.writeUint32(mailbox.configuration);
 		writer.writeUint32(mailbox.write);
+		memory->blockObservation(observerId, false);
+	}
+
+	void observe()
+	{
+		unobserve();
+		observerId = memory->observe(mailboxAddress, sizeof(Mailbox),
+			[this](memsize m, Access event){this->pickupMail(m, event);},
+			Access::Write | Access::Read);
+	}
+
+	void unobserve()
+	{
+		if (observerId != 0)
+		{
+			memory->unobserve(observerId);
+			observerId = 0;
+		}
+	}
+
+	void pickupMail(memsize address, Access event)
+	{
+		std::cerr << "picking up mail " << std::hex << address << std::dec << std::endl;
+		// Unatomic and excessive just to write 1 bit.
+		// Would cause undefined behavior if GPU and CPU
+		// were to run on separate threads.
+		//
+		// Unknown: how the actual hardware behaves if CPU
+		// writes to mailbox when write flag is unready?
+		Mailbox mail = readMailbox();
+		size_t addressAligned = address & (~static_cast<typeof(address)>(0b11));
+		if (event == Access::Write && mail.isWriteReady())
+		{
+			size_t writeOffset = offsetof(typeof(mail), write);
+			size_t writeAddress = mailboxAddress + writeOffset;
+			if (addressAligned == writeAddress)
+			{
+				mail.writeReady(false);
+				hasMail = true;
+			}
+		}
+		if (event == Access::Read)
+		{
+			size_t readOffset = offsetof(typeof(mail), read);
+			size_t readAddress = mailboxAddress + readOffset;
+			if (addressAligned == readAddress)
+			{
+				mail.readReady(false);
+			}
+		}
+		writeMailbox(mail);
+	}
+
+	Mail readMessage(const Mail &message)
+	{
+		std::cerr << "picked up a message, HAHA" << message.channel << message.message << std::endl;
+		return Mail();
 	}
 };
 
@@ -122,15 +213,30 @@ DPointered(Gpu)
 Gpu::Gpu(Memory &memory)
 {
 	d->memory = &memory;
-	d->mailboxAddress = 0;
+}
+
+Gpu::~Gpu()
+{
+	d->unobserve();
 }
 
 void Gpu::cycle()
 {
-	// Mailbox mailbox = d->readMailbox();
-	// mailbox.writeReady(false);
-	// mailbox.writeReady(true);
-	// d->writeMailbox(mailbox);
+	if (!d->isInit)
+	{
+		d->init();
+		d->isInit = true;
+	}
+	if (d->hasMail)
+	{
+		Mailbox mailbox = d->readMailbox();
+		Mail response = d->readMessage(mailbox.write);
+		d->hasMail = false;
+		mailbox.write = response;
+		mailbox.writeReady(true);
+		mailbox.readReady(true);
+		d->writeMailbox(mailbox);
+	}
 	++d->shift;
 }
 
@@ -151,5 +257,7 @@ void Gpu::draw(Canvas &canvas)
 
 void Gpu::setMailboxAddress(memsize address)
 {
+	if (d->isInit)
+		throw std::logic_error("cannot change GPU mailbox address after init");
 	d->mailboxAddress = address;
 }

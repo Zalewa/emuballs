@@ -18,10 +18,12 @@
  */
 #include "memory.hpp"
 
-#include <atomic>
+#include <algorithm>
 #include <list>
 
-bitmask_enum(Emuballs::Memory::EventFlag);
+#ifdef EMUBALLS_DEBUGS
+#include <iostream>
+#endif
 
 namespace Emuballs
 {
@@ -29,29 +31,50 @@ namespace Emuballs
 struct MemObserveZone
 {
 	memobserver_id id;
-	memsize offset;
+	memsize address;
 	memsize length;
 	memobserver observer;
-	Memory::EventFlag flags;
+	Access events;
+	bool blocked = false;
 
-	bool isRead()
+	memsize end() const
 	{
-		return static_cast<bool>(flags & Memory::EventFlag::Read);
+		validate();
+		return address + length - 1;
 	}
 
-	bool isWrite()
+	bool isRead() const
 	{
-		return static_cast<bool>(flags & Memory::EventFlag::Write);
+		return static_cast<bool>(events & Access::Read);
 	}
 
-	bool isInZone(memsize address)
+	bool isWrite() const
 	{
-		return address >= offset && address < offset + length;
+		return static_cast<bool>(events & Access::Write);
 	}
 
-	void execute(memsize address)
+	bool isInZone(memsize address) const
 	{
-		observer(address);
+		validate();
+		return address >= this->address && address < this->address + length;
+	}
+
+	bool isRangeColliding(memsize from, memsize to) const
+	{
+		validate();
+		auto lesser = std::min(from, to);
+		auto greater = std::max(from, to);
+		auto end = this->end();
+		return (lesser >= address && greater <= end)
+			|| (lesser <= address && greater >= address)
+			|| (lesser <= end && greater >= end);
+	}
+
+private:
+	void validate() const
+	{
+		if (length == 0)
+			throw std::runtime_error("memory observer with 0 length");
 	}
 };
 
@@ -106,7 +129,6 @@ public:
 	Emuballs::memsize pageSize;
 	mutable std::map<Emuballs::memsize, Emuballs::Page> pages;
 	Emuballs::Page falsePage;
-	//std::atomic<Emuballs::memobserver_id> observeId;
 	Emuballs::memobserver_id observeId;
 	std::list<Emuballs::MemObserveZone> observers;
 
@@ -145,6 +167,36 @@ public:
 	{
 		pages[pageAddress(address)] = Emuballs::Page(pageSize);
 	}
+
+	void execObservers(Emuballs::memsize address, Emuballs::Access event)
+	{
+		for (Emuballs::MemObserveZone &observer : this->observers)
+		{
+			#ifdef EMUBALLS_DEBUGS
+			if (!observer.blocked) {
+				std::cerr << "execObservers " << std::hex << address << " " << static_cast<int>(event) << " in da zone? " << observer.isInZone(address) << " events? " << static_cast<int>(observer.events & event) << " addr=" << observer.address << std::dec << " length=" << observer.length << std::endl;
+			}
+			#endif
+			if (!observer.blocked && (observer.events & event) != 0
+				&& observer.isInZone(address))
+			{
+				observer.observer(address, event);
+			}
+		}
+	}
+
+	void execObserversInRange(Emuballs::memsize address, Emuballs::memsize length,
+		Emuballs::Access event)
+	{
+		for (Emuballs::MemObserveZone &observer : this->observers)
+		{
+			if (!observer.blocked && (observer.events & event) != 0
+				&& observer.isRangeColliding(address, length))
+			{
+				observer.observer(address, event);
+			}
+		}
+	}
 };
 
 DPointered(Emuballs::Memory);
@@ -157,7 +209,7 @@ Memory::Memory(memsize totalSize, memsize pageSize)
 	d->size = totalSize;
 	d->pageSize = pageSize;
 	d->falsePage = Page(pageSize);
-	d->observeId = 0;
+	d->observeId = 1; // 0 is special; it should denote no observer
 }
 
 std::vector<memsize> Memory::allocatedPages() const
@@ -186,6 +238,7 @@ memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
 		offset += insertCount;
 		currentPageOffset = 0;
 	}
+	d->execObserversInRange(address, totalInsertCount, Access::Write);
 	return totalInsertCount;
 }
 
@@ -211,16 +264,19 @@ std::vector<uint8_t> Memory::chunk(memsize address, memsize length) const
 		remainingLength -= insertCount;
 		currentPageOffset = 0;
 	}
+	d->execObserversInRange(address, bytes.size(), Access::Read);
 	return bytes;
 }
 
 void Memory::putByte(memsize address, uint8_t value)
 {
 	d->page(address)[d->pageOffset(address)] = value;
+	d->execObservers(address, Access::Write);
 }
 
 uint8_t Memory::byte(memsize address) const
 {
+	d->execObservers(address, Access::Read);
 	return d->page(address)[d->pageOffset(address)];
 }
 
@@ -228,15 +284,17 @@ void Memory::putWord(memsize address, uint32_t value)
 {
 	Page *p = &d->page(address);
 	memsize offset = d->pageOffset(address);
-	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++address)
+	memsize currentAddress = address;
+	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++currentAddress)
 	{
 		if (offset >= p->size())
 		{
-			p = &d->page(address);
-			offset = d->pageOffset(address);
+			p = &d->page(currentAddress);
+			offset = d->pageOffset(currentAddress);
 		}
 		(*p)[offset] = static_cast<uint8_t>(value >> (8 * i));
 	}
+	d->execObservers(address, Access::Write);
 }
 
 uint32_t Memory::word(memsize address) const
@@ -244,15 +302,17 @@ uint32_t Memory::word(memsize address) const
 	const Page *p = &d->page(address);
 	memsize offset = d->pageOffset(address);
 	uint32_t value = 0;
-	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++address)
+	memsize currentAddress = address;
+	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++currentAddress)
 	{
 		if (offset >= p->size())
 		{
-			p = &d->page(address);
-			offset = d->pageOffset(address);
+			p = &d->page(currentAddress);
+			offset = d->pageOffset(currentAddress);
 		}
 		value |= static_cast<uint32_t>((*p)[offset]) << (8 * i);
 	}
+	d->execObservers(address, Access::Read);
 	return value;
 }
 
@@ -266,18 +326,28 @@ memsize Memory::size() const
 	return d->size;
 }
 
-memobserver_id Memory::observe(memsize offset, memsize length, memobserver observer, EventFlag flags)
+memobserver_id Memory::observe(memsize address, memsize length, memobserver observer, Access events)
 {
 	memobserver_id id = d->observeId++;
 	MemObserveZone observerDescriptor {
 		.id = id,
-		.offset = offset,
+		.address = address,
 		.length = length,
 		.observer = observer,
-		.flags = flags
+		.events = events
 	};
 	d->observers.emplace_back(observerDescriptor);
 	return id;
+}
+
+void Memory::blockObservation(memobserver_id id, bool block)
+{
+	auto it = std::find_if(d->observers.begin(), d->observers.end(),
+		[id](MemObserveZone& zone){ return zone.id == id; });
+	if (it != d->observers.end())
+		it->blocked = block;
+	else
+		throw std::runtime_error("no observer");
 }
 
 void Memory::unobserve(memobserver_id id)
@@ -306,6 +376,11 @@ uint32_t MemoryStreamReader::readUint32()
 	return val;
 }
 
+void MemoryStreamReader::skip(memsize amount)
+{
+	_offset += amount;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 MemoryStreamWriter::MemoryStreamWriter(Memory &memory, memsize startOffset)
@@ -317,6 +392,11 @@ void MemoryStreamWriter::writeUint32(uint32_t val)
 {
 	memory.putWord(_offset, val);
 	_offset += sizeof(uint32_t);
+}
+
+void MemoryStreamWriter::skip(memsize amount)
+{
+	_offset += amount;
 }
 
 }
