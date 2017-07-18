@@ -376,6 +376,15 @@ uint32_t MemoryStreamReader::readUint32()
 	return val;
 }
 
+uint64_t MemoryStreamReader::readUint64()
+{
+	uint64_t low = memory.word(_offset);
+	_offset += sizeof(uint32_t);
+	uint64_t high = memory.word(_offset);
+	_offset += sizeof(uint32_t);
+	return (high << 32) | low;
+}
+
 void MemoryStreamReader::skip(memsize amount)
 {
 	_offset += amount;
@@ -391,6 +400,16 @@ MemoryStreamWriter::MemoryStreamWriter(Memory &memory, memsize startOffset)
 void MemoryStreamWriter::writeUint32(uint32_t val)
 {
 	memory.putWord(_offset, val);
+	_offset += sizeof(uint32_t);
+}
+
+void MemoryStreamWriter::writeUint64(uint64_t val)
+{
+	uint64_t low = val & 0xffffffffULL;
+	uint64_t high = (val >> 32) & 0xffffffffULL;
+	memory.putWord(_offset, low);
+	_offset += sizeof(uint32_t);
+	memory.putWord(_offset, high);
 	_offset += sizeof(uint32_t);
 }
 

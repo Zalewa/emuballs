@@ -22,10 +22,11 @@
 #include "armregisterset.hpp"
 #include "armgpu.hpp"
 #include "programmer_pi.hpp"
+#include "pi_timer.hpp"
 #include <memory>
 
 using namespace Emuballs;
-using namespace Emuballs::Devs;
+using namespace Emuballs::Pi;
 
 PiDef::PiDef()
 {
@@ -37,59 +38,62 @@ PiDef::PiDef()
 	systemTimerAddress = 0x20003000;
 }
 
-DClass<Pi>
+DClass<PiDevice>
 {
 public:
 	Arm::Machine machine;
 	std::unique_ptr<Arm::Gpu> gpu;
 	std::unique_ptr<Arm::NamedRegisterSet> regs;
+	std::unique_ptr<Pi::Timer> timer;
 	PiDef definition;
 
 	PrivData()
 	{
 		gpu.reset(new Arm::Gpu(machine.memory()));
 		regs.reset(new Arm::NamedRegisterSet(machine));
+		timer.reset(new Emuballs::Pi::Timer(machine.memory()));
 	}
 };
 
-DPointeredNoCopy(Pi);
+DPointeredNoCopy(PiDevice);
 
-Pi::Pi(const PiDef &definition)
+PiDevice::PiDevice(const PiDef &definition)
 {
 	d->definition = definition;
 	d->gpu->setMailboxAddress(definition.gpuMailboxAddress);
 	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 
-void Pi::cycle()
+void PiDevice::cycle()
 {
+	d->timer->cycle();
 	d->machine.cycle();
 	d->gpu->cycle();
 }
 
-void Pi::draw(Canvas &canvas)
+void PiDevice::draw(Canvas &canvas)
 {
 	d->gpu->draw(canvas);
 }
 
-Memory &Pi::memory()
+Memory &PiDevice::memory()
 {
 	return d->machine.memory();
 }
 
-void Pi::reset()
+void PiDevice::reset()
 {
 	d->machine.cpu().regs().pc() = 0;
 }
 
-RegisterSet &Pi::registers()
+RegisterSet &PiDevice::registers()
 {
 	return *d->regs;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-std::list<DeviceFactory> Emuballs::Devs::listPiDevices()
+std::list<DeviceFactory> Emuballs::Pi::listPiDevices()
 {
 	device_factory rpi1 = [](){
 		PiDef def;
@@ -97,7 +101,7 @@ std::list<DeviceFactory> Emuballs::Devs::listPiDevices()
 		def.actLedGpio = 16;
 		def.ledOnIfPullDown = true;
 		def.gpioAddress = 0x20200000;
-		return DevicePtr(new Pi(def));
+		return DevicePtr(new PiDevice(def));
 	};
 
 	device_factory rpi1b = [](){
@@ -106,7 +110,7 @@ std::list<DeviceFactory> Emuballs::Devs::listPiDevices()
 		def.actLedGpio = 47;
 		def.ledOnIfPullDown = false;
 		def.gpioAddress = 0x20200000;
-		return DevicePtr(new Pi(def));
+		return DevicePtr(new PiDevice(def));
 	};
 
 	device_factory rpi2 = [](){
@@ -116,7 +120,7 @@ std::list<DeviceFactory> Emuballs::Devs::listPiDevices()
 		def.ledOnIfPullDown = false;
 		def.gpioAddress = 0x3f200000;
 		def.gpuMailboxAddress = 0x3f00b880;
-		return DevicePtr(new Pi(def));
+		return DevicePtr(new PiDevice(def));
 	};
 
 	std::list<DeviceFactory> factories = {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Zalewa <zalewapl@gmail.com>.
+ * Copyright 2017 Zalewa <zalewapl@gmail.com>.
  *
  * This file is part of Emuballs.
  *
@@ -18,43 +18,28 @@
  */
 #pragma once
 
-#include "device.hpp"
 #include "dptr.hpp"
 
 namespace Emuballs
 {
 
+class Memory;
+
 namespace Pi
 {
 
-struct PiDef
-{
-	int gpioCount;
-	int actLedGpio;
-	bool ledOnIfPullDown;
-	uint32_t gpioAddress;
-	uint32_t gpuMailboxAddress;
-	uint32_t systemTimerAddress;
-
-	PiDef();
-};
-
-class PiDevice : public Device
+class Timer
 {
 public:
-	PiDevice(const PiDef &definition);
+	Timer(Memory &memory);
+	Timer(const Timer &other) = delete;
+	Timer &operator=(const Timer &other) = delete;
 
-	void cycle() override;
-	void draw(Canvas &canvas) override;
-	Memory &memory() override;
-	void reset() override;
-	RegisterSet &registers() override;
+	void cycle();
 
 private:
-	DPtr<PiDevice> d;
+	DPtr<Timer> d;
 };
-
-std::list<DeviceFactory> listPiDevices();
 
 }
 

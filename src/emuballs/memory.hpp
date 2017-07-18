@@ -89,6 +89,7 @@ public:
 	MemoryStreamReader(const Memory &memory, memsize startOffset = 0);
 
 	uint32_t readUint32();
+	uint64_t readUint64();
 	void skip(memsize amount);
 
 private:
@@ -102,6 +103,7 @@ public:
 	MemoryStreamWriter(Memory &memory, memsize startOffset = 0);
 
 	void writeUint32(uint32_t value);
+	void writeUint64(uint64_t value);
 	void skip(memsize amount);
 
 private:

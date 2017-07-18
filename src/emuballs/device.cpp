@@ -106,5 +106,5 @@ bool DeviceFactory::isValid() const
 
 std::list<DeviceFactory> Emuballs::listDevices()
 {
-	return Devs::listPiDevices();
+	return Pi::listPiDevices();
 }
