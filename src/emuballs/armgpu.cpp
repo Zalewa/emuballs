@@ -60,7 +60,7 @@ struct Mailbox
 {
 	/** Receiving mail. */
 	uint32_t read;
-	uint32_t reserved[4];
+	uint32_t reserved[3];
 	/** Receive without retrieving; value of `read` is written to memory. */
 	uint32_t poll;
 	/** Sender information. */
@@ -72,28 +72,42 @@ struct Mailbox
 
 	bool isReadReady() const
 	{
-		return (status & readyBit(StatusBit::ReadReady, true)) != 0;
+		return statusBit(StatusBit::ReadReady);
 	}
 
 	void readReady(bool ready)
 	{
-		status &= readyBit(StatusBit::ReadReady, ready);
+		statusBit(StatusBit::ReadReady, ready);
 	}
 
 	bool isWriteReady() const
 	{
-		return (status & readyBit(StatusBit::WriteReady, true)) != 0;
+		return statusBit(StatusBit::WriteReady);
 	}
 
 	void writeReady(bool ready)
 	{
-		status &= readyBit(StatusBit::WriteReady, ready);
+		statusBit(StatusBit::WriteReady, ready);
 	}
 
 private:
-	static uint32_t readyBit(StatusBit bit, bool ready)
+	bool statusBit(StatusBit bit) const
 	{
-		return ready ? ~static_cast<uint32_t>(bit) : static_cast<uint32_t>(bit);
+		// 0 - enabled, 1 - disabled
+		return (status & static_cast<uint32_t>(bit)) == 0;
+	}
+
+	void statusBit(StatusBit bit, bool enable)
+	{
+		// 0 - enabled, 1 - disabled
+		if (enable)
+		{
+			status &= ~static_cast<uint32_t>(bit);
+		}
+		else
+		{
+			status |= static_cast<uint32_t>(bit);
+		}
 	}
 };
 }
@@ -124,7 +138,7 @@ public:
 	Mailbox readMailbox()
 	{
 		MemoryStreamReader reader(*memory, mailboxAddress);
-		Mailbox mailbox = {0};
+		Mailbox mailbox;
 		mailbox.read = Mail(reader.readUint32());
 		reader.skip(sizeof(mailbox.reserved));
 		mailbox.poll = reader.readUint32();
@@ -166,7 +180,7 @@ public:
 
 	void pickupMail(memsize address, Access event)
 	{
-		std::cerr << "picking up mail " << std::hex << address << std::dec << std::endl;
+		std::cerr << "picking up mail " << std::hex << address << ";" << (uint32_t)event << std::dec << std::endl;
 		// Unatomic and excessive just to write 1 bit.
 		// Would cause undefined behavior if GPU and CPU
 		// were to run on separate threads.
@@ -174,13 +188,17 @@ public:
 		// Unknown: how the actual hardware behaves if CPU
 		// writes to mailbox when write flag is unready?
 		Mailbox mail = readMailbox();
+		std::cerr << "\treadready is " << mail.isReadReady() << " writeready is " << mail.isWriteReady() << std::endl;
 		size_t addressAligned = address & (~static_cast<typeof(address)>(0b11));
 		if (event == Access::Write && mail.isWriteReady())
 		{
+			std::cerr << "written at ready write" << std::endl;
 			size_t writeOffset = offsetof(typeof(mail), write);
+			std::cerr << "write offset is " << std::hex << writeOffset << std::endl;
 			size_t writeAddress = mailboxAddress + writeOffset;
 			if (addressAligned == writeAddress)
 			{
+				std::cerr << "written at write address" << std::endl;
 				mail.writeReady(false);
 				hasMail = true;
 			}
@@ -191,6 +209,7 @@ public:
 			size_t readAddress = mailboxAddress + readOffset;
 			if (addressAligned == readAddress)
 			{
+				std::cerr << "read at read address" << std::endl;
 				mail.readReady(false);
 			}
 		}
