@@ -35,7 +35,6 @@ struct MemObserveZone
 	memsize length;
 	memobserver observer;
 	Access events;
-	bool blocked = false;
 
 	memsize end() const
 	{
@@ -173,11 +172,9 @@ public:
 		for (Emuballs::MemObserveZone &observer : this->observers)
 		{
 			#ifdef EMUBALLS_DEBUGS
-			if (!observer.blocked) {
-				std::cerr << "execObservers " << std::hex << address << " " << static_cast<int>(event) << " in da zone? " << observer.isInZone(address) << " events? " << static_cast<int>(observer.events & event) << " addr=" << observer.address << std::dec << " length=" << observer.length << std::endl;
-			}
+			std::cerr << "execObservers " << std::hex << address << " " << static_cast<int>(event) << " in da zone? " << observer.isInZone(address) << " events? " << static_cast<int>(observer.events & event) << " addr=" << observer.address << std::dec << " length=" << observer.length << std::endl;
 			#endif
-			if (!observer.blocked && (observer.events & event) != 0
+			if ((observer.events & event) != 0
 				&& observer.isInZone(address))
 			{
 				observer.observer(address, event);
@@ -190,7 +187,7 @@ public:
 	{
 		for (Emuballs::MemObserveZone &observer : this->observers)
 		{
-			if (!observer.blocked && (observer.events & event) != 0
+			if ((observer.events & event) != 0
 				&& observer.isRangeColliding(address, length))
 			{
 				observer.observer(address, event);
@@ -220,6 +217,18 @@ std::vector<memsize> Memory::allocatedPages() const
 	return pages;
 }
 
+void Memory::execObservers(memsize address, memsize length, Access events)
+{
+	if (length <= 1)
+	{
+		d->execObservers(address, events);
+	}
+	else
+	{
+		d->execObserversInRange(address, length, events);
+	}
+}
+
 memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
 {
 	memsize totalInsertCount = 0;
@@ -238,7 +247,6 @@ memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
 		offset += insertCount;
 		currentPageOffset = 0;
 	}
-	d->execObserversInRange(address, totalInsertCount, Access::Write);
 	return totalInsertCount;
 }
 
@@ -264,19 +272,16 @@ std::vector<uint8_t> Memory::chunk(memsize address, memsize length) const
 		remainingLength -= insertCount;
 		currentPageOffset = 0;
 	}
-	d->execObserversInRange(address, bytes.size(), Access::Read);
 	return bytes;
 }
 
 void Memory::putByte(memsize address, uint8_t value)
 {
 	d->page(address)[d->pageOffset(address)] = value;
-	d->execObservers(address, Access::Write);
 }
 
 uint8_t Memory::byte(memsize address) const
 {
-	d->execObservers(address, Access::Read);
 	return d->page(address)[d->pageOffset(address)];
 }
 
@@ -294,7 +299,6 @@ void Memory::putWord(memsize address, uint32_t value)
 		}
 		(*p)[offset] = static_cast<uint8_t>(value >> (8 * i));
 	}
-	d->execObservers(address, Access::Write);
 }
 
 uint32_t Memory::word(memsize address) const
@@ -312,7 +316,6 @@ uint32_t Memory::word(memsize address) const
 		}
 		value |= static_cast<uint32_t>((*p)[offset]) << (8 * i);
 	}
-	d->execObservers(address, Access::Read);
 	return value;
 }
 
@@ -351,16 +354,6 @@ memobserver_id Memory::observe(memsize address, memsize length, memobserver obse
 	};
 	d->observers.emplace_back(observerDescriptor);
 	return id;
-}
-
-void Memory::blockObservation(memobserver_id id, bool block)
-{
-	auto it = std::find_if(d->observers.begin(), d->observers.end(),
-		[id](MemObserveZone& zone){ return zone.id == id; });
-	if (it != d->observers.end())
-		it->blocked = block;
-	else
-		throw std::runtime_error("no observer");
 }
 
 void Memory::unobserve(memobserver_id id)
@@ -423,6 +416,66 @@ void MemoryStreamWriter::writeUint64(uint64_t val)
 void MemoryStreamWriter::skip(memsize amount)
 {
 	_offset += amount;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+TrackedMemory::TrackedMemory(Memory &memory)
+	: memory(memory)
+{
+}
+
+memsize TrackedMemory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
+{
+	auto ret = memory.putChunk(address, chunk);
+	memory.execObservers(address, ret, Access::Write);
+	return ret;
+}
+
+std::vector<uint8_t> TrackedMemory::chunk(memsize address, memsize length) const
+{
+	auto ret = memory.chunk(address, length);
+	memory.execObservers(address, ret.size(), Access::Read);
+	return ret;
+}
+
+void TrackedMemory::putByte(memsize address, uint8_t value)
+{
+	memory.putByte(address, value);
+	memory.execObservers(address, 0, Access::Write);
+}
+
+uint8_t TrackedMemory::byte(memsize address) const
+{
+	auto ret = memory.byte(address);
+	memory.execObservers(address, 0, Access::Read);
+	return ret;
+}
+
+void TrackedMemory::putWord(memsize address, uint32_t value)
+{
+	memory.putWord(address, value);
+	memory.execObservers(address, 0, Access::Write);
+}
+
+uint32_t TrackedMemory::word(memsize address) const
+{
+	auto ret = memory.word(address);
+	memory.execObservers(address, 0, Access::Read);
+	return ret;
+}
+
+void TrackedMemory::putDword(memsize address, uint64_t value)
+{
+	memory.putDword(address, value);
+	memory.execObservers(address, 0, Access::Write);
+}
+
+uint64_t TrackedMemory::dword(memsize address) const
+{
+	auto ret = memory.dword(address);
+	memory.execObservers(address, 0, Access::Read);
+	return ret;
 }
 
 }

@@ -27,6 +27,7 @@ namespace Emuballs
 {
 
 class Memory;
+class TrackedMemory;
 
 namespace Arm
 {
@@ -137,8 +138,11 @@ public:
 	Cpu &cpu();
 	const Cpu &cpu() const;
 
-	Memory &memory();
-	const Memory &memory() const;
+	TrackedMemory memory();
+	const TrackedMemory memory() const;
+
+	Memory &untrackedMemory();
+	const Memory &untrackedMemory() const;
 
 	void cycle();
 

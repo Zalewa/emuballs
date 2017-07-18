@@ -49,9 +49,9 @@ public:
 
 	PrivData()
 	{
-		gpu.reset(new Arm::Gpu(machine.memory()));
+		gpu.reset(new Arm::Gpu(machine.untrackedMemory()));
 		regs.reset(new Arm::NamedRegisterSet(machine));
-		timer.reset(new Emuballs::Pi::Timer(machine.memory()));
+		timer.reset(new Emuballs::Pi::Timer(machine.untrackedMemory()));
 	}
 };
 
@@ -78,14 +78,14 @@ void PiDevice::draw(Canvas &canvas)
 
 Memory &PiDevice::memory()
 {
-	return d->machine.memory();
+	return d->machine.untrackedMemory();
 }
 
 void PiDevice::reset()
 {
 	d->machine.cpu().regs().pc() = 0x8000;
 	// TODO: don't do this twice here and in PrivData constructor.
-	d->timer.reset(new Emuballs::Pi::Timer(d->machine.memory()));
+	d->timer.reset(new Emuballs::Pi::Timer(d->machine.untrackedMemory()));
 }
 
 RegisterSet &PiDevice::registers()

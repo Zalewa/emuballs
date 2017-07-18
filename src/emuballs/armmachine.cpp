@@ -268,12 +268,22 @@ const Emuballs::Arm::Cpu &Emuballs::Arm::Machine::cpu() const
 	return d->cpu;
 }
 
-Emuballs::Memory &Emuballs::Arm::Machine::memory()
+Emuballs::TrackedMemory Emuballs::Arm::Machine::memory()
+{
+	return TrackedMemory(d->memory);
+}
+
+const Emuballs::TrackedMemory Emuballs::Arm::Machine::memory() const
+{
+	return TrackedMemory(d->memory);
+}
+
+Emuballs::Memory &Emuballs::Arm::Machine::untrackedMemory()
 {
 	return d->memory;
 }
 
-const Emuballs::Memory &Emuballs::Arm::Machine::memory() const
+const Emuballs::Memory &Emuballs::Arm::Machine::untrackedMemory() const
 {
 	return d->memory;
 }

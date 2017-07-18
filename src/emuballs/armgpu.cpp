@@ -123,7 +123,6 @@ public:
 
 	Mailbox readMailbox()
 	{
-		memory->blockObservation(observerId, true);
 		MemoryStreamReader reader(*memory, mailboxAddress);
 		Mailbox mailbox = {0};
 		mailbox.read = Mail(reader.readUint32());
@@ -133,13 +132,11 @@ public:
 		mailbox.status = reader.readUint32();
 		mailbox.configuration = reader.readUint32();
 		mailbox.write = Mail(reader.readUint32());
-		memory->blockObservation(observerId, false);
 		return mailbox;
 	}
 
 	void writeMailbox(const Mailbox &mailbox)
 	{
-		memory->blockObservation(observerId, true);
 		MemoryStreamWriter writer(*memory, mailboxAddress);
 		writer.writeUint32(mailbox.read);
 		writer.skip(sizeof(mailbox.reserved));
@@ -148,7 +145,6 @@ public:
 		writer.writeUint32(mailbox.status);
 		writer.writeUint32(mailbox.configuration);
 		writer.writeUint32(mailbox.write);
-		memory->blockObservation(observerId, false);
 	}
 
 	void observe()

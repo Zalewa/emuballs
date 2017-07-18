@@ -29,7 +29,7 @@ struct Fixture : public ArmProgramFixture
 
 	Fixture() : MEM_BASE(0x40000), MEM_RANGE(0x80)
 	{
-		auto &memory = machine.memory();
+		auto &memory = machine.untrackedMemory();
 		for (auto addr = -(MEM_RANGE / 2);  addr < (MEM_RANGE / 2); addr += sizeof(uint32_t))
 			memory.putWord(addr, 0xccc4cccc * addr);
 	}

@@ -79,11 +79,14 @@ public:
 
 	// TODO: this pattern will probably fit in a separate class.
 	memobserver_id observe(memsize address, memsize length, memobserver observer, Access events);
-	void blockObservation(memobserver_id id, bool block);
 	void unobserve(memobserver_id id);
 
 private:
+	friend class TrackedMemory;
+
 	DPtr<Memory> d;
+
+	void execObservers(memsize address, memsize length, Access events);
 };
 
 class MemoryStreamReader
@@ -112,6 +115,26 @@ public:
 private:
 	Memory &memory;
 	memsize _offset;
+};
+
+class TrackedMemory
+{
+public:
+	TrackedMemory(Memory &memory);
+
+	memsize putChunk(memsize address, const std::vector<uint8_t> &chunk);
+	std::vector<uint8_t> chunk(memsize address, memsize length) const;
+
+	void putByte(memsize address, uint8_t value);
+	uint8_t byte(memsize address) const;
+
+	void putWord(memsize address, uint32_t value);
+	uint32_t word(memsize address) const;
+
+	void putDword(memsize address, uint64_t value);
+	uint64_t dword(memsize address) const;
+
+	Memory &memory;
 };
 
 
