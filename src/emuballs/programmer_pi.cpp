@@ -10,7 +10,7 @@ void ProgrammerPi::load(std::istream &in)
 {
 	static const auto CHUNK_SIZE = 1024 * 1024;
 	char chunk[CHUNK_SIZE];
-	uint32_t memoryOffset = 0;
+	uint32_t memoryOffset = 0x8000;
 	while (in)
 	{
 		in.read(&chunk[0], sizeof(char) * CHUNK_SIZE);

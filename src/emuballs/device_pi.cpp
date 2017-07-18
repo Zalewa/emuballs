@@ -83,7 +83,9 @@ Memory &PiDevice::memory()
 
 void PiDevice::reset()
 {
-	d->machine.cpu().regs().pc() = 0;
+	d->machine.cpu().regs().pc() = 0x8000;
+	// TODO: don't do this twice here and in PrivData constructor.
+	d->timer.reset(new Emuballs::Pi::Timer(d->machine.memory()));
 }
 
 RegisterSet &PiDevice::registers()
