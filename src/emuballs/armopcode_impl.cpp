@@ -285,8 +285,87 @@ class DoublewordDataTransfer  : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
+	void validate()
+	{
+		if (isWriteBack() && rn() == 15)
+			throw IllegalOpcodeError("ldr/str cannot write back to r15");
+		if (isRegisterOffset())
+		{
+			auto rm = code() & 0xf;
+			if (rm == 15)
+				throw IllegalOpcodeError("shift register cannot be r15");
+		}
+		if ((rd() % 2) != 0)
+			throw IllegalOpcodeError("ldrd/strd target/source register must be even");
+	}
+
 	void run(Machine &machine)
 	{
+		bool load = ((code() & (1 << 5)) == 0);
+		bool positiveOffset = code() & (1 << 23);
+		bool preIndexing = code() & (1 << 24);
+
+		uint32_t offset = 0;
+		if (isRegisterOffset())
+		{
+			auto rm = code() & 0xf;
+			auto rmVal = machine.cpu().regs()[rm];
+			offset = rmVal;
+		}
+		else
+		{
+			auto immediateLow = code() & 0xf;
+			auto immediateHigh = code() & 0xf00;
+			offset = (immediateHigh >> 4) | immediateLow;
+		}
+		auto address = machine.cpu().regs()[rn()];
+		auto addressWithOffset = address + (positiveOffset ? offset : -offset);
+		auto memoryAddress = preIndexing ? addressWithOffset : address;
+		if (load)
+		{
+			uint64_t value = machine.memory().dword(memoryAddress);
+			machine.cpu().regs()[rd()] = value & 0xffffffff;
+			machine.cpu().regs()[rd2()] = (value >> 32) & 0xffffffff;
+		}
+		else
+		{
+			uint64_t value = 0;
+			value |= machine.cpu().regs()[rd()];
+			value |= static_cast<uint64_t>(machine.cpu().regs()[rd2()]) << 32;
+			machine.memory().putDword(memoryAddress, value);
+		}
+		if (isWriteBack())
+		{
+			machine.cpu().regs()[rn()] = addressWithOffset;
+		}
+	}
+
+private:
+	bool isRegisterOffset() const
+	{
+		return (code() & (1 << 22)) == 0;
+	}
+
+	bool isWriteBack() const
+	{
+		bool writeBack = code() & (1 << 21);
+		bool preIndexing = code() & (1 << 24);
+		return writeBack || !preIndexing;
+	}
+
+	int rn() const
+	{
+		return (code() >> 16) & 0xf;
+	}
+
+	int rd() const
+	{
+		return (code() >> 12) & 0xf;
+	}
+
+	int rd2() const
+	{
+		return rd() + 1;
 	}
 };
 
@@ -486,7 +565,9 @@ static bool isSingleDataSwap(uint32_t code)
 
 static bool isDoublewordDataTransfer(uint32_t code)
 {
-	return (code & 0x0e1000d0) == 0x000000d0;
+	uint32_t masked = (code & 0x0e1000f0);
+	// ldrd or strd
+	return masked == 0x000000d0 || masked == 0x000000f0;
 }
 
 static bool isMultiply(uint32_t code)

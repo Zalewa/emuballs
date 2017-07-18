@@ -316,6 +316,19 @@ uint32_t Memory::word(memsize address) const
 	return value;
 }
 
+void Memory::putDword(memsize address, uint64_t value)
+{
+	putWord(address, static_cast<uint32_t>(value & 0xffffffff));
+	putWord(address + sizeof(uint32_t), static_cast<uint32_t>((value >> 32) & 0xffffffff));
+}
+
+uint64_t Memory::dword(memsize address) const
+{
+	uint64_t low = word(address);
+	uint64_t high = word(address + sizeof(uint32_t));
+	return (high << 32) | low;
+}
+
 memsize Memory::pageSize() const
 {
 	return d->pageSize;
@@ -378,11 +391,9 @@ uint32_t MemoryStreamReader::readUint32()
 
 uint64_t MemoryStreamReader::readUint64()
 {
-	uint64_t low = memory.word(_offset);
-	_offset += sizeof(uint32_t);
-	uint64_t high = memory.word(_offset);
-	_offset += sizeof(uint32_t);
-	return (high << 32) | low;
+	uint64_t val = memory.dword(_offset);
+	_offset += sizeof(uint64_t);
+	return val;
 }
 
 void MemoryStreamReader::skip(memsize amount)
@@ -405,12 +416,8 @@ void MemoryStreamWriter::writeUint32(uint32_t val)
 
 void MemoryStreamWriter::writeUint64(uint64_t val)
 {
-	uint64_t low = val & 0xffffffffULL;
-	uint64_t high = (val >> 32) & 0xffffffffULL;
-	memory.putWord(_offset, low);
-	_offset += sizeof(uint32_t);
-	memory.putWord(_offset, high);
-	_offset += sizeof(uint32_t);
+	memory.putDword(_offset, val);
+	_offset += sizeof(uint64_t);
 }
 
 void MemoryStreamWriter::skip(memsize amount)

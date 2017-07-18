@@ -113,6 +113,22 @@ BOOST_AUTO_TEST_CASE(memoryPutWord)
 	BOOST_CHECK_EQUAL(m.word(0x1000), 0xdeadbeef);
 }
 
+BOOST_AUTO_TEST_CASE(memoryPutDword)
+{
+	Memory m;
+	m.putDword(0x1000, 0xcafebebadeadbeef);
+	BOOST_CHECK_EQUAL(m.word(0x1000), 0xdeadbeef);
+	BOOST_CHECK_EQUAL(m.word(0x1004), 0xcafebeba);
+}
+
+BOOST_AUTO_TEST_CASE(memoryDword)
+{
+	Memory m;
+	m.putWord(0x1000, 0xa1b2c3d4);
+	m.putWord(0x1004, 0xffabbc11);
+	BOOST_CHECK_EQUAL(m.dword(0x1000), 0xffabbc11a1b2c3d4);
+}
+
 BOOST_AUTO_TEST_CASE(memoryPutWordOnBoundary)
 {
 	Memory m(1024, 512);

@@ -71,6 +71,9 @@ public:
 	void putWord(memsize address, uint32_t value);
 	uint32_t word(memsize address) const;
 
+	void putDword(memsize address, uint64_t value);
+	uint64_t dword(memsize address) const;
+
 	memsize pageSize() const;
 	memsize size() const;
 
