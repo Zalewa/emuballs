@@ -268,6 +268,18 @@ struct Fixture
 					{0xe9c201c0}, // stmib r2, {r6, r7, r8}^
 					{0xe842ffff}, // stmda r2, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}^
 					{0xe94201c0}, // stmdb r2, {r6, r7, r8}^
+					{0xe8bd0003}, // pop {r0, r1}
+					{0xe8bd00ff}, // pop {r0, r1, r2, r3, r4, r5, r6, r7}
+					{0xe8bdff00}, // pop {r8, r9, sl, fp, ip, sp, lr, pc}
+					{0xe8bdc000}, // pop {lr, pc}
+					{0xe8bd4001}, // pop {r0, lr}
+					{0xe8bd4002}, // pop {r1, lr}
+					{0xe92d0003}, // push {r0, r1}
+					{0xe92d00ff}, // push {r0, r1, r2, r3, r4, r5, r6, r7}
+					{0xe92dff00}, // push {r8, r9, sl, fp, ip, sp, lr, pc}
+					{0xe92dc000}, // push {lr, pc}
+					{0xe92d4001}, // push {r0, lr}
+					{0xe92d4002}, // push {r1, lr}
 						}});
 		codes.emplace(Factory::opcodeSingleDataSwap,
 			CodeSet {

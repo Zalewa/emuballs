@@ -114,7 +114,7 @@ protected:
 	{
 		auto regs = { rs(), rm(), rdHi(), rdLo() };
 		if (std::any_of(begin(regs), end(regs), [](auto reg){return reg == 15;}))
-			throw IllegalOpcodeError("mull: register cannot be 15");
+			throw IllegalOpcodeError("mull: register cannot be r15");
 		if (rdHi() == rdLo() || rdHi() == rm() || rdLo() == rm())
 			throw IllegalOpcodeError("mull: registers rdHi, rdLo and rm must be different");
 	}
@@ -470,8 +470,78 @@ class BlockDataTransfer : public Opcode
 public:
 	using Opcode::Opcode;
 protected:
-	void run(Machine &machine)
+	void validate() override
 	{
+		if (rn() == 15)
+			throw IllegalOpcodeError("ldm/stm: Rn cannot be r15");
+	}
+
+	void run(Machine &machine) override
+	{
+		bool load = code() & (1 << 20);
+		bool writeBack = code() & (1 << 21);
+		// TODO: psr when I know what this is.
+		// bool psr = code() & (1 << 22);
+		bool up = code() & (1 << 23);
+		bool preIndexing = code() & (1 << 24);
+
+		std::bitset<16> regs = registers();
+
+		memsize address = machine.cpu().regs()[rn()];
+		memsize offset = 0;
+
+		int start = 0;
+		int end = 0;
+		int increment = 0;
+		int offsetIncrement = 0;
+		if (up)
+		{
+			start = 0;
+			end = 16;
+			increment = 1;
+			offsetIncrement = sizeof(memsize);
+		}
+		else
+		{
+			start = 15;
+			end = -1;
+			increment = -1;
+			offsetIncrement = -sizeof(memsize);
+		}
+
+		TrackedMemory memory = machine.memory();
+		for (int reg = start; reg != end; reg += increment)
+		{
+			if (!regs.test(reg))
+				continue;
+			if (preIndexing)
+				offset += offsetIncrement;
+			if (load)
+			{
+				auto val = memory.word(address + offset);
+				machine.cpu().regs()[reg] = val;
+			}
+			else
+			{
+				auto val = machine.cpu().regs()[reg];
+				memory.putWord(address + offset, val);
+			}
+			if (!preIndexing)
+				offset += offsetIncrement;
+		}
+		if (writeBack)
+			machine.cpu().regs()[rn()] = address + offset;
+	}
+
+private:
+	int rn() const
+	{
+		return (code() >> 16) & 0xf;
+	}
+
+	std::bitset<16> registers() const
+	{
+		return std::bitset<16>(code() & 0xffff);
 	}
 };
 
