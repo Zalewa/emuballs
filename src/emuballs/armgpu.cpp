@@ -110,6 +110,20 @@ private:
 		}
 	}
 };
+
+struct FrameBufferInfo
+{
+	uint32_t physicalWidth;
+	uint32_t physicalHeight;
+	uint32_t virtualWidth;
+	uint32_t virtualHeight;
+	uint32_t pitch; // out
+	uint32_t bitDepth;
+	uint32_t xOffset;
+	uint32_t yOffset;
+	uint32_t pointer; // out
+	uint32_t size; // out
+};
 }
 
 DClass<Gpu>
@@ -159,6 +173,38 @@ public:
 		writer.writeUint32(mailbox.status);
 		writer.writeUint32(mailbox.configuration);
 		writer.writeUint32(mailbox.write);
+	}
+
+	FrameBufferInfo readFrameBufferInfo(memsize address)
+	{
+		MemoryStreamReader reader(*memory, address);
+		FrameBufferInfo fb;
+		fb.physicalWidth = reader.readUint32();
+		fb.physicalHeight = reader.readUint32();
+		fb.virtualWidth = reader.readUint32();
+		fb.virtualHeight = reader.readUint32();
+		fb.pitch = reader.readUint32();
+		fb.bitDepth = reader.readUint32();
+		fb.xOffset = reader.readUint32();
+		fb.yOffset = reader.readUint32();
+		fb.pointer = reader.readUint32();
+		fb.size = reader.readUint32();
+		return fb;
+	}
+
+	void writeFrameBufferInfo(memsize address, const FrameBufferInfo &fb)
+	{
+		MemoryStreamWriter writer(*memory, address);
+		writer.writeUint32(fb.physicalWidth);
+		writer.writeUint32(fb.physicalHeight);
+		writer.writeUint32(fb.virtualWidth);
+		writer.writeUint32(fb.virtualHeight);
+		writer.writeUint32(fb.pitch);
+		writer.writeUint32(fb.bitDepth);
+		writer.writeUint32(fb.xOffset);
+		writer.writeUint32(fb.yOffset);
+		writer.writeUint32(fb.pointer);
+		writer.writeUint32(fb.size);
 	}
 
 	void observe()
@@ -218,8 +264,27 @@ public:
 
 	Mail readMessage(const Mail &message)
 	{
-		std::cerr << "picked up a message, HAHA" << message.channel << message.message << std::endl;
-		return Mail();
+		// 0x40000000 is a special cache flag, so let's filter
+		// it out and all bits above it.
+		// https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/screen01.html
+		memsize frameBufferAddress = message.message & 0x3fffffff;
+
+		FrameBufferInfo frameBufferInfo = readFrameBufferInfo(frameBufferAddress);
+		uint32_t bytesPerPixel = frameBufferInfo.bitDepth / 8;
+		if ((frameBufferInfo.bitDepth % 8) != 0)
+			bytesPerPixel++;
+		frameBufferInfo.pitch = frameBufferInfo.virtualWidth * bytesPerPixel;
+		// How does the GPU pick the pointer? How does it know it won't
+		// collide with anything? More documentation must be found, but
+		// for now let's pick the place right after the mailbox.
+		frameBufferInfo.pointer = mailboxAddress + sizeof(Mailbox);
+		frameBufferInfo.size = frameBufferInfo.pitch * frameBufferInfo.virtualHeight;
+		writeFrameBufferInfo(frameBufferAddress, frameBufferInfo);
+
+		Mail response;
+		response.channel = message.channel;
+		response.message = 0;
+		return response;
 	}
 };
 
@@ -247,7 +312,7 @@ void Gpu::cycle()
 		Mailbox mailbox = d->readMailbox();
 		Mail response = d->readMessage(mailbox.write);
 		d->hasMail = false;
-		mailbox.write = response;
+		mailbox.read = response;
 		mailbox.writeReady(true);
 		mailbox.readReady(true);
 		d->writeMailbox(mailbox);
