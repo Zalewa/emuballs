@@ -33,8 +33,7 @@ struct Fixture
 		opcodeMultiplyLong,
 		opcodeSingleDataSwap,
 		opcodeBranchAndExchange,
-		opcodeHalfwordDataTransferRegisterOffset,
-		opcodeHalfwordDataTransferImmediateOffset,
+		opcodeHalfwordDataTransfer,
 		opcodeDoublewordDataTransfer,
 		opcodeSingleDataTransfer,
 		opcodeBlockDataTransfer,
@@ -369,9 +368,9 @@ struct Fixture
 					{0xe128f004}, // msr CPSR_f, r4
 					{0xe328f20f}, // msr CPSR_f, #-268435456 ; 0xf0000000
 						}});
-		codes.emplace(Factory::opcodeHalfwordDataTransferRegisterOffset,
+		codes.emplace(Factory::opcodeHalfwordDataTransfer,
 			CodeSet {
-				Emuballs::Arm::opcodeHalfwordDataTransferRegisterOffset, std::list<Code> {
+				Emuballs::Arm::opcodeHalfwordDataTransfer, std::list<Code> {
 					{0xe19100d2}, // ldrsb r0, [r1, r2]
 					{0xe11100d2}, // ldrsb r0, [r1, -r2]
 					{0xe1b100d2}, // ldrsb r0, [r1, r2]!
@@ -396,10 +395,6 @@ struct Fixture
 					{0xe12100b2}, // strh r0, [r1, -r2]!
 					{0xe08100b2}, // strh r0, [r1], r2
 					{0xe00100b2}, // strh r0, [r1], -r2
-						}});
-		codes.emplace(Factory::opcodeHalfwordDataTransferImmediateOffset,
-			CodeSet {
-				Emuballs::Arm::opcodeHalfwordDataTransferImmediateOffset, std::list<Code> {
 					{0xe1d100d0}, // ldrsb r0, [r1]
 					{0xe1d100d4}, // ldrsb r0, [r1, #4]
 					{0xe15100d4}, // ldrsb r0, [r1, #-4]
@@ -560,10 +555,8 @@ std::ostream& operator<< (std::ostream & os, Fixture::Factory factory)
 		return os << "opcodeSingleDataSwap";
 	case Fixture::Factory::opcodeBranchAndExchange:
 		return os << "opcodeBranchAndExchange";
-	case Fixture::Factory::opcodeHalfwordDataTransferRegisterOffset:
-		return os << "opcodeHalfwordDataTransferRegisterOffset";
-	case Fixture::Factory::opcodeHalfwordDataTransferImmediateOffset:
-		return os << "opcodeHalfwordDataTransferImmediateOffset";
+	case Fixture::Factory::opcodeHalfwordDataTransfer:
+		return os << "opcodeHalfwordDataTransfer";
 	case Fixture::Factory::opcodeDoublewordDataTransfer:
 		return os << "opcodeDoublewordDataTransfer";
 	case Fixture::Factory::opcodeSingleDataTransfer:

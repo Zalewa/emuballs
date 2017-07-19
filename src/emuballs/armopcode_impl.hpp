@@ -32,8 +32,7 @@ OpcodePtr opcodeMultiply(uint32_t code);
 OpcodePtr opcodeMultiplyLong(uint32_t code);
 OpcodePtr opcodeSingleDataSwap(uint32_t code);
 OpcodePtr opcodeBranchAndExchange(uint32_t code);
-OpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code);
-OpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code);
+OpcodePtr opcodeHalfwordDataTransfer(uint32_t code);
 OpcodePtr opcodeDoublewordDataTransfer(uint32_t code);
 OpcodePtr opcodeSingleDataTransfer(uint32_t code);
 OpcodePtr opcodeBlockDataTransfer(uint32_t code);
@@ -50,8 +49,7 @@ const OpFactory factories[] =
 	opcodeMultiplyLong,
 	opcodeSingleDataSwap,
 	opcodeBranchAndExchange,
-	opcodeHalfwordDataTransferRegisterOffset,
-	opcodeHalfwordDataTransferImmediateOffset,
+	opcodeHalfwordDataTransfer,
 	opcodeDoublewordDataTransfer,
 	opcodeSingleDataTransfer,
 	opcodeBlockDataTransfer,

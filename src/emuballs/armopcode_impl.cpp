@@ -260,23 +260,92 @@ protected:
 	}
 };
 
-class HalfwordDataTransferRegisterOffset  : public Opcode
+class HalfwordDataTransfer : public Opcode
 {
 public:
 	using Opcode::Opcode;
 protected:
-	void run(Machine &machine)
+	void run(Machine &machine) override
 	{
-	}
-};
+		bool halfword = code() & (1 << 5);
+		bool isSigned = code() & (1 << 6);
+		bool load = code() & (1 << 20);
+		bool writeBack = code() & (1 << 21);
+		bool immediateOffset = code() & (1 << 22);
+		bool up = code() & (1 << 23);
+		bool preIndexing = code() & (1 << 24);
 
-class HalfwordDataTransferImmediateOffset : public Opcode
-{
-public:
-	using Opcode::Opcode;
-protected:
-	void run(Machine &machine)
+		memsize address = machine.cpu().regs()[rn()];
+
+		int offset = 0;
+		if (immediateOffset)
+			offset = (code() & 0xf) | ((code() >> 4) & 0xf0);
+		else
+			offset = machine.cpu().regs()[rm()];
+		if (!up)
+			offset = -offset;
+
+		memsize offsetAddress = address;
+		if (preIndexing)
+			offsetAddress += offset;
+
+		if (load)
+		{
+			regval value = 0;
+			if (halfword)
+			{
+				value = machine.memory().byte(offsetAddress);
+				value |= machine.memory().byte(offsetAddress + 1) << 8;
+				if (isSigned)
+				{
+					if (value & (1 << 15))
+						value |= ~static_cast<regval>(0xffff);
+				}
+			}
+			else
+			{
+				value = machine.memory().byte(offsetAddress);
+				if (isSigned)
+				{
+					if (value & (1 << 7))
+						value |= ~static_cast<regval>(0xff);
+				}
+			}
+			machine.cpu().regs()[rd()] = value;
+		}
+		else
+		{
+			regval value = machine.cpu().regs()[rd()];
+			machine.memory().putByte(offsetAddress, value & 0xff);
+			if (halfword)
+			{
+				machine.memory().putByte(offsetAddress + 1, (value >> 8) & 0xff);
+			}
+		}
+
+		if (!preIndexing || writeBack)
+			machine.cpu().regs()[rn()] = address + offset;
+	}
+
+private:
+	int rn() const
 	{
+		return (code() >> 16) & 0xf;
+	}
+
+	int rd() const
+	{
+		return (code() >> 12) & 0xf;
+	}
+
+	int rm() const
+	{
+		return code() & 0xf;
+	}
+
+	bool isPreIndexing() const
+	{
+		return code() & (1 << 24);
 	}
 };
 
@@ -701,20 +770,12 @@ static bool canBeHalfwordDataTransfer(uint32_t code)
 		isMultiply(code) || isMultiplyLong(code));
 }
 
-OpcodePtr opcodeHalfwordDataTransferRegisterOffset(uint32_t code)
+OpcodePtr opcodeHalfwordDataTransfer(uint32_t code)
 {
-	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400f90) == 0x00000090)
+	if (canBeHalfwordDataTransfer(code) &&
+		((code & 0x0e400f90) == 0x00000090 || (code & 0x0e400090) == 0x00400090))
 	{
-		return OpcodePtr(new HalfwordDataTransferRegisterOffset(code));
-	}
-	return nullptr;
-}
-
-OpcodePtr opcodeHalfwordDataTransferImmediateOffset(uint32_t code)
-{
-	if (canBeHalfwordDataTransfer(code) && (code & 0x0e400090) == 0x00400090)
-	{
-		return OpcodePtr(new HalfwordDataTransferRegisterOffset(code));
+		return OpcodePtr(new HalfwordDataTransfer(code));
 	}
 	return nullptr;
 }
