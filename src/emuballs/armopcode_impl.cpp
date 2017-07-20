@@ -568,14 +568,14 @@ protected:
 			start = 0;
 			end = 16;
 			increment = 1;
-			offsetIncrement = sizeof(memsize);
+			offsetIncrement = 4;
 		}
 		else
 		{
 			start = 15;
 			end = -1;
 			increment = -1;
-			offsetIncrement = -sizeof(memsize);
+			offsetIncrement = -4;
 		}
 
 		TrackedMemory memory = machine.memory();

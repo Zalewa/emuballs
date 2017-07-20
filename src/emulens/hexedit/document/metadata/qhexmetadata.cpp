@@ -130,11 +130,12 @@ const QHexMetadataItem *QHexMetadata::comment(integer_t offset) const
 {
     MetadataList metalist = this->fromOffset(offset);
 
-    for(MetadataList::const_reverse_iterator it = metalist.crbegin(); it != metalist.crend(); it++)
+    MetadataList::const_iterator lastIt = metalist.constEnd();
+    for(MetadataList::const_iterator it = metalist.constBegin(); it != metalist.constEnd(); it++)
     {
         if((*it)->hasComment())
-            return *it;
+            lastIt = it;
     }
 
-    return NULL;
+    return lastIt != metalist.constEnd() ? (*lastIt) : NULL;
 }

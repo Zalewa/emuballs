@@ -20,11 +20,14 @@
 
 #include "canvas.hpp"
 #include "color.hpp"
+#include <cstddef>
 #include <functional>
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
-namespace Emuballs::Arm
+namespace Emuballs
+{
+namespace Arm
 {
 enum class StatusBit : uint32_t
 {
@@ -128,6 +131,7 @@ enum class BitDepth : int
 {
 	HighColor = 16
 };
+}
 }
 
 DClass<Gpu>
@@ -238,10 +242,10 @@ public:
 		// Unknown: how the actual hardware behaves if CPU
 		// writes to mailbox when write flag is unready?
 		Mailbox mail = readMailbox();
-		size_t addressAligned = address & (~static_cast<typeof(address)>(0b11));
+		size_t addressAligned = address & (~static_cast<decltype(address)>(0b11));
 		if (event == Access::Write && mail.isWriteReady())
 		{
-			size_t writeOffset = offsetof(typeof(mail), write);
+			size_t writeOffset = offsetof(decltype(mail), write);
 			size_t writeAddress = mailboxAddress + writeOffset;
 			if (addressAligned == writeAddress)
 			{
@@ -251,7 +255,7 @@ public:
 		}
 		if (event == Access::Read)
 		{
-			size_t readOffset = offsetof(typeof(mail), read);
+			size_t readOffset = offsetof(decltype(mail), read);
 			size_t readAddress = mailboxAddress + readOffset;
 			if (addressAligned == readAddress)
 			{

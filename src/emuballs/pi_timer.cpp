@@ -21,7 +21,9 @@
 #include "memory.hpp"
 #include <chrono>
 
-namespace Emuballs::Pi
+namespace Emuballs
+{
+namespace Pi
 {
 
 struct Timebox
@@ -34,6 +36,7 @@ struct Timebox
 	uint32_t compare[NUM_COMPARES];
 };
 
+}
 }
 
 using namespace Emuballs;

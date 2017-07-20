@@ -263,7 +263,8 @@ BOOST_AUTO_TEST_CASE(stm_postindex_up_writeback_self_first)
 	BOOST_CHECK_EQUAL(r(6), 0xa1b2c3d4);
 	BOOST_CHECK_EQUAL(r(7), 0xfedcba98);
 	int i = 0;
-	for (auto value : {MEM_BASE, 0xcafebeba, 0xdeadbeef, 0xa1b2c3d4, 0xfedcba98})
+	uint32_t values[] = {static_cast<uint32_t>(MEM_BASE), 0xcafebeba, 0xdeadbeef, 0xa1b2c3d4, 0xfedcba98};
+	for (uint32_t value : values)
 	{
 		BOOST_CHECK_EQUAL(machine.memory().word(MEM_BASE + (i * 4)), value);
 		++i;
