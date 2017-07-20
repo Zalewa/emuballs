@@ -41,6 +41,7 @@ OpcodePtr opcodeCoprocessorDataTransfer(uint32_t code);
 OpcodePtr opcodeCoprocessorDataOperation(uint32_t code);
 OpcodePtr opcodeCoprocessorRegisterTransfer(uint32_t code);
 OpcodePtr opcodeSoftwareInterrupt(uint32_t code);
+OpcodePtr opcodeByteReverse(uint32_t code);
 
 const OpFactory factories[] =
 {
@@ -57,7 +58,8 @@ const OpFactory factories[] =
 	opcodeCoprocessorDataTransfer,
 	opcodeCoprocessorDataOperation,
 	opcodeCoprocessorRegisterTransfer,
-	opcodeSoftwareInterrupt
+	opcodeSoftwareInterrupt,
+	opcodeByteReverse,
 };
 
 

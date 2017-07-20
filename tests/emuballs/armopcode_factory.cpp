@@ -41,7 +41,8 @@ struct Fixture
 		opcodeCoprocessorDataTransfer,
 		opcodeCoprocessorDataOperation,
 		opcodeCoprocessorRegisterTransfer,
-		opcodeSoftwareInterrupt
+		opcodeSoftwareInterrupt,
+		opcodeByteReverse,
 	};
 
 	struct Code
@@ -511,6 +512,13 @@ struct Fixture
 					{0xec5327b5}, // mrrc 7, 11, r2, r3, cr5
 					{0xfc5429ea}, // mrrc2 9, 14, r2, r4, cr10
 					{0xfc5327b5}, // mrrc2 7, 11, r2, r3, cr5
+						}});
+		codes.emplace(Factory::opcodeByteReverse,
+			CodeSet {
+				Emuballs::Arm::opcodeByteReverse, std::list<Code> {
+					{0xe6bf4f37}, // rev r4, r7
+					{0xe6bf5fb6}, // rev16 r5, r6
+					{0xe6ff9fba}, // revsh r9, sl
 						}});
 
 		fillInConditionals();

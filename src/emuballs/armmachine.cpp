@@ -303,7 +303,7 @@ void Emuballs::Arm::Machine::cycle()
 	catch (const OpDecodeError &error)
 	{
 		std::stringstream ss;
-		ss << error.what() << "; instruction addr = " << pc - PREFETCH_SIZE;
+		ss << error.what() << "; instruction addr = 0x" << std::hex << pc - PREFETCH_SIZE;
 		throw OpDecodeError(ss.str());
 	}
 	// Execute opcode.

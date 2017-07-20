@@ -674,6 +674,53 @@ protected:
 	}
 };
 
+class ByteReverse : public Opcode
+{
+public:
+	using Opcode::Opcode;
+protected:
+	void run(Machine &machine) override
+	{
+		int rd = (code() >> 12) & 0xf;
+		int rm = code() & 0xf;
+
+		bool halfword = code() & (1 << 7);
+		bool isSigned = code() & (1 << 22);
+
+		regval val = machine.cpu().regs()[rm];
+		regval reversed = 0;
+		if (halfword && isSigned)
+		{
+			reversed =
+				((val & 0xff) << 8) |
+				((val & 0xff00) >> 8);
+			if (reversed & (1 << 15))
+				reversed |= ~static_cast<regval>(0xffff);
+			else
+				reversed &= 0xffff;
+		}
+		else if (halfword)
+		{
+			reversed =
+				((val & 0xff) << 8) |
+				((val & 0xff00) >> 8) |
+				((val & 0xff0000) << 8) |
+				((val & 0xff000000) >> 8);
+		}
+		else if (!halfword && !isSigned)
+		{
+			reversed =
+				((val & 0xff) << 24) |
+				((val & 0xff00) << 8) |
+				((val & 0xff0000) >> 8) |
+				((val & 0xff000000) >> 24);
+		}
+		else
+			throw IllegalOpcodeError("rev: illegal");
+		machine.cpu().regs()[rd] = reversed;
+	}
+};
+
 } // namespace OpcodeImpl
 
 using namespace OpcodeImpl;
@@ -854,6 +901,16 @@ OpcodePtr opcodeSoftwareInterrupt(uint32_t code)
 	if ((code & 0x0f000000) == 0x0f000000)
 	{
 		return OpcodePtr(new SoftwareInterrupt(code));
+	}
+	return nullptr;
+}
+
+OpcodePtr opcodeByteReverse(uint32_t code)
+{
+	uint32_t masked = code & 0x0fff0ff0;
+	if (masked == 0x06bf0f30 || masked == 0x06bf0fb0 || masked == 0x06ff0fb0)
+	{
+		return OpcodePtr(new ByteReverse(code));
 	}
 	return nullptr;
 }
