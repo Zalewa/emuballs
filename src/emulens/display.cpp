@@ -20,6 +20,7 @@
 
 #include <emuballs/canvas.hpp>
 #include <emuballs/color.hpp>
+#include <QElapsedTimer>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QVBoxLayout>
@@ -29,8 +30,9 @@ namespace Emulens
 class Canvas : public Emuballs::Canvas
 {
 public:
-	Canvas(QGraphicsScene *scene)
+	Canvas(QGraphicsView *graphics, QGraphicsScene *scene)
 	{
+		this->graphics = graphics;
 		this->scene = scene;
 		this->drawTarget.reset(new QGraphicsPixmapItem());
 		scene->addItem(drawTarget.get());
@@ -43,6 +45,7 @@ public:
 	void end() override
 	{
 		drawTarget->setPixmap(QPixmap::fromImage(image));
+		fitView();
 	}
 
 	void drawPixel(int x, int y, const Emuballs::Color &color)
@@ -58,7 +61,13 @@ public:
 		image = QImage(width, height, QImage::Format_RGB32);
 	}
 
+	void fitView()
+	{
+		graphics->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+	}
+
 private:
+	QGraphicsView *graphics;
 	QGraphicsScene *scene;
 	std::unique_ptr<QGraphicsPixmapItem> drawTarget;
 	QImage image;
@@ -75,11 +84,8 @@ public:
 	QGraphicsScene scene;
 	QGraphicsView *graphics;
 	std::unique_ptr<Canvas> canvas;
-
-	void fitView()
-	{
-		graphics->fitInView(scene.sceneRect(), Qt::KeepAspectRatio);
-	}
+	int refreshIntervalMs = 200;
+	QElapsedTimer refreshClock;
 };
 
 DPointeredNoCopy(Display)
@@ -89,7 +95,8 @@ Display::Display(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 {
 	d->device = device;
 	d->graphics = new QGraphicsView(&d->scene, this);
-	d->canvas.reset(new Canvas(&d->scene));
+	d->canvas.reset(new Canvas(d->graphics, &d->scene));
+	d->refreshClock.start();
 	setLayout(new QVBoxLayout(this));
 	setWindowTitle(tr("Display"));
 	layout()->setContentsMargins(0, 0, 0, 0);
@@ -98,11 +105,13 @@ Display::Display(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 
 void Display::resizeEvent(QResizeEvent *)
 {
-	d->fitView();
+	d->canvas->fitView();
 }
 
 void Display::update()
 {
+	if (d->refreshClock.elapsed() < d->refreshIntervalMs)
+		return;
+	d->refreshClock.start();
 	d->device->draw(*d->canvas);
-	d->fitView();
 }

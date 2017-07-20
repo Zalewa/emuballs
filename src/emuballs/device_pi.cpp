@@ -49,9 +49,6 @@ public:
 
 	PrivData()
 	{
-		gpu.reset(new Arm::Gpu(machine.untrackedMemory()));
-		regs.reset(new Arm::NamedRegisterSet(machine));
-		timer.reset(new Emuballs::Pi::Timer(machine.untrackedMemory()));
 	}
 };
 
@@ -60,8 +57,7 @@ DPointeredNoCopy(PiDevice);
 PiDevice::PiDevice(const PiDef &definition)
 {
 	d->definition = definition;
-	d->gpu->setMailboxAddress(definition.gpuMailboxAddress);
-	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
+	reset();
 }
 
 void PiDevice::cycle()
@@ -83,9 +79,12 @@ Memory &PiDevice::memory()
 
 void PiDevice::reset()
 {
-	d->machine.cpu().regs().pc() = 0x8000;
-	// TODO: don't do this twice here and in PrivData constructor.
+	d->gpu.reset(new Arm::Gpu(d->machine.untrackedMemory()));
+	d->regs.reset(new Arm::NamedRegisterSet(d->machine));
 	d->timer.reset(new Emuballs::Pi::Timer(d->machine.untrackedMemory()));
+	d->machine.cpu().regs().pc() = 0x8000;
+	d->gpu->setMailboxAddress(d->definition.gpuMailboxAddress);
+	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 
 RegisterSet &PiDevice::registers()

@@ -21,7 +21,6 @@
 #include "canvas.hpp"
 #include "color.hpp"
 #include <functional>
-#include <iostream>
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
@@ -124,6 +123,11 @@ struct FrameBufferInfo
 	uint32_t pointer; // out
 	uint32_t size; // out
 };
+
+enum class BitDepth : int
+{
+	HighColor = 16
+};
 }
 
 DClass<Gpu>
@@ -137,6 +141,7 @@ public:
 	memobserver_id observerId = 0;
 	bool hasMail = false;
 	bool isInit = false;
+	std::shared_ptr<FrameBufferInfo> frameBufferInfo;
 
 	void init()
 	{
@@ -226,7 +231,6 @@ public:
 
 	void pickupMail(memsize address, Access event)
 	{
-		std::cerr << "picking up mail " << std::hex << address << ";" << (uint32_t)event << std::dec << std::endl;
 		// Unatomic and excessive just to write 1 bit.
 		// Would cause undefined behavior if GPU and CPU
 		// were to run on separate threads.
@@ -234,17 +238,13 @@ public:
 		// Unknown: how the actual hardware behaves if CPU
 		// writes to mailbox when write flag is unready?
 		Mailbox mail = readMailbox();
-		std::cerr << "\treadready is " << mail.isReadReady() << " writeready is " << mail.isWriteReady() << std::endl;
 		size_t addressAligned = address & (~static_cast<typeof(address)>(0b11));
 		if (event == Access::Write && mail.isWriteReady())
 		{
-			std::cerr << "written at ready write" << std::endl;
 			size_t writeOffset = offsetof(typeof(mail), write);
-			std::cerr << "write offset is " << std::hex << writeOffset << std::endl;
 			size_t writeAddress = mailboxAddress + writeOffset;
 			if (addressAligned == writeAddress)
 			{
-				std::cerr << "written at write address" << std::endl;
 				mail.writeReady(false);
 				hasMail = true;
 			}
@@ -255,7 +255,6 @@ public:
 			size_t readAddress = mailboxAddress + readOffset;
 			if (addressAligned == readAddress)
 			{
-				std::cerr << "read at read address" << std::endl;
 				mail.readReady(false);
 			}
 		}
@@ -280,11 +279,37 @@ public:
 		frameBufferInfo.pointer = mailboxAddress + sizeof(Mailbox);
 		frameBufferInfo.size = frameBufferInfo.pitch * frameBufferInfo.virtualHeight;
 		writeFrameBufferInfo(frameBufferAddress, frameBufferInfo);
+		this->frameBufferInfo.reset(new FrameBufferInfo(frameBufferInfo));
 
 		Mail response;
 		response.channel = message.channel;
 		response.message = 0;
 		return response;
+	}
+
+	void drawRgb16(Canvas &canvas)
+	{
+		auto &fbInfo = frameBufferInfo;
+		std::vector<uint8_t> frameBuffer = memory->chunk(fbInfo->pointer, fbInfo->size);
+		size_t pitch = 0;
+		for (size_t y = 0; y < fbInfo->virtualHeight; ++y)
+		{
+			for (size_t x = 0; x < fbInfo->virtualWidth; ++x)
+			{
+				uint8_t rawcolor[2];
+				rawcolor[0] = frameBuffer[pitch];
+				rawcolor[1] = frameBuffer[pitch + 1];
+
+				canvas.drawPixel(x, y, Color(
+						(((rawcolor[0] & 0b11111000) >> 3) * 255) / 31,
+						((((rawcolor[0] & 0b111) << 3) | ((rawcolor[1] & 0b11100000) >> 5)) * 255) / 63,
+						(rawcolor[1] & 0b11111) * 255 / 31
+					)
+				);
+
+				pitch += 2;
+			}
+		}
 	}
 };
 
@@ -322,16 +347,17 @@ void Gpu::cycle()
 
 void Gpu::draw(Canvas &canvas)
 {
+	if (d->frameBufferInfo == nullptr)
+		return;
+
+	auto &fbInfo = d->frameBufferInfo;
+
 	canvas.begin();
-	canvas.changeSize(640, 480);
-	for (int x = 0; x < 640; ++x)
+	canvas.changeSize(fbInfo->virtualWidth, fbInfo->virtualHeight);
+	if (fbInfo->bitDepth == static_cast<int>(BitDepth::HighColor))
 	{
-		for (int y = 0; y < 480; ++y)
-		{
-			canvas.drawPixel(x, y, Color((x + d->shift) % 255, 128, y % 255));
-		}
+		d->drawRgb16(canvas);
 	}
-	canvas.drawPixel(0, 0, Color(255, 0, 255));
 	canvas.end();
 }
 
