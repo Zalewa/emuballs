@@ -39,6 +39,7 @@ public:
 
 	void cycle();
 	void draw(Canvas &canvas);
+	void setFrameBufferPointerEnd(memsize address);
 	void setMailboxAddress(memsize address);
 
 private:

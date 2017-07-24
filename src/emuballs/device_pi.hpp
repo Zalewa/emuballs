@@ -34,6 +34,7 @@ struct PiDef
 	int actLedGpio;
 	bool ledOnIfPullDown;
 	uint32_t gpioAddress;
+	uint32_t gpuFrameBufferPointerEnd;
 	uint32_t gpuMailboxAddress;
 	uint32_t systemTimerAddress;
 

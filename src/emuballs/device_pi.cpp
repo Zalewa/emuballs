@@ -34,6 +34,7 @@ PiDef::PiDef()
 	actLedGpio = 0;
 	ledOnIfPullDown = false;
 	gpioAddress = 0;
+	gpuFrameBufferPointerEnd = 0x20000000;
 	gpuMailboxAddress = 0x2000B880;
 	systemTimerAddress = 0x20003000;
 }
@@ -86,6 +87,7 @@ void PiDevice::reset()
 	d->regs.reset(new Arm::NamedRegisterSet(d->machine));
 	d->timer.reset(new Emuballs::Pi::Timer(d->machine.untrackedMemory()));
 	d->machine.cpu().regs().pc() = 0x8000;
+	d->gpu->setFrameBufferPointerEnd(d->definition.gpuFrameBufferPointerEnd);
 	d->gpu->setMailboxAddress(d->definition.gpuMailboxAddress);
 	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }

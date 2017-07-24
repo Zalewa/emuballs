@@ -143,11 +143,12 @@ namespace Emuballs
 DClass<Gpu>
 {
 public:
-	constexpr static const memsize INVALID_MAILBOX = static_cast<memsize>(-1);
+	constexpr static const memsize INVALID_ADDRESS = static_cast<memsize>(-1);
 
 	Memory *memory;
 	int shift = 0;
-	memsize mailboxAddress = INVALID_MAILBOX;
+	memsize mailboxAddress = INVALID_ADDRESS;
+	memsize frameBufferPointerEnd = INVALID_ADDRESS;
 	memobserver_id observerId = 0;
 	bool hasMail = false;
 	bool isInit = false;
@@ -155,8 +156,10 @@ public:
 
 	void init()
 	{
-		if (mailboxAddress == INVALID_MAILBOX)
+		if (mailboxAddress == INVALID_ADDRESS)
 			throw std::logic_error("GPU mailbox address not set");
+		if (frameBufferPointerEnd == INVALID_ADDRESS)
+			throw std::logic_error("Frame Buffer pointer end not set");
 		observe();
 		Mailbox mailbox;
 		mailbox.readReady(false);
@@ -285,9 +288,9 @@ public:
 		frameBufferInfo.pitch = frameBufferInfo.virtualWidth * bytesPerPixel;
 		// How does the GPU pick the pointer? How does it know it won't
 		// collide with anything? More documentation must be found, but
-		// for now let's pick the place right after the mailbox.
-		frameBufferInfo.pointer = mailboxAddress + sizeof(Mailbox);
+		// for now let's pick an arbitrary place.
 		frameBufferInfo.size = frameBufferInfo.pitch * frameBufferInfo.virtualHeight;
+		frameBufferInfo.pointer = frameBufferPointerEnd - frameBufferInfo.size;
 		writeFrameBufferInfo(frameBufferAddress, frameBufferInfo);
 		this->frameBufferInfo.reset(new FrameBufferInfo(frameBufferInfo));
 
@@ -371,6 +374,13 @@ void Gpu::draw(Canvas &canvas)
 		d->drawRgb16(canvas);
 	}
 	canvas.end();
+}
+
+void Gpu::setFrameBufferPointerEnd(memsize address)
+{
+	if (d->isInit)
+		throw std::logic_error("cannot change GPU frame buffer pointer end after init");
+	d->frameBufferPointerEnd = address;
 }
 
 void Gpu::setMailboxAddress(memsize address)
