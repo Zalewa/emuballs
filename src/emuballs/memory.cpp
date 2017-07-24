@@ -22,10 +22,6 @@
 #include <list>
 #include <map>
 
-#ifdef EMUBALLS_DEBUGS
-#include <iostream>
-#endif
-
 #include "dptr_impl.hpp"
 
 namespace Emuballs
@@ -176,9 +172,6 @@ public:
 	{
 		for (Emuballs::MemObserveZone &observer : this->observers)
 		{
-			#ifdef EMUBALLS_DEBUGS
-			std::cerr << "execObservers " << std::hex << address << " " << static_cast<int>(event) << " in da zone? " << observer.isInZone(address) << " events? " << static_cast<int>(observer.events & event) << " addr=" << observer.address << std::dec << " length=" << observer.length << std::endl;
-			#endif
 			if ((observer.events & event) != 0
 				&& observer.isInZone(address))
 			{
