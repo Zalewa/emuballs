@@ -56,15 +56,27 @@ OpcodePtr OpDecoder::next(std::istream &input)
 OpcodePtr OpDecoder::decode(uint32_t instruction)
 {
 	OpcodePtr opcode = nullptr;
-	for (auto factory : factories)
+	// Try to find cached opcode - revalidation is not needed.
+	auto cachedOpIt = decodedOps.find(instruction);
+	if (cachedOpIt != decodedOps.end())
 	{
-		opcode = factory(instruction);
-		if (opcode)
+		opcode = cachedOpIt->second;
+	}
+	// Try to decode using one of the factories.
+	if (!opcode)
+	{
+		for (auto factory : factories)
 		{
-			opcode->validate();
-			break;
+			opcode = factory(instruction);
+			if (opcode)
+			{
+				opcode->validate();
+				decodedOps.insert(std::make_pair(instruction, opcode));
+				break;
+			}
 		}
 	}
+	// Handle bad opcode.
 	if (!opcode)
 	{
 		throw decodeError("unkown opcode", instruction, 0);

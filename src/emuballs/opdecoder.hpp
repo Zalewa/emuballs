@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <map>
 #include "armopcode.hpp"
 
 namespace Emuballs
@@ -36,6 +37,9 @@ class OpDecoder
 public:
 	OpcodePtr next(std::istream &);
 	OpcodePtr decode(uint32_t instruction);
+
+private:
+	std::map<uint32_t, OpcodePtr> decodedOps;
 };
 
 }

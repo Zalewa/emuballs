@@ -234,7 +234,7 @@ private:
 		while (prefetchedInstructions.size() < 2)
 		{
 			auto &pc = machine.cpu().regs().pc();
-			uint32_t instruction = machine.memory().word(pc);
+			uint32_t instruction = machine.untrackedMemory().word(pc);
 			prefetchedInstructions.push(instruction);
 			pc += 4;
 		}
@@ -253,6 +253,7 @@ DClass<Emuballs::Arm::Machine>
 {
 public:
 	Emuballs::Arm::Cpu cpu;
+	Emuballs::Arm::OpDecoder decoder;
 	Emuballs::Memory memory;
 	Emuballs::Arm::Prefetch prefetch;
 
@@ -303,11 +304,10 @@ void Emuballs::Arm::Machine::cycle()
 	auto instruction = d->prefetch.next(*this);
 	auto pc = cpu().regs().pc();
 	// Decode opcode.
-	OpDecoder decoder;
 	OpcodePtr opcode;
 	try
 	{
-		opcode = decoder.decode(instruction);
+		opcode = d->decoder.decode(instruction);
 	}
 	catch (const OpDecodeError &error)
 	{

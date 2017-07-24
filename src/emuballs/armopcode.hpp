@@ -47,7 +47,7 @@ private:
 	uint32_t m_code;
 };
 
-typedef std::unique_ptr<Opcode> OpcodePtr;
+typedef std::shared_ptr<Opcode> OpcodePtr;
 typedef std::function<OpcodePtr(uint32_t)> OpFactory;
 
 }
