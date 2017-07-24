@@ -20,6 +20,7 @@
 
 #include "device.hpp"
 #include "pickdevice.hpp"
+#include "version.hpp"
 
 #include "ui_mainwindow.h"
 
@@ -54,6 +55,18 @@ MainWindow::MainWindow()
 void MainWindow::start()
 {
 	QTimer::singleShot(0, this, SLOT(showDeviceInitSelect()));
+}
+
+void MainWindow::showAbout()
+{
+	QMessageBox::about(this, tr("Emuballs Emulens v.%1").arg(Version::fullVersion()),
+		Emulens::Version::copyright() +
+		tr(
+			"\n\n"
+			"This program is distributed under the terms of the GPL v3.\n"
+			"\n"
+			"Emuballs library is distributed under the terms of the LGPL v3.\n"
+			));
 }
 
 void MainWindow::showDeviceInitSelect()

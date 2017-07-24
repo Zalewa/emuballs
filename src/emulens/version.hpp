@@ -26,7 +26,9 @@ namespace Emulens
 class Version
 {
 public:
+	static QString copyright();
 	static QString fullVersion();
+	static QString yearSpan();
 };
 
 }

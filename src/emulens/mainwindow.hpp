@@ -18,6 +18,7 @@
  */
 #pragma once
 
+
 #include "dptr.hpp"
 #include <QMainWindow>
 
@@ -49,6 +50,7 @@ private slots:
 	void closeAllSubWindows();
 	void tileSubWindows();
 
+	void showAbout();
 	bool showDeviceChange();
 	void showDeviceInitSelect();
 	void showLoadProgram();

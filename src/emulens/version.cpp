@@ -18,7 +18,19 @@
  */
 #include "version.hpp"
 
+#include <QObject>
+
+QString Emulens::Version::copyright()
+{
+	return QObject::tr("Copyright \u00A9 Zalewa <zalewapl@gmail.com> %1").arg(yearSpan());
+}
+
 QString Emulens::Version::fullVersion()
 {
 	return "0";
+}
+
+QString Emulens::Version::yearSpan()
+{
+	return "2016 - 2017";
 }
