@@ -54,6 +54,11 @@ void Cycler::cycle()
 	}
 }
 
+bool Cycler::isAutoRun() const
+{
+	return d->cycleTimer.isActive();
+}
+
 void Cycler::pauseAutoRun()
 {
 	d->cycleTimer.stop();

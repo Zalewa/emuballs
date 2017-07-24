@@ -29,6 +29,7 @@
 #include <emuballs/errors.hpp>
 #include <emuballs/programmer.hpp>
 #include <fstream>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMap>
@@ -57,6 +58,8 @@ public:
 	Registers *registers;
 	std::shared_ptr<Emuballs::Device> device;
 	std::unique_ptr<DeviceToolBar> toolBar;
+	int refreshIntervalMs = 200;
+	QElapsedTimer refreshClock;
 };
 
 DPointeredNoCopy(Device);
@@ -66,6 +69,7 @@ Device::Device(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 {
 	d->setupUi(this);
 
+	d->refreshClock.start();
 	d->postInit = false;
 	d->device = device;
 	d->cycler.reset(new Cycler(device, this));
@@ -195,6 +199,8 @@ void Device::setupToolBar()
 		d->cycler.get(), &Cycler::startAutoRun);
 	connect(d->toolBar->pauseAction, &QAction::triggered,
 		d->cycler.get(), &Cycler::pauseAutoRun);
+	connect(d->toolBar->pauseAction, &QAction::triggered,
+		this, &Device::updateViewsForce);
 	connect(d->toolBar->stepAction, &QAction::triggered,
 		d->cycler.get(), &Cycler::cycle);
 }
@@ -229,6 +235,17 @@ void Device::updateActiveWindowAction()
 }
 
 void Device::updateViews()
+{
+	if (d->cycler->isAutoRun())
+	{
+		if (d->refreshClock.elapsed() < d->refreshIntervalMs)
+			return;
+		d->refreshClock.start();
+	}
+	updateViewsForce();
+}
+
+void Device::updateViewsForce()
 {
 	Updateable* views[] = { d->registers, d->memory, d->display };
 	for (auto *view : views)

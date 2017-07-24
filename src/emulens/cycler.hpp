@@ -33,6 +33,8 @@ class Cycler : public QObject
 public:
 	Cycler(std::shared_ptr<Emuballs::Device> device, QObject *parent);
 
+	bool isAutoRun() const;
+
 public slots:
 	void cycle();
 	void pauseAutoRun();

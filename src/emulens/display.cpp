@@ -20,7 +20,6 @@
 
 #include <emuballs/canvas.hpp>
 #include <emuballs/color.hpp>
-#include <QElapsedTimer>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QVBoxLayout>
@@ -84,8 +83,6 @@ public:
 	QGraphicsScene scene;
 	QGraphicsView *graphics;
 	std::unique_ptr<Canvas> canvas;
-	int refreshIntervalMs = 200;
-	QElapsedTimer refreshClock;
 };
 
 DPointeredNoCopy(Display)
@@ -96,7 +93,6 @@ Display::Display(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 	d->device = device;
 	d->graphics = new QGraphicsView(&d->scene, this);
 	d->canvas.reset(new Canvas(d->graphics, &d->scene));
-	d->refreshClock.start();
 	setLayout(new QVBoxLayout(this));
 	setWindowTitle(tr("Display"));
 	layout()->setContentsMargins(0, 0, 0, 0);
@@ -110,8 +106,5 @@ void Display::resizeEvent(QResizeEvent *)
 
 void Display::update()
 {
-	if (d->refreshClock.elapsed() < d->refreshIntervalMs)
-		return;
-	d->refreshClock.start();
 	d->device->draw(*d->canvas);
 }
