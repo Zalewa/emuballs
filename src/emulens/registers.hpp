@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <emuballs/dptr.hpp>
+#include "dptr.hpp"
 
 #include <QWidget>
 #include <emuballs/device.hpp>

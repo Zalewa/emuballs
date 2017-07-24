@@ -18,11 +18,14 @@
  */
 #include "programmer_impl.hpp"
 
+#include "dptr_impl.hpp"
 #include "errors_private.hpp"
 #include "emuballs/device.hpp"
 
 using namespace Emuballs;
 
+namespace Emuballs
+{
 DClass<Programmer>
 {
 public:
@@ -30,6 +33,7 @@ public:
 };
 
 DPointeredNoCopy(Programmer);
+}
 
 Programmer::Programmer(Device &device)
 {

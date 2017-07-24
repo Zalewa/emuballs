@@ -19,7 +19,8 @@
 #pragma once
 
 #include "emuballs/device.hpp"
-#include "emuballs/dptr.hpp"
+
+#include "dptr_impl.hpp"
 
 namespace Emuballs
 {

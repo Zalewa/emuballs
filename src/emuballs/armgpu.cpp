@@ -137,6 +137,9 @@ enum class BitDepth : int
 }
 }
 
+namespace Emuballs
+{
+
 DClass<Gpu>
 {
 public:
@@ -318,9 +321,11 @@ public:
 			}
 		}
 	}
+
 };
 
 DPointered(Gpu)
+}
 
 Gpu::Gpu(Memory &memory)
 {

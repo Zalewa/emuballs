@@ -18,11 +18,15 @@
  */
 #include "emuballs/device.hpp"
 
+#include "dptr_impl.hpp"
 #include "programmer_impl.hpp"
 
 #include "device_pi.hpp"
 
 using namespace Emuballs;
+
+namespace Emuballs
+{
 
 DClass<Device>
 {
@@ -31,6 +35,8 @@ public:
 };
 
 DPointeredNoCopy(Device)
+
+}
 
 Device::Device()
 {
@@ -51,6 +57,8 @@ void Device::setProgrammer(std::shared_ptr<Programmer> programmer)
 
 ///////////////////////////////////////////////////////////////////////////
 
+namespace Emuballs
+{
 DClass<DeviceFactory>
 {
 public:
@@ -59,6 +67,7 @@ public:
 };
 
 DPointered(DeviceFactory)
+}
 
 DeviceFactory::DeviceFactory()
 {

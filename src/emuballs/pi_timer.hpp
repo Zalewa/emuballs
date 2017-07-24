@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "emuballs/dptr.hpp"
+#include "dptr_impl.hpp"
 
 namespace Emuballs
 {

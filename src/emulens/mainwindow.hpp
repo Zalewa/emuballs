@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <emuballs/dptr.hpp>
+#include "dptr.hpp"
 #include <QMainWindow>
 
 namespace Emuballs

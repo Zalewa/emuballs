@@ -23,9 +23,7 @@
 
 namespace Emuballs
 {
-
 struct Color;
-class Picture;
 
 class EMUBALLS_API Canvas
 {

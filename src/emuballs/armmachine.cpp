@@ -153,6 +153,9 @@ cpumode Flags::cpuMode() const
 
 ///////////////////////////////////////////////////////////////////////////
 
+namespace Emuballs
+{
+
 DClass<Emuballs::Arm::Cpu>
 {
 public:
@@ -163,7 +166,8 @@ public:
 
 DPointered(Emuballs::Arm::Cpu);
 
-namespace Emuballs { namespace Arm {
+namespace Arm
+{
 
 const Flags &Cpu::flags() const
 {
@@ -243,7 +247,7 @@ private:
 		return instruction;
 	}
 };
-}}
+}
 
 DClass<Emuballs::Arm::Machine>
 {
@@ -259,6 +263,9 @@ public:
 };
 
 DPointered(Emuballs::Arm::Machine);
+
+}
+
 
 Emuballs::Arm::Cpu &Emuballs::Arm::Machine::cpu()
 {

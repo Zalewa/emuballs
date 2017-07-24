@@ -2,20 +2,20 @@
 // dptr.hpp
 //------------------------------------------------------------------------------
 //
-// This file is part of Emuballs.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// Emuballs is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Emuballs is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
+// GNU General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public License
-// along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+// 02110-1301, USA.
 //
 //------------------------------------------------------------------------------
 // Copyright (C) 2015 Braden "Blzut3" Obrzut <admin@maniacsvault.net>
@@ -25,13 +25,14 @@
 
 #include <memory>
 
-namespace Emuballs
-{
-
 /**
  * Private data structure for your class T. This needs to be specialized.
  */
 template<class T> class PrivData;
+/**
+ * Syntactic sugar for specializing PrivData. Use is DClass<T>.
+ */
+#define DClass template<> class PrivData
 
 /**
  * RAII wrapper for implementing d-pointers. The resulting object can be copied
@@ -59,4 +60,28 @@ public:
 	~DPtr();
 };
 
+/**
+ * Specializes DPtr<T> for non-copyable DClass.
+ */
+#define DPointeredNoCopy(cls)  \
+template<> \
+DPtr<cls>::DPtr() : std::unique_ptr<PrivData<cls> >(new PrivData<cls>) {} \
+template<> \
+DPtr<cls>::~DPtr() {}
+
+/**
+ * Standard method for specializing DPtr<T>.
+ */
+#define DPointered(cls) DPointeredNoCopy(cls) \
+template<> \
+DPtr<cls>::DPtr(const DPtr<cls> &other) : std::unique_ptr<PrivData<cls> >(new PrivData<cls>) \
+{ \
+	*(this->get()) = *(other.get()); \
+} \
+template<> \
+const DPtr<cls> &DPtr<cls>::operator=(const DPtr<cls> &other) \
+{ \
+	if(this->get() != other.get()) \
+		*(this->get()) = *(other.get()); \
+	return *this; \
 }

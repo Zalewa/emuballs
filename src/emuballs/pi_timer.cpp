@@ -21,6 +21,12 @@
 #include "memory_impl.hpp"
 #include <chrono>
 
+using namespace Emuballs;
+using namespace Emuballs::Pi;
+using Clock = std::chrono::steady_clock;
+using Timepoint = Clock::time_point;
+using Resolution = std::chrono::duration<uint64_t, std::ratio<1, 1000000>>;
+
 namespace Emuballs
 {
 namespace Pi
@@ -37,13 +43,6 @@ struct Timebox
 };
 
 }
-}
-
-using namespace Emuballs;
-using namespace Emuballs::Pi;
-using Clock = std::chrono::steady_clock;
-using Timepoint = Clock::time_point;
-using Resolution = std::chrono::duration<uint64_t, std::ratio<1, 1000000>>;
 
 DClass<Emuballs::Pi::Timer>
 {
@@ -74,6 +73,8 @@ public:
 };
 
 DPointeredNoCopy(Emuballs::Pi::Timer);
+
+}
 
 Timer::Timer(Memory &memory)
 {

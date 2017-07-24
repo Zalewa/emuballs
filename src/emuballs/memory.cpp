@@ -26,6 +26,8 @@
 #include <iostream>
 #endif
 
+#include "dptr_impl.hpp"
+
 namespace Emuballs
 {
 
@@ -122,6 +124,8 @@ memsize Page::size() const
 
 //////////////////////////////////////////////////////////////////////
 
+namespace Emuballs
+{
 DClass<Emuballs::Memory>
 {
 public:
@@ -198,9 +202,6 @@ public:
 };
 
 DPointered(Emuballs::Memory);
-
-namespace Emuballs
-{
 
 Memory::Memory(memsize totalSize, memsize pageSize)
 {

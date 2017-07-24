@@ -18,8 +18,12 @@
  */
 #include "emuballs/regval.hpp"
 
+#include "dptr_impl.hpp"
+
 using namespace Emuballs;
 
+namespace Emuballs
+{
 DClass<RegVal>
 {
 public:
@@ -27,6 +31,7 @@ public:
 };
 
 DPointered(RegVal);
+}
 
 RegVal::RegVal()
 {

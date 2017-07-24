@@ -38,6 +38,8 @@ PiDef::PiDef()
 	systemTimerAddress = 0x20003000;
 }
 
+namespace Emuballs
+{
 DClass<PiDevice>
 {
 public:
@@ -53,6 +55,7 @@ public:
 };
 
 DPointeredNoCopy(PiDevice);
+}
 
 PiDevice::PiDevice(const PiDef &definition)
 {

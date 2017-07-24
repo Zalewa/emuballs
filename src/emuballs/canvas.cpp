@@ -18,9 +18,14 @@
  */
 #include "emuballs/canvas.hpp"
 
+#include "dptr_impl.hpp"
+
 using namespace Emuballs;
 
+namespace Emuballs
+{
 DClass<Canvas> {};
 DPointered(Canvas);
+}
 Canvas::Canvas() {}
 Canvas::~Canvas() {}

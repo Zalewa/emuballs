@@ -20,12 +20,15 @@
 
 #include "emuballs/regval.hpp"
 
+#include "dptr_impl.hpp"
 #include "errors_private.hpp"
 #include "strings.hpp"
 #include <algorithm>
 
 using namespace Emuballs;
 
+namespace Emuballs
+{
 DClass<NamedRegister>
 {
 public:
@@ -34,6 +37,7 @@ public:
 };
 
 DPointered(NamedRegister);
+}
 
 NamedRegister::NamedRegister()
 {
@@ -78,11 +82,14 @@ RegVal NamedRegister::value() const
 
 ///////////////////////////////////////////////////////////////////////////
 
+namespace Emuballs
+{
 DClass<RegisterSet>
 {
 };
 
 DPointeredNoCopy(RegisterSet);
+}
 
 RegisterSet::RegisterSet() {}
 

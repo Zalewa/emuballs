@@ -27,6 +27,9 @@
 using namespace Emuballs;
 using namespace Emuballs::Arm;
 
+namespace Emuballs
+{
+
 DClass<Emuballs::Arm::NamedRegisterSet>
 {
 public:
@@ -34,6 +37,8 @@ public:
 };
 
 DPointeredNoCopy(Emuballs::Arm::NamedRegisterSet);
+
+}
 
 constexpr auto GENERAL_PURPOSE_REGISTERS = 13;
 
