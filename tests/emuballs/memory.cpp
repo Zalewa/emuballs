@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(pageSetContentsExact)
 	BOOST_CHECK_EQUAL_COLLECTIONS(
 		emptyExpected.begin(), emptyExpected.end(),
 		emptyContents.begin(), emptyContents.end());
-	std::vector<uint8_t> payload = {0xca, 0xfe, 0xba, 0xbe, 0x11, 0x22, 0x33, 0x44};
+	std::vector<uint8_t> payload = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 	p.setContents(0, payload);
 	auto filledContents = p.contents();
 	BOOST_CHECK_EQUAL_COLLECTIONS(

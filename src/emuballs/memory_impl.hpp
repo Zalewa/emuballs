@@ -37,6 +37,9 @@ public:
 
 	const std::vector<uint8_t> &contents() const;
 	void setContents(memsize offset, const std::vector<uint8_t> &bytes);
+	void setContents(memsize offset,
+		const std::vector<uint8_t>::const_iterator &bytesBegin,
+		const std::vector<uint8_t>::const_iterator &bytesEnd);
 
 	memsize size() const;
 

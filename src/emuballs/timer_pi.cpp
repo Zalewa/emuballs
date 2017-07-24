@@ -19,6 +19,7 @@
 #include "timer_pi.hpp"
 
 #include "memory_impl.hpp"
+#include <algorithm>
 #include <chrono>
 
 using namespace Emuballs;
@@ -67,22 +68,21 @@ public:
 
 	Timebox readTimebox()
 	{
-		MemoryStreamReader reader(*memory, address);
+		std::vector<uint8_t> raw = memory->chunk(address, sizeof(Timebox));
 		Timebox timebox;
-		timebox.control = reader.readUint32();
-		timebox.counter = reader.readUint64();
-		for (uint32_t &compare : timebox.compare)
-			compare = reader.readUint32();
+		std::copy(raw.begin(), raw.end(), reinterpret_cast<uint8_t*>(&timebox));
 		return timebox;
 	}
 
 	void writeTimebox(const Timebox &timebox)
 	{
-		MemoryStreamWriter writer(*memory, address);
-		writer.writeUint32(timebox.control);
-		writer.writeUint64(timebox.counter);
-		for (uint32_t compare : timebox.compare)
-			writer.writeUint32(compare);
+		std::vector<uint8_t> raw;
+		raw.resize(sizeof(Timebox));
+		std::copy(
+			reinterpret_cast<const uint8_t*>(&timebox),
+			reinterpret_cast<const uint8_t*>(&timebox + 1),
+			raw.begin());
+		memory->putChunk(address, raw);
 	}
 };
 
