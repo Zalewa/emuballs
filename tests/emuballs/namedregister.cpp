@@ -18,8 +18,8 @@
  */
 #define BOOST_TEST_MODULE namedregister
 #include <boost/test/unit_test.hpp>
-#include "src/emuballs/registerset.hpp"
-#include "src/emuballs/regval.hpp"
+#include "emuballs/registerset.hpp"
+#include "emuballs/regval.hpp"
 
 using namespace Emuballs;
 

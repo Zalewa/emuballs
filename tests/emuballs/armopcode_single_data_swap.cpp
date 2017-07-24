@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include "arm_program_fixture.hpp"
 #include "src/emuballs/armopcode_impl.hpp"
-#include "src/emuballs/errors.hpp"
+#include "src/emuballs/errors_private.hpp"
 
 static Emuballs::Arm::OpcodePtr decode(uint32_t code)
 {

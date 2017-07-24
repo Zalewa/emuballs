@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE machine_opdecoder
 #include <boost/test/unit_test.hpp>
 #include <sstream>
-#include "src/emuballs/errors.hpp"
+#include "src/emuballs/errors_private.hpp"
 #include "src/emuballs/opdecoder.hpp"
 
 using namespace Emuballs::Arm;

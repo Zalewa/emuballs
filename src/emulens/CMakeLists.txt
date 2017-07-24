@@ -34,7 +34,9 @@ set(SOURCES
 	version.cpp
 	)
 
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(
+	${CMAKE_SOURCE_DIR}/include/
+	${CMAKE_SOURCE_DIR}/src/common/)
 
 add_executable(${NAME} ${SOURCES})
 target_link_libraries(${NAME} emuballs Qt5::Widgets)

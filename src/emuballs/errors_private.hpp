@@ -18,30 +18,23 @@
  */
 #pragma once
 
-#include "emuballs/dptr.hpp"
-#include "emuballs/registerset.hpp"
+#include <stdexcept>
+#include "emuballs/errors.hpp"
+#include "emuballs/export.h"
 
 namespace Emuballs
 {
 
-namespace Arm
-{
-
-class Machine;
-
-class NamedRegisterSet : public Emuballs::RegisterSet
+class UnhandledCaseError : public std::logic_error
 {
 public:
-	NamedRegisterSet(Machine &machine);
-
-	std::list<NamedRegister> registers() const;
-
-	void setReg(const std::string &name, const RegVal &val);
-
-private:
-	DPtr<NamedRegisterSet> d;
+	using logic_error::logic_error;
 };
 
-}
+class UnknownRegisterError : public std::runtime_error
+{
+public:
+	using runtime_error::runtime_error;
+};
 
 }

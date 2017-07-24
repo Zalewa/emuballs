@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "device.hpp"
+#include "emuballs/device.hpp"
+
+#include "programmer_impl.hpp"
 
 #include "device_pi.hpp"
-#include "programmer.hpp"
 
 using namespace Emuballs;
 

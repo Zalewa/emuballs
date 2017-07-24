@@ -18,8 +18,11 @@
  */
 #include "armgpu.hpp"
 
-#include "canvas.hpp"
-#include "color.hpp"
+#include "emuballs/canvas.hpp"
+#include "emuballs/color.hpp"
+
+#include "memory_impl.hpp"
+
 #include <cstddef>
 #include <functional>
 using namespace Emuballs;

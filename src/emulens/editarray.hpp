@@ -18,8 +18,8 @@
  */
 #pragma once
 
+#include <emuballs/dptr.hpp>
 #include <QWidget>
-#include "dptr.hpp"
 
 namespace Emulens
 {

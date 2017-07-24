@@ -18,31 +18,12 @@
  */
 #pragma once
 
-#include "export.h"
-#include "dptr.hpp"
+#include "emuballs/programmer.hpp"
 
 namespace Emuballs
 {
 
 class Device;
-
-class EMUBALLS_API Programmer
-{
-public:
-	Programmer(Device &device);
-	virtual ~Programmer();
-
-	/**
-	 * @throw ProgramLoadError
-	 */
-	virtual void load(std::istream &) = 0;
-
-protected:
-	Device &device();
-
-private:
-	DPtr<Programmer> d;
-};
 
 /**
  * @brief Programmer that always throws ProgramLoadError.

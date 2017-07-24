@@ -19,8 +19,8 @@
 #pragma once
 
 #include <emuballs/device.hpp>
+#include <emuballs/dptr.hpp>
 #include <QObject>
-#include "dptr.hpp"
 
 namespace Emulens
 {

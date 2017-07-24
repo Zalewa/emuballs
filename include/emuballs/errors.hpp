@@ -19,7 +19,7 @@
 #pragma once
 
 #include <stdexcept>
-#include "export.h"
+#include "emuballs/export.h"
 
 namespace Emuballs
 {
@@ -50,21 +50,6 @@ class EMUBALLS_API OpDecodeError : public ProgramRuntimeError
 {
 public:
 	using ProgramRuntimeError::ProgramRuntimeError;
-};
-
-///////////////////////////////////////////////////////////////////////////
-// PRIVATE
-
-class UnhandledCaseError : public std::logic_error
-{
-public:
-	using logic_error::logic_error;
-};
-
-class UnknownRegisterError : public std::runtime_error
-{
-public:
-	using runtime_error::runtime_error;
 };
 
 }

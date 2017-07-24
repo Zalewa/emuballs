@@ -20,8 +20,8 @@
 
 #include "armmachine.hpp"
 #include "armopcode_dataproc_psr.hpp"
-#include "errors.hpp"
-#include "memory.hpp"
+#include "errors_private.hpp"
+#include "memory_impl.hpp"
 #include "shift.hpp"
 #include <algorithm>
 

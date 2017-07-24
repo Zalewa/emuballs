@@ -18,8 +18,9 @@
  */
 #include "opdecoder.hpp"
 
+#include "emuballs/errors.hpp"
+
 #include "armopcode_impl.hpp"
-#include "errors.hpp"
 
 #include <sstream>
 

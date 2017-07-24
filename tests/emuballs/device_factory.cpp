@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE device_factory
 #include <boost/test/unit_test.hpp>
-#include "src/emuballs/device.hpp"
+#include "emuballs/device.hpp"
 
 #include <string>
 

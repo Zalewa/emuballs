@@ -16,7 +16,7 @@
  */
 #define BOOST_TEST_MODULE strings
 #include <boost/test/unit_test.hpp>
-#include "src/strings.hpp"
+#include "src/common/strings.hpp"
 
 
 BOOST_AUTO_TEST_CASE(_compareCaseInsensitive)

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <emuballs/device.hpp>
+#include <emuballs/dptr.hpp>
 
 #include <memory>
 #include <QAction>
@@ -26,7 +27,6 @@
 #include <QList>
 #include <QMdiArea>
 #include <QToolBar>
-#include "dptr.hpp"
 
 namespace Emulens
 {

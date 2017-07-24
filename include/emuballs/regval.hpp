@@ -19,29 +19,23 @@
 #pragma once
 
 #include "emuballs/dptr.hpp"
-#include "emuballs/registerset.hpp"
+#include "emuballs/export.h"
+#include <cstdint>
 
 namespace Emuballs
 {
 
-namespace Arm
-{
-
-class Machine;
-
-class NamedRegisterSet : public Emuballs::RegisterSet
+class EMUBALLS_API RegVal
 {
 public:
-	NamedRegisterSet(Machine &machine);
+	RegVal();
+	RegVal(uint32_t val);
+	virtual ~RegVal();
 
-	std::list<NamedRegister> registers() const;
-
-	void setReg(const std::string &name, const RegVal &val);
+	operator uint32_t() const;
 
 private:
-	DPtr<NamedRegisterSet> d;
+	DPtr<RegVal> d;
 };
-
-}
 
 }

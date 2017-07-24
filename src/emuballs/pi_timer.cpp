@@ -18,7 +18,7 @@
  */
 #include "pi_timer.hpp"
 
-#include "memory.hpp"
+#include "memory_impl.hpp"
 #include <chrono>
 
 namespace Emuballs

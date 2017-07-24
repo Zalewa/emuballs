@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE armopcode_double_data_transfer
 #include <boost/test/unit_test.hpp>
 #include "src/emuballs/armopcode_impl.hpp"
-#include "src/emuballs/errors.hpp"
+#include "src/emuballs/errors_private.hpp"
 #include "arm_program_fixture.hpp"
 
 struct Fixture : public ArmProgramFixture

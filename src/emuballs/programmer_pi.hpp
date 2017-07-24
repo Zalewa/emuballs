@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "programmer.hpp"
+#include "programmer_impl.hpp"
 
 namespace Emuballs
 {

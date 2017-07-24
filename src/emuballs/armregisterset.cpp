@@ -18,9 +18,10 @@
  */
 #include "armregisterset.hpp"
 
+#include "emuballs/regval.hpp"
+
 #include "armmachine.hpp"
-#include "errors.hpp"
-#include "regval.hpp"
+#include "errors_private.hpp"
 #include <string>
 
 using namespace Emuballs;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "export.h"
+#include "emuballs/export.h"
 #include <cstdint>
 
 namespace Emuballs

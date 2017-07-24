@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "dptr.hpp"
-#include "export.h"
+#include "emuballs/dptr.hpp"
+#include "emuballs/export.h"
 #include <functional>
 #include <memory>
 #include <list>

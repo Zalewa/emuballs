@@ -18,24 +18,31 @@
  */
 #pragma once
 
-#include "dptr.hpp"
-#include "export.h"
-#include <cstdint>
+#include "emuballs/dptr.hpp"
+#include "emuballs/export.h"
 
 namespace Emuballs
 {
 
-class EMUBALLS_API RegVal
+struct Color;
+class Picture;
+
+class EMUBALLS_API Canvas
 {
 public:
-	RegVal();
-	RegVal(uint32_t val);
-	virtual ~RegVal();
+	Canvas();
+	Canvas(const Canvas &other) = delete;
+	Canvas &operator=(const Canvas &other) = delete;
+	virtual ~Canvas();
 
-	operator uint32_t() const;
+	virtual void begin() = 0;
+	virtual void end() = 0;
+
+	virtual void drawPixel(int x, int y, const Color &color) = 0;
+	virtual void changeSize(int width, int height) = 0;
 
 private:
-	DPtr<RegVal> d;
+	DPtr<Canvas> d;
 };
 
 }

@@ -21,7 +21,7 @@
 #include <bitset>
 #include <limits>
 #include <vector>
-#include "dptr.hpp"
+#include "emuballs/dptr.hpp"
 
 namespace Emuballs
 {

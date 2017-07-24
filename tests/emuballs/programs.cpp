@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include <iterator>
 #include "src/emuballs/armmachine.hpp"
-#include "src/emuballs/memory.hpp"
+#include "src/emuballs/memory_impl.hpp"
 #include "arm_program_fixture.hpp"
 
 using namespace Emuballs::Arm;

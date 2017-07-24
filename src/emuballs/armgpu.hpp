@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "dptr.hpp"
-#include "memory.hpp"
+#include "emuballs/dptr.hpp"
+#include "emuballs/memory.hpp"
 
 namespace Emuballs
 {

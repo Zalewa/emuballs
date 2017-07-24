@@ -19,7 +19,7 @@
 #include "armopcode_dataproc_psr.hpp"
 
 #include "armmachine.hpp"
-#include "errors.hpp"
+#include "errors_private.hpp"
 #include "shift.hpp"
 
 #define OpLogic(name) class name : public DataProcessingLogic { \

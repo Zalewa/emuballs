@@ -31,7 +31,12 @@ set(SOURCES
 	programmer_pi.cpp
 	registerset.cpp
 	regval.cpp
-	../strings.cpp
+	../common/strings.cpp
+	)
+
+include_directories(
+	${CMAKE_SOURCE_DIR}/src/common
+	${CMAKE_SOURCE_DIR}/include
 	)
 
 # static

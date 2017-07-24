@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "device.hpp"
-#include "dptr.hpp"
+#include "emuballs/device.hpp"
+#include "emuballs/dptr.hpp"
 
 namespace Emuballs
 {

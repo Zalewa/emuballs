@@ -18,31 +18,30 @@
  */
 #pragma once
 
-#include "dptr.hpp"
-#include "export.h"
+#include "emuballs/export.h"
+#include "emuballs/dptr.hpp"
 
 namespace Emuballs
 {
 
-struct Color;
-class Picture;
+class Device;
 
-class EMUBALLS_API Canvas
+class EMUBALLS_API Programmer
 {
 public:
-	Canvas();
-	Canvas(const Canvas &other) = delete;
-	Canvas &operator=(const Canvas &other) = delete;
-	virtual ~Canvas();
+	Programmer(Device &device);
+	virtual ~Programmer();
 
-	virtual void begin() = 0;
-	virtual void end() = 0;
+	/**
+	 * @throw ProgramLoadError
+	 */
+	virtual void load(std::istream &) = 0;
 
-	virtual void drawPixel(int x, int y, const Color &color) = 0;
-	virtual void changeSize(int width, int height) = 0;
+protected:
+	Device &device();
 
 private:
-	DPtr<Canvas> d;
+	DPtr<Programmer> d;
 };
 
 }

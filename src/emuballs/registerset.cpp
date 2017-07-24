@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "registerset.hpp"
+#include "emuballs/registerset.hpp"
 
-#include "errors.hpp"
-#include "regval.hpp"
+#include "emuballs/regval.hpp"
+
+#include "errors_private.hpp"
 #include "strings.hpp"
 #include <algorithm>
 

@@ -1,8 +1,8 @@
 #include "programmer_pi.hpp"
 
 #include <iostream>
-#include "device.hpp"
-#include "memory.hpp"
+#include "emuballs/device.hpp"
+#include "emuballs/memory.hpp"
 
 using namespace Emuballs;
 

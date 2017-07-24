@@ -1,7 +1,7 @@
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${Boost_INCLUDE_DIR})
 
 function(def_module name units)
@@ -14,4 +14,4 @@ endfunction()
 enable_testing()
 add_subdirectory("emuballs")
 
-def_module(strings "strings.cpp;../src/strings.cpp")
+def_module(strings "strings.cpp;../src/common/strings.cpp")

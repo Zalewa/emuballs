@@ -19,7 +19,7 @@
 #pragma once
 #include <boost/test/unit_test.hpp>
 #include "src/emuballs/armmachine.hpp"
-#include "src/emuballs/memory.hpp"
+#include "src/emuballs/memory_impl.hpp"
 #include <vector>
 
 

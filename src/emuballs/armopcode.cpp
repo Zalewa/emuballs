@@ -19,7 +19,7 @@
 #include "armopcode.hpp"
 #include "armmachine.hpp"
 
-#include "errors.hpp"
+#include "errors_private.hpp"
 
 namespace Emuballs
 {

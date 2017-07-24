@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include "src/emuballs/armopcode.hpp"
 #include "src/emuballs/armmachine.hpp"
-#include "src/emuballs/errors.hpp"
+#include "src/emuballs/errors_private.hpp"
 
 using namespace Emuballs::Arm;
 

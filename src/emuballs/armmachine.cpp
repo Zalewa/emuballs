@@ -17,9 +17,11 @@
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "armmachine.hpp"
-#include "memory.hpp"
+
+#include "emuballs/errors.hpp"
+
+#include "memory_impl.hpp"
 #include "opdecoder.hpp"
-#include "errors.hpp"
 
 #include <queue>
 #include <sstream>

@@ -18,10 +18,10 @@
  */
 #define BOOST_TEST_MODULE armregisterset
 #include <boost/test/unit_test.hpp>
+#include "emuballs/regval.hpp"
 #include "src/emuballs/armmachine.hpp"
 #include "src/emuballs/armregisterset.hpp"
-#include "src/emuballs/errors.hpp"
-#include "src/emuballs/regval.hpp"
+#include "src/emuballs/errors_private.hpp"
 
 using namespace Emuballs::Arm;
 

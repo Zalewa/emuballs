@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Zalewa <zalewapl@gmail.com>.
+ * Copyright 2017 Zalewa <zalewapl@gmail.com>.
  *
  * This file is part of Emuballs.
  *
@@ -18,30 +18,17 @@
  */
 #pragma once
 
-#include "emuballs/dptr.hpp"
-#include "emuballs/registerset.hpp"
+#include "emuballs/bitmask_enum.hpp"
 
 namespace Emuballs
 {
 
-namespace Arm
+enum class Access : int
 {
-
-class Machine;
-
-class NamedRegisterSet : public Emuballs::RegisterSet
-{
-public:
-	NamedRegisterSet(Machine &machine);
-
-	std::list<NamedRegister> registers() const;
-
-	void setReg(const std::string &name, const RegVal &val);
-
-private:
-	DPtr<NamedRegisterSet> d;
+	Read = 0x1,
+	Write = 0x2
 };
 
 }
 
-}
+bitmask_enum(Emuballs::Access);
