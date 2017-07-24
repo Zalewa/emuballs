@@ -47,9 +47,23 @@ struct Timebox
 DClass<Emuballs::Pi::Timer>
 {
 public:
-	memsize address = 0x20003000;
+	static const memsize INVALID_ADDRESS = -1;
+
+	memsize address = INVALID_ADDRESS;
 	Timepoint startingPoint;
 	Memory *memory;
+
+	bool isInit() const
+	{
+		return startingPoint.time_since_epoch() != Resolution::zero();
+	}
+
+	void init()
+	{
+		if (address == INVALID_ADDRESS)
+			throw std::logic_error("timer has no address specified");
+		startingPoint = Clock::now();
+	}
 
 	Timebox readTimebox()
 	{
@@ -83,12 +97,19 @@ Timer::Timer(Memory &memory)
 
 void Timer::cycle()
 {
-	Timepoint now = Clock::now();
-	if (d->startingPoint.time_since_epoch() == Resolution::zero())
-		d->startingPoint = now;
+	if (!d->isInit())
+		d->init();
 
+	Timepoint now = Clock::now();
 	Resolution duration = std::chrono::duration_cast<Resolution>(now - d->startingPoint);
 	Timebox timebox = d->readTimebox();
 	timebox.counter = duration.count();
 	d->writeTimebox(timebox);
+}
+
+void Timer::setAddress(memsize address)
+{
+	if (d->isInit())
+		throw std::logic_error("cannot change timer address after init");
+	d->address = address;
 }

@@ -84,11 +84,14 @@ Memory &PiDevice::memory()
 void PiDevice::reset()
 {
 	d->gpu.reset(new Arm::Gpu(d->machine.untrackedMemory()));
-	d->regs.reset(new Arm::NamedRegisterSet(d->machine));
-	d->timer.reset(new Emuballs::Pi::Timer(d->machine.untrackedMemory()));
-	d->machine.cpu().regs().pc() = 0x8000;
 	d->gpu->setFrameBufferPointerEnd(d->definition.gpuFrameBufferPointerEnd);
 	d->gpu->setMailboxAddress(d->definition.gpuMailboxAddress);
+
+	d->timer.reset(new Emuballs::Pi::Timer(d->machine.untrackedMemory()));
+	d->timer->setAddress(d->definition.systemTimerAddress);
+
+	d->regs.reset(new Arm::NamedRegisterSet(d->machine));
+	d->machine.cpu().regs().pc() = 0x8000;
 	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 

@@ -19,11 +19,10 @@
 #pragma once
 
 #include "dptr_impl.hpp"
+#include "emuballs/memory.hpp"
 
 namespace Emuballs
 {
-
-class Memory;
 
 namespace Pi
 {
@@ -36,6 +35,7 @@ public:
 	Timer &operator=(const Timer &other) = delete;
 
 	void cycle();
+	void setAddress(memsize address);
 
 private:
 	DPtr<Timer> d;
