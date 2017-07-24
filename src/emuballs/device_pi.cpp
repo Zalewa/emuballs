@@ -22,7 +22,7 @@
 #include "armregisterset.hpp"
 #include "armgpu.hpp"
 #include "programmer_pi.hpp"
-#include "pi_timer.hpp"
+#include "timer_pi.hpp"
 #include <memory>
 
 using namespace Emuballs;

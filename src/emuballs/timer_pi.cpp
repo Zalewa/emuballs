@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pi_timer.hpp"
+#include "timer_pi.hpp"
 
 #include "memory_impl.hpp"
 #include <chrono>
