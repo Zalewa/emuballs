@@ -211,6 +211,10 @@ Memory::Memory(memsize totalSize, memsize pageSize)
 	d->observeId = 1; // 0 is special; it should denote no observer
 }
 
+Memory::~Memory()
+{
+}
+
 std::vector<memsize> Memory::allocatedPages() const
 {
 	std::vector<memsize> pages;

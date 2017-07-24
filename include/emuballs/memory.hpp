@@ -35,6 +35,7 @@ class EMUBALLS_API Memory
 {
 public:
 	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
+	virtual ~Memory();
 
 	std::vector<memsize> allocatedPages() const;
 
