@@ -27,6 +27,7 @@ DClass<Cycler>
 {
 public:
 	QTimer cycleTimer;
+	int deviceCyclesPerAutoRunCycle = 10000;
 	std::shared_ptr<Emuballs::Device> device;
 };
 
@@ -43,7 +44,15 @@ void Cycler::cycle()
 {
 	try
 	{
-		d->device->cycle();
+		if (isAutoRun())
+		{
+			for (int i = 0; i < d->deviceCyclesPerAutoRunCycle; ++i)
+				d->device->cycle();
+		}
+		else
+		{
+			d->device->cycle();
+		}
 		emit updated();
 	}
 	catch (const Emuballs::ProgramRuntimeError &e)
