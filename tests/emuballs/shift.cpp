@@ -48,6 +48,8 @@ BOOST_AUTO_TEST_CASE(logicalLeft)
 	BOOST_CHECK(!carry);
 	BOOST_CHECK_EQUAL(0xfffffffe, f(0xffffffff, 1, &carry));
 	BOOST_CHECK(carry);
+	BOOST_CHECK_EQUAL(0, f(0xffffffff, 33, &carry));
+	BOOST_CHECK(!carry);
 }
 
 BOOST_AUTO_TEST_CASE(logicalRight)

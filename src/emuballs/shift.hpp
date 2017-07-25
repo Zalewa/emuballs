@@ -53,15 +53,20 @@ template<class T> std::deque<bool> valToBits(const T &value)
 
 template<class T> T logicalLeft(const T &value, unsigned amount, bool *carry = nullptr)
 {
-	std::deque<bool> bits = valToBits<T>(value);
-	for (auto i = 0U; i < amount; ++i)
+	unsigned bitcount = sizeof(T) * 8;
+	if (carry && amount > 0 && amount <= bitcount)
 	{
-		if (carry)
-			*carry = bits.front();
-		bits.pop_front();
-		bits.push_back(false);
+		T valueMinusOne = value << (static_cast<int>(amount) - 1);
+		unsigned maxbit = (sizeof(T) * 8) - 1;
+		*carry = (valueMinusOne & (1 << maxbit));
 	}
-	return bitsToVal<T>(bits);
+	if (amount >= bitcount)
+	{
+		if (amount > bitcount)
+			*carry = false;
+		return 0;
+	}
+	return value << amount;
 }
 
 template<class T> T logicalRight(T value, unsigned amount, bool *carry = nullptr)
@@ -92,16 +97,21 @@ template<class T> T arithmeticRight(T value, unsigned amount, bool *carry = null
 
 template<class T> T rotateRight(T value, unsigned amount, bool *carry = nullptr)
 {
-	std::deque<bool> bits = valToBits<T>(value);
-	for (auto i = 0U; i < amount; ++i)
+	unsigned bitcount = sizeof(T) * 8;
+	unsigned moduloAmount = amount % bitcount;
+	if (amount > 0)
 	{
-		bool bit = bits.back();
 		if (carry)
-			*carry = bit;
-		bits.pop_back();
-		bits.push_front(bit);
+			*carry = value & (1 << ((amount - 1) % bitcount));
+		if (moduloAmount > 0)
+		{
+			unsigned remainder = bitcount - moduloAmount;
+			T low = value >> moduloAmount;
+			T high = value << remainder;
+			return high | low;
+		}
 	}
-	return bitsToVal<T>(bits);
+	return value;
 }
 
 template<class T> T rotateRightExtended(T value, bool carryIn, bool *carryOut)
