@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(allNamedRegs)
 {
 	auto &regs = machine.cpu().regs();
 	for (int i = 0; i < NUM_CPU_REGS; ++i)
-		regs[i] = (i + 1) * 4;
+		regs.set(i, (i + 1) * 4);
 	NamedRegisterSet namedRegs(machine);
 	int index = 0;
 	for (auto &namedReg : namedRegs.registers())
@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(allNamedRegs)
 BOOST_AUTO_TEST_CASE(specificRegGet)
 {
 	auto &regs = machine.cpu().regs();
-	regs[15] = 0xcafebeef;
-	regs[14] = 1000;
+	regs.set(15, 0xcafebeef);
+	regs.set(14, 1000);
 	NamedRegisterSet namedRegs(machine);
 	BOOST_CHECK_EQUAL(0xcafebeef, namedRegs.reg("r15"));
 	BOOST_CHECK_EQUAL(0xcafebeef, namedRegs.reg("pc"));

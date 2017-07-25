@@ -66,10 +66,10 @@ protected:
 		bool accumulate = code() & (1 << 21);
 		auto &regs = machine.cpu().regs();
 		regval rnVal = regs[rn()]; // If rn() == rd().
-		regs[rd()] = regs[rs()] * regs[rm()];
+		regs.set(rd(), regs[rs()] * regs[rm()]);
 		if (accumulate)
 		{
-			regs[rd()] += rnVal;
+			regs.set(rd(), regs[rd()] + rnVal);
 		}
 		if (condition)
 		{
@@ -151,8 +151,8 @@ protected:
 			uint64_t b = regs[rs()];
 			endResult = static_cast<uint64_t>(accumulated + (a * b));
 		}
-		regs[rdLo()] = static_cast<uint32_t>(endResult & 0xffffffff);
-		regs[rdHi()] = static_cast<uint32_t>((endResult >> 32) & 0xffffffff);
+		regs.set(rdLo(), static_cast<uint32_t>(endResult & 0xffffffff));
+		regs.set(rdHi(), static_cast<uint32_t>((endResult >> 32) & 0xffffffff));
 		if (condition)
 		{
 			auto &flags = machine.cpu().flags();
@@ -211,13 +211,13 @@ protected:
 		{
 			regval val = machine.memory().byte(addr);
 			machine.memory().putByte(addr, machine.cpu().regs()[rm] & 0xff);
-			machine.cpu().regs()[rd] = val;
+			machine.cpu().regs().set(rd, val);
 		}
 		else
 		{
 			regval val = machine.memory().word(addr);
 			machine.memory().putWord(addr, machine.cpu().regs()[rm]);
-			machine.cpu().regs()[rd] = val;
+			machine.cpu().regs().set(rd, val);
 		}
 	}
 
@@ -256,7 +256,7 @@ protected:
 		}
 		else
 		{
-			machine.cpu().regs().pc() = address;
+			machine.cpu().regs().pc(address);
 		}
 	}
 };
@@ -312,7 +312,7 @@ protected:
 						value |= ~static_cast<regval>(0xff);
 				}
 			}
-			machine.cpu().regs()[rd()] = value;
+			machine.cpu().regs().set(rd(), value);
 		}
 		else
 		{
@@ -325,7 +325,7 @@ protected:
 		}
 
 		if (!preIndexing || writeBack)
-			machine.cpu().regs()[rn()] = address + offset;
+			machine.cpu().regs().set(rn(), address + offset);
 	}
 
 private:
@@ -394,8 +394,8 @@ protected:
 		if (load)
 		{
 			uint64_t value = machine.memory().dword(memoryAddress);
-			machine.cpu().regs()[rd()] = value & 0xffffffff;
-			machine.cpu().regs()[rd2()] = (value >> 32) & 0xffffffff;
+			machine.cpu().regs().set(rd(), value & 0xffffffff);
+			machine.cpu().regs().set(rd2(), (value >> 32) & 0xffffffff);
 		}
 		else
 		{
@@ -406,7 +406,7 @@ protected:
 		}
 		if (isWriteBack())
 		{
-			machine.cpu().regs()[rn()] = addressWithOffset;
+			machine.cpu().regs().set(rn(), addressWithOffset);
 		}
 	}
 
@@ -484,7 +484,7 @@ protected:
 			if (load)
 			{
 				uint8_t value = machine.memory().byte(memoryAddress);
-				machine.cpu().regs()[rd()] = value;
+				machine.cpu().regs().set(rd(), value);
 			}
 			else
 			{
@@ -497,7 +497,7 @@ protected:
 			if (load)
 			{
 				uint32_t value = machine.memory().word(memoryAddress);
-				machine.cpu().regs()[rd()] = value;
+				machine.cpu().regs().set(rd(), value);
 			}
 			else
 			{
@@ -507,7 +507,7 @@ protected:
 		}
 		if (isWriteBack())
 		{
-			machine.cpu().regs()[rn()] = addressWithOffset;
+			machine.cpu().regs().set(rn(), addressWithOffset);
 		}
 	}
 
@@ -589,7 +589,7 @@ protected:
 			if (load)
 			{
 				auto val = memory.word(address + offset);
-				machine.cpu().regs()[reg] = val;
+				machine.cpu().regs().set(reg, val);
 			}
 			else
 			{
@@ -600,7 +600,7 @@ protected:
 				offset += offsetIncrement;
 		}
 		if (writeBack)
-			machine.cpu().regs()[rn()] = address + offset;
+			machine.cpu().regs().set(rn(), address + offset);
 	}
 
 private:
@@ -626,12 +626,13 @@ protected:
 		auto masked = 0x00ffffff & code();
 		auto sign = 0x00800000 & code();
 		auto offset = (masked << 2) | (sign ? 0xfc000000 : 0);
+		auto &regs = machine.cpu().regs();
 		if (link)
 		{
-			auto pc = machine.cpu().regs().pc();
-			machine.cpu().regs().lr() = pc - PREFETCH_SIZE + INSTRUCTION_SIZE;
+			auto pc = regs.pc();
+			regs.lr(pc - PREFETCH_SIZE + INSTRUCTION_SIZE);
 		}
-		machine.cpu().regs().pc() += offset;
+		regs.pc(regs.pc() + offset);
 	}
 };
 
@@ -718,7 +719,7 @@ protected:
 		}
 		else
 			throw IllegalOpcodeError("rev: illegal");
-		machine.cpu().regs()[rd] = reversed;
+		machine.cpu().regs().set(rd, reversed);
 	}
 };
 

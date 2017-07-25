@@ -37,7 +37,7 @@ struct ArmProgramFixture
 
 	void r(int which, Emuballs::Arm::regval val)
 	{
-		machine.cpu().regs()[which] = val;
+		machine.cpu().regs().set(which, val);
 	}
 
 	auto &flags()
@@ -59,8 +59,8 @@ struct ArmProgramFixture
 		{
 			machine.memory().putWord(addr, *it);
 		}
-		machine.cpu().regs().pc() = 0;
-		machine.cpu().regs().lr() = addr + Emuballs::Arm::PREFETCH_SIZE;
+		machine.cpu().regs().pc(0);
+		machine.cpu().regs().lr(addr + Emuballs::Arm::PREFETCH_SIZE);
 		snapshot = machine;
 	}
 

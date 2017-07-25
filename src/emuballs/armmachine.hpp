@@ -48,20 +48,24 @@ class RegisterSet
 public:
 	RegisterSet();
 
-	regval &sp();
+	void sp(const regval &value);
 	const regval &sp() const;
 
-	regval &lr();
+	void lr(const regval &value);
 	const regval &lr() const;
 
-	regval &pc();
+	void pc(const regval &value);
 	const regval &pc() const;
 
-	regval &operator[](int idx);
+	void set(int idx, const regval &value);
 	const regval &operator[](int idx) const;
+
+	void resetPcChanged();
+	bool wasPcChanged() const;
 
 private:
 	std::vector<regval> regs;
+	bool pcChanged;
 };
 
 

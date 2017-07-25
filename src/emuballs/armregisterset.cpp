@@ -70,7 +70,7 @@ void NamedRegisterSet::setReg(const std::string &name, const RegVal &value)
 	{
 		if (namedReg.isNameMatch(name))
 		{
-			d->machine->cpu().regs()[index] = value;
+			d->machine->cpu().regs().set(index, value);
 			return;
 		}
 		++index;

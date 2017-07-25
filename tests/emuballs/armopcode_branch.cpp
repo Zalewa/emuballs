@@ -33,8 +33,8 @@ struct State
 
 	State() : cpu(machine.cpu())
 	{
-		cpu.regs().pc() = 0x80000000U;
-		cpu.regs().lr() = 0xcafefeed;
+		cpu.regs().pc(0x80000000U);
+		cpu.regs().lr(0xcafefeed);
 	}
 };
 

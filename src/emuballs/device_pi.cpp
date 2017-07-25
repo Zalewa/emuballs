@@ -91,7 +91,7 @@ void PiDevice::reset()
 	d->timer->setAddress(d->definition.systemTimerAddress);
 
 	d->regs.reset(new Arm::NamedRegisterSet(d->machine));
-	d->machine.cpu().regs().pc() = 0x8000;
+	d->machine.cpu().regs().pc(0x8000);
 	setProgrammer(std::shared_ptr<Programmer>(new ProgrammerPi(*this)));
 }
 

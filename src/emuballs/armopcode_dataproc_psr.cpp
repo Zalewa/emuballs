@@ -79,7 +79,7 @@ protected:
 		calcOperand2(machine);
 		auto endval = calculate();
 		if (writeRd())
-			machine.cpu().regs()[rd] = endval;
+			machine.cpu().regs().set(rd, endval);
 		if (condition)
 			adjustFlags(machine, endval);
 	}
@@ -336,7 +336,7 @@ protected:
 	{
 		auto rd = (code() >> 12) & 0xf;
 		auto &flags = psr(machine);
-		machine.cpu().regs()[rd] = flags.dump();
+		machine.cpu().regs().set(rd, flags.dump());
 	}
 };
 
