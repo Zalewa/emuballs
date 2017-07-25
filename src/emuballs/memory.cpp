@@ -307,15 +307,27 @@ uint32_t Memory::word(memsize address) const
 	const Page *p = &d->page(address);
 	memsize offset = d->pageOffset(address);
 	uint32_t value = 0;
-	memsize currentAddress = address;
-	for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++currentAddress)
+	if (offset + WORD_SIZE < p->size())
 	{
-		if (offset >= p->size())
+		// We can optimize things a bit if word is all on the same page.
+		auto &memContents = p->contents();
+		std::copy(
+			memContents.begin() + offset,
+			memContents.begin() + offset + WORD_SIZE,
+			reinterpret_cast<uint8_t*>(&value));
+	}
+	else
+	{
+		memsize currentAddress = address;
+		for (int i = 0; i < WORD_SIZE; ++i, ++offset, ++currentAddress)
 		{
-			p = &d->page(currentAddress);
-			offset = d->pageOffset(currentAddress);
+			if (offset >= p->size())
+			{
+				p = &d->page(currentAddress);
+				offset = d->pageOffset(currentAddress);
+			}
+			value |= static_cast<uint32_t>((*p)[offset]) << (8 * i);
 		}
-		value |= static_cast<uint32_t>((*p)[offset]) << (8 * i);
 	}
 	return value;
 }
