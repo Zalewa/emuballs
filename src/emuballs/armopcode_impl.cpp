@@ -65,10 +65,11 @@ protected:
 		bool condition = code() & (1 << 20);
 		bool accumulate = code() & (1 << 21);
 		auto &regs = machine.cpu().regs();
+		regval rnVal = regs[rn()]; // If rn() == rd().
 		regs[rd()] = regs[rs()] * regs[rm()];
 		if (accumulate)
 		{
-			regs[rd()] += regs[rn()];
+			regs[rd()] += rnVal;
 		}
 		if (condition)
 		{
