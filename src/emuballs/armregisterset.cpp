@@ -40,7 +40,7 @@ DPointeredNoCopy(Emuballs::Arm::NamedRegisterSet);
 
 }
 
-constexpr auto GENERAL_PURPOSE_REGISTERS = 13;
+constexpr auto GENERAL_PURPOSE_REGISTERS = 10;
 
 NamedRegisterSet::NamedRegisterSet(Machine &machine)
 {
@@ -53,6 +53,9 @@ std::list<NamedRegister> NamedRegisterSet::registers() const
 	std::list<NamedRegister> mapping;
 	for (int i = 0; i < GENERAL_PURPOSE_REGISTERS; ++i)
 		mapping.push_back(NamedRegister("r" + std::to_string(i), regs[i]));
+	mapping.push_back(NamedRegister(std::list<std::string> {"sl", "r10"}, regs[10]));
+	mapping.push_back(NamedRegister(std::list<std::string> {"fp", "r11"}, regs[11]));
+	mapping.push_back(NamedRegister(std::list<std::string> {"ip", "r12"}, regs[12]));
 	mapping.push_back(NamedRegister(std::list<std::string> {"sp", "r13"}, regs[13]));
 	mapping.push_back(NamedRegister(std::list<std::string> {"lr", "r14"}, regs[14]));
 	mapping.push_back(NamedRegister(std::list<std::string> {"pc", "r15"}, regs[15]));
