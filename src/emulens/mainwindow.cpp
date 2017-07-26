@@ -66,6 +66,9 @@ void MainWindow::showAbout()
 			"This program is distributed under the terms of the GPL v3.\n"
 			"\n"
 			"Emuballs library is distributed under the terms of the LGPL v3.\n"
+			"\n"
+			"Emulens & Emuballs source code is available on GitHub.\n"
+			"Emulens uses Dax89's QHexEdit, available on GitHub.\n"
 			));
 }
 

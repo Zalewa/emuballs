@@ -175,6 +175,14 @@ Source Materials
 * [ARM Compiler toolchain Assembler Reference](http://infocenter.arm.com/help/topic/com.arm.doc.dui0489f/DUI0489F_arm_assembler_reference.pdf)
 
 
+3rd Party
+=========
+
+* Qt5 - https://www.qt.io/
+* Boost - http://www.boost.org/
+* Dax89's QHexEdit - https://github.com/Dax89/QHexEdit
+
+
 Why Emuballs?
 =============
 
