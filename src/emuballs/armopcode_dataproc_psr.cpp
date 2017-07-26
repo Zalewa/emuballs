@@ -208,6 +208,10 @@ protected:
 	{
 		carryOut = minuend >= subtrahend;
 		overflow = (minuend & REGVAL_HIGHBIT) != (subtrahend & REGVAL_HIGHBIT);
+		regval subtrahendNegated = ~subtrahend;
+		auto sameHighBit = (minuend & REGVAL_HIGHBIT) == (subtrahendNegated & REGVAL_HIGHBIT);
+		overflow = sameHighBit &&
+			(minuend & REGVAL_HIGHBIT) != ((minuend + subtrahendNegated) & REGVAL_HIGHBIT);
 	}
 };
 

@@ -94,6 +94,21 @@ BOOST_AUTO_TEST_CASE(sub)
 	r(1, 30);
 	op->execute(machine);
 	BOOST_CHECK_EQUAL(r(0), -41);
+
+	r(0, 0);
+	r(1, 0xffffff6e);
+	op->execute(machine);
+	BOOST_CHECK_EQUAL(r(0), 146);
+
+	r(0, 0);
+	r(1, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK_EQUAL(r(0), 73);
+
+	r(0, 0xfffffffe);
+	r(1, 0x7fffffff);
+	op->execute(machine);
+	BOOST_CHECK_EQUAL(r(0), 0x7fffffff);
 }
 
 BOOST_AUTO_TEST_CASE(sub_lsr)
@@ -122,6 +137,15 @@ BOOST_AUTO_TEST_CASE(sub_lsr)
 	r(2, 0);
 	op->execute(machine);
 	BOOST_CHECK_EQUAL(r(0), -41);
+}
+
+BOOST_AUTO_TEST_CASE(sub_lsl)
+{
+	auto op = decode(0xe0444088); // sub r4, r4, r8, lsl #1
+	r(4, 0);
+	r(8, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK_EQUAL(r(4), 146);
 }
 
 BOOST_AUTO_TEST_CASE(rsb)
@@ -315,7 +339,7 @@ BOOST_AUTO_TEST_CASE(cmp)
 	r(1, 0x0f0f0f0f);
 	op->execute(machine);
 	BOOST_CHECK_EQUAL(r(0), 0xf0f0f0f0);
-	BOOST_CHECK(flags().overflow());
+	BOOST_CHECK(!flags().overflow());
 	BOOST_CHECK(flags().carry());
 	BOOST_CHECK(!flags().zero());
 	BOOST_CHECK(flags().negative());
@@ -337,6 +361,139 @@ BOOST_AUTO_TEST_CASE(cmp)
 	BOOST_CHECK(!flags().carry());
 	BOOST_CHECK(!flags().zero());
 	BOOST_CHECK(flags().negative());
+
+	flags().carry(false);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 0xb);
+	r(1, 0x5);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(true);
+	flags().zero(true);
+	flags().negative(false);
+	flags().overflow(true);
+	r(0, 0xb);
+	r(1, 0xf);
+	op->execute(machine);
+	BOOST_CHECK(!flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(true);
+	flags().zero(true);
+	flags().negative(false);
+	flags().overflow(true);
+	r(0, 2);
+	r(1, 3);
+	op->execute(machine);
+	BOOST_CHECK(!flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(false);
+	flags().zero(false);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 3);
+	r(1, 3);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(false);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 4);
+	r(1, 3);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(true);
+	flags().zero(true);
+	flags().negative(false);
+	flags().overflow(true);
+	r(0, 0xffffffb6);
+	r(1, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK(!flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(false);
+	flags().zero(false);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 0xffffffb7);
+	r(1, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(false);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 0xffffffb8);
+	r(1, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(true);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(true);
+	r(0, 0);
+	r(1, 0xffffffb7);
+	op->execute(machine);
+	BOOST_CHECK(!flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
+
+	flags().carry(false);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(false);
+	r(0, 0xfffffffe);
+	r(1, 0x7fffffff);
+	op->execute(machine);
+	BOOST_CHECK(flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(flags().overflow());
+
+	flags().carry(true);
+	flags().zero(true);
+	flags().negative(true);
+	flags().overflow(true);
+	r(4, 0);
+	r(8, 0xffffffb7);
+	auto op2 = decode(0xe1540088); // cmp r4, r8, lsl #1
+	op2->execute(machine);
+	BOOST_CHECK(!flags().carry());
+	BOOST_CHECK(!flags().zero());
+	BOOST_CHECK(!flags().negative());
+	BOOST_CHECK(!flags().overflow());
 }
 
 BOOST_AUTO_TEST_CASE(cmn)
@@ -697,7 +854,7 @@ BOOST_AUTO_TEST_CASE(cmp_imm)
 	op->execute(machine);
 	BOOST_CHECK_EQUAL(r(0), -1);
 	BOOST_CHECK(flags().carry());
-	BOOST_CHECK(flags().overflow());
+	BOOST_CHECK(!flags().overflow());
 	BOOST_CHECK(!flags().zero());
 	BOOST_CHECK(flags().negative());
 

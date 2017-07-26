@@ -34,8 +34,6 @@ BOOST_FIXTURE_TEST_SUITE(suite, ArmProgramFixture)
 
 BOOST_AUTO_TEST_CASE(byte_reverse)
 {
-
-	//  8008:       
 	r(4, 0);
 	r(7, 0xa1b2c3d4);
 	auto op = decode(0xe6bf4f37); // rev r4, r7
