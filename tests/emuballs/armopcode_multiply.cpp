@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(mla_rd_rs_same_rm_rn_same)
 	r(3, 0);
 	r(4, 0xffffffff);
 	op->execute(machine);
-	BOOST_CHECK_EQUAL(r(0xffffffff), 0);
+	BOOST_CHECK_EQUAL(r(0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(mlas_rd_rn_same)
