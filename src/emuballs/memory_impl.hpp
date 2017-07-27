@@ -37,9 +37,15 @@ public:
 
 	const std::vector<uint8_t> &contents() const;
 	void setContents(memsize offset, const std::vector<uint8_t> &bytes);
-	void setContents(memsize offset,
-		const std::vector<uint8_t>::const_iterator &bytesBegin,
-		const std::vector<uint8_t>::const_iterator &bytesEnd);
+
+	template<class iter>
+	void setContents(memsize offset, iter bytesBegin, iter bytesEnd)
+	{
+		size_t bytesSize = bytesEnd - bytesBegin;
+		if (offset + bytesSize > size())
+			throw std::out_of_range("contents must be within page size");
+		std::copy(bytesBegin, bytesEnd, this->bytes.begin() + offset);
+	}
 
 	memsize size() const;
 

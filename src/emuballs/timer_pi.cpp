@@ -52,6 +52,7 @@ public:
 
 	memsize address = INVALID_ADDRESS;
 	Timepoint startingPoint;
+	Timebox timebox;
 	Memory *memory;
 
 	bool isInit() const
@@ -66,23 +67,15 @@ public:
 		startingPoint = Clock::now();
 	}
 
-	Timebox readTimebox()
+	void readTimebox()
 	{
-		std::vector<uint8_t> raw = memory->chunk(address, sizeof(Timebox));
-		Timebox timebox;
-		std::copy(raw.begin(), raw.end(), reinterpret_cast<uint8_t*>(&timebox));
-		return timebox;
+		memory->chunk(address, sizeof(Timebox), reinterpret_cast<uint8_t*>(&timebox));
 	}
 
-	void writeTimebox(const Timebox &timebox)
+	void writeTimebox()
 	{
-		std::vector<uint8_t> raw;
-		raw.resize(sizeof(Timebox));
-		std::copy(
-			reinterpret_cast<const uint8_t*>(&timebox),
-			reinterpret_cast<const uint8_t*>(&timebox + 1),
-			raw.begin());
-		memory->putChunk(address, raw);
+		const uint8_t *timeboxPtr = reinterpret_cast<const uint8_t*>(&timebox);
+		memory->putChunk(address, timeboxPtr, sizeof(Timebox));
 	}
 };
 
@@ -102,9 +95,9 @@ void Timer::cycle()
 
 	Timepoint now = Clock::now();
 	Resolution duration = std::chrono::duration_cast<Resolution>(now - d->startingPoint);
-	Timebox timebox = d->readTimebox();
-	timebox.counter = duration.count();
-	d->writeTimebox(timebox);
+	d->readTimebox();
+	d->timebox.counter = duration.count();
+	d->writeTimebox();
 }
 
 void Timer::setAddress(memsize address)

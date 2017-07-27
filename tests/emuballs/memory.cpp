@@ -212,6 +212,49 @@ BOOST_AUTO_TEST_CASE(memoryChunk)
 	BOOST_CHECK_EQUAL(2, chunk3.size());
 	BOOST_CHECK_EQUAL(chunk3[0], 0xfe);
 	BOOST_CHECK_EQUAL(chunk3[1], 0xed);
+
+	m.putByte(1022, 0xa1);
+	m.putByte(1023, 0xb2);
+	std::vector<uint8_t> chunkReadMore = m.chunk(1022, 10512);
+	BOOST_CHECK_EQUAL(2, chunkReadMore.size());
+	BOOST_CHECK_EQUAL(chunkReadMore[0], 0xa1);
+	BOOST_CHECK_EQUAL(chunkReadMore[1], 0xb2);
+}
+
+BOOST_AUTO_TEST_CASE(memoryChunkToPointer)
+{
+	Memory m(1024, 128);
+	m.putByte(0, 0x40);
+	std::vector<uint8_t> chunk;
+	chunk.reserve(1);
+	auto read = m.chunk(0, 1, chunk.data());
+	BOOST_CHECK_EQUAL(1, read);
+	BOOST_CHECK_EQUAL(chunk[0], 0x40);
+
+	m.putByte(128, 0x71);
+	std::vector<uint8_t> chunk2;
+	chunk2.reserve(1);
+	auto read2 = m.chunk(128, 1, chunk2.data());
+	BOOST_CHECK_EQUAL(1, read2);
+	BOOST_CHECK_EQUAL(chunk2[0], 0x71);
+
+	m.putByte(1000, 0xfe);
+	m.putByte(1001, 0xed);
+	std::vector<uint8_t> chunk3;
+	chunk3.reserve(2);
+	auto read3 = m.chunk(1000, 2, chunk3.data());
+	BOOST_CHECK_EQUAL(2, read3);
+	BOOST_CHECK_EQUAL(chunk3[0], 0xfe);
+	BOOST_CHECK_EQUAL(chunk3[1], 0xed);
+
+	m.putByte(1022, 0xa1);
+	m.putByte(1023, 0xb2);
+	std::vector<uint8_t> chunkReadMore;
+	chunkReadMore.reserve(300); // 300 is different than 2 and 10512.
+	auto readMore = m.chunk(1022, 10512, chunkReadMore.data());
+	BOOST_CHECK_EQUAL(2, readMore);
+	BOOST_CHECK_EQUAL(chunkReadMore[0], 0xa1);
+	BOOST_CHECK_EQUAL(chunkReadMore[1], 0xb2);
 }
 
 BOOST_AUTO_TEST_CASE(memoryMaxSize)

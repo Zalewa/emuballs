@@ -103,16 +103,6 @@ void Page::setContents(memsize offset, const std::vector<uint8_t> &bytes)
 	setContents(offset, bytes.begin(), bytes.end());
 }
 
-void Page::setContents(memsize offset,
-	const std::vector<uint8_t>::const_iterator &bytesBegin,
-	const std::vector<uint8_t>::const_iterator &bytesEnd)
-{
-	size_t bytesSize = bytesEnd - bytesBegin;
-	if (offset + bytesSize > size())
-		throw std::out_of_range("contents must be within page size");
-	std::copy(bytesBegin, bytesEnd, this->bytes.begin() + offset);
-}
-
 memsize Page::size() const
 {
 	return bytes.size();
@@ -232,19 +222,24 @@ void Memory::execObservers(memsize address, memsize length, Access events)
 
 memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
 {
+	return putChunk(address, chunk.data(), chunk.size());
+}
+
+memsize Memory::putChunk(memsize address, const uint8_t *begin, memsize length)
+{
 	memsize totalInsertCount = 0;
 	memsize currentPageAddress = d->pageAddress(address);
 	memsize currentPageOffset = d->pageOffset(address);
 	for (memsize offset = 0;
-		 currentPageAddress < size() && offset < chunk.size();
+		 currentPageAddress < size() && offset < length;
 		 currentPageAddress += d->pageSize)
 	{
-		memsize insertCount = std::min(d->pageSize - currentPageOffset, chunk.size() - offset);
+		memsize insertCount = std::min(d->pageSize - currentPageOffset, length - offset);
 		totalInsertCount += insertCount;
 		Page &p = d->page(currentPageAddress);
 		p.setContents(currentPageOffset,
-				chunk.begin() + offset,
-				chunk.begin() + offset + insertCount);
+			begin + offset,
+			begin + offset + insertCount);
 		offset += insertCount;
 		currentPageOffset = 0;
 	}
@@ -253,27 +248,41 @@ memsize Memory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
 
 std::vector<uint8_t> Memory::chunk(memsize address, memsize length) const
 {
+	uint8_t *buffer = new uint8_t[length];
+	auto read = chunk(address, length, buffer);
+	std::vector<uint8_t> bytes;
+	bytes.assign(buffer, buffer + read);
+	delete [] buffer;
+	return bytes;
+}
+
+memsize Memory::chunk(memsize address, memsize length, uint8_t *begin) const
+{
+	if (address >= size())
+		return 0;
+	if (address + length > size())
+		length = size() - address;
+
 	memsize currentPageAddress = d->pageAddress(address);
 	memsize currentPageOffset = d->pageOffset(address);
-	std::vector<uint8_t> bytes;
-	if (length > d->pageSize)
-		bytes.reserve(length);
 	memsize remainingLength = length;
-	for (; currentPageAddress < size() && remainingLength > 0;
-		 currentPageAddress += d->pageSize)
+	while (remainingLength > 0)
 	{
 		memsize insertCount = std::min(remainingLength, d->pageSize - currentPageOffset);
 		const Page &p = d->isPageAllocated(currentPageAddress) ?
 			d->page(currentPageAddress) :
 			d->falsePage;
 		const std::vector<uint8_t> &pageBytes = p.contents();
-		bytes.insert(bytes.end(),
+		std::copy(
 			pageBytes.cbegin() + currentPageOffset,
-			pageBytes.cbegin() + currentPageOffset + insertCount);
+			pageBytes.cbegin() + currentPageOffset + insertCount,
+			begin);
+		begin += insertCount;
 		remainingLength -= insertCount;
+		currentPageAddress += d->pageSize;
 		currentPageOffset = 0;
 	}
-	return bytes;
+	return length;
 }
 
 void Memory::putByte(memsize address, uint8_t value)
