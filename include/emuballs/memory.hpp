@@ -60,6 +60,16 @@ public:
 	void putDword(memsize address, uint64_t value);
 	uint64_t dword(memsize address) const;
 
+	/**
+	 * Plain C pointer to memory chunk under this address.
+	 *
+	 * This is highly unsafe as the memory is split into pages.
+	 *
+	 * `pageSize() - (address % pageSize())` determines the length
+	 * of the buffer pointed at this pointer. Memory is only continuous
+	 * within a Page. Pages break continuity.
+	 */
+	uint8_t *ptr(memsize address);
 	memsize pageSize() const;
 	memsize size() const;
 

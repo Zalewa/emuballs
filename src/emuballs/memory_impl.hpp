@@ -36,6 +36,7 @@ public:
 	}
 
 	const std::vector<uint8_t> &contents() const;
+	std::vector<uint8_t> &contents();
 	void setContents(memsize offset, const std::vector<uint8_t> &bytes);
 
 	template<class iter>

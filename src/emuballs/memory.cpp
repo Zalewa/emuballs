@@ -98,6 +98,11 @@ const std::vector<uint8_t> &Page::contents() const
 	return bytes;
 }
 
+std::vector<uint8_t> &Page::contents()
+{
+	return bytes;
+}
+
 void Page::setContents(memsize offset, const std::vector<uint8_t> &bytes)
 {
 	setContents(offset, bytes.begin(), bytes.end());
@@ -352,6 +357,11 @@ uint64_t Memory::dword(memsize address) const
 	uint64_t low = word(address);
 	uint64_t high = word(address + sizeof(uint32_t));
 	return (high << 32) | low;
+}
+
+uint8_t *Memory::ptr(memsize address)
+{
+	return d->page(address).contents().data() + d->pageOffset(address);
 }
 
 memsize Memory::pageSize() const

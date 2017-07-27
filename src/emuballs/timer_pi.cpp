@@ -52,7 +52,7 @@ public:
 
 	memsize address = INVALID_ADDRESS;
 	Timepoint startingPoint;
-	Timebox timebox;
+	Timebox *timebox;
 	Memory *memory;
 
 	bool isInit() const
@@ -65,17 +65,10 @@ public:
 		if (address == INVALID_ADDRESS)
 			throw std::logic_error("timer has no address specified");
 		startingPoint = Clock::now();
-	}
 
-	void readTimebox()
-	{
-		memory->chunk(address, sizeof(Timebox), reinterpret_cast<uint8_t*>(&timebox));
-	}
-
-	void writeTimebox()
-	{
-		const uint8_t *timeboxPtr = reinterpret_cast<const uint8_t*>(&timebox);
-		memory->putChunk(address, timeboxPtr, sizeof(Timebox));
+		// Tragedy will occur if this code will be run
+		// on a big-endian machine.
+		timebox = reinterpret_cast<Timebox*>(memory->ptr(address));
 	}
 };
 
@@ -95,9 +88,7 @@ void Timer::cycle()
 
 	Timepoint now = Clock::now();
 	Resolution duration = std::chrono::duration_cast<Resolution>(now - d->startingPoint);
-	d->readTimebox();
-	d->timebox.counter = duration.count();
-	d->writeTimebox();
+	d->timebox->counter = duration.count();
 }
 
 void Timer::setAddress(memsize address)
