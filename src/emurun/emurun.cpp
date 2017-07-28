@@ -49,7 +49,12 @@ int execute(const std::string &deviceName, const std::string &programPath,
 	}
 
 	// Load program.
-	std::ifstream program(programPath);
+	std::ifstream program(programPath, std::ios::in | std::ios::binary);
+	if (!program.is_open())
+	{
+		std::cerr << "program file cannot be opened" << std::endl;
+		return 4;
+	}
 	device->programmer().load(program);
 	program.close();
 
