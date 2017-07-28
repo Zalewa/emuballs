@@ -134,9 +134,16 @@ public:
 		if (address >= size)
 			throw std::out_of_range("address too big");
 		Emuballs::memsize page = pageAddress(address);
-		if (!isPageAllocated(page))
+		auto it = pages.find(page);
+		if (it != pages.end())
+		{
+			return it->second;
+		}
+		else
+		{
 			allocatePage(page);
-		return pages[page];
+			return pages[page];
+		}
 	}
 
 
