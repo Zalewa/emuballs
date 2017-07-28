@@ -34,18 +34,6 @@ namespace Arm
 namespace OpcodeImpl
 {
 
-class DataProcessingPsrTransfer : public Opcode
-{
-public:
-	using Opcode::Opcode;
-protected:
-	void run(Machine &machine)
-	{
-		OpcodePtr ptr = decodeDataProcessingPsrTransfer(code());
-		ptr->execute(machine);
-	}
-};
-
 class Multiply : public Opcode
 {
 public:
@@ -772,7 +760,7 @@ OpcodePtr opcodeDataProcessingPsrTransfer(uint32_t code)
 {
 	if (isDataProcessingPsrTransfer(code))
 	{
-		return OpcodePtr(new DataProcessingPsrTransfer(code));
+		return decodeDataProcessingPsrTransfer(code);
 	}
 	return nullptr;
 }
