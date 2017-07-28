@@ -133,9 +133,9 @@ std::list<DeviceFactory> Emuballs::Pi::listPiDevices()
 	};
 
 	std::list<DeviceFactory> factories = {
-		DeviceFactory(L"Raspberry Pi 1", rpi1),
-		DeviceFactory(L"Raspberry Pi 1 B+", rpi1b),
-		DeviceFactory(L"Raspberry Pi 2", rpi2),
+		DeviceFactory("Raspberry Pi 1", rpi1),
+		DeviceFactory("Raspberry Pi 1 B+", rpi1b),
+		DeviceFactory("Raspberry Pi 2", rpi2),
 	};
 	return factories;
 }

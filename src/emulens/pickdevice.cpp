@@ -37,7 +37,7 @@ public:
 		int i = 0;
 		for (Emuballs::DeviceFactory &factory : factories)
 		{
-			auto *item = new QListWidgetItem(QString::fromStdWString(factory.name()));
+			auto *item = new QListWidgetItem(QString::fromStdString(factory.name()));
 			item->setData(Qt::UserRole, i);
 			devicesList->addItem(item);
 			++i;

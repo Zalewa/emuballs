@@ -44,10 +44,4 @@ std::string concat(const Range &range, std::string delim)
 	return concat<Range, std::string, std::ostringstream>(range, delim);
 }
 
-template<class Range>
-std::wstring concat(const Range &range, std::wstring delim)
-{
-	return concat<Range, std::wstring, std::wostringstream>(range, delim);
-}
-
 }

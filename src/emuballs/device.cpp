@@ -62,7 +62,7 @@ namespace Emuballs
 DClass<DeviceFactory>
 {
 public:
-	std::wstring name;
+	std::string name;
 	device_factory factory;
 };
 
@@ -73,7 +73,7 @@ DeviceFactory::DeviceFactory()
 {
 }
 
-DeviceFactory::DeviceFactory(const std::wstring &name, device_factory &factory)
+DeviceFactory::DeviceFactory(const std::string &name, device_factory &factory)
 {
 	d->name = name;
 	d->factory = factory;
@@ -102,7 +102,7 @@ DevicePtr DeviceFactory::create() const
 	return d->factory();
 }
 
-std::wstring &DeviceFactory::name() const
+std::string &DeviceFactory::name() const
 {
 	return d->name;
 }

@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(device_factory_all_valid)
 	std::list<Emuballs::DeviceFactory> devices = Emuballs::listDevices();
 	for (auto &factory : devices)
 	{
-		std::wstring msg =  L"Factory '" + factory.name() + L"' is not valid.";
+		std::string msg =  u8"Factory '" + factory.name() + u8"' is not valid.";
 		BOOST_CHECK_MESSAGE(factory.isValid(), msg.data());
 	}
 }

@@ -69,7 +69,7 @@ public:
 	/**
 	 * @brief Creates factory with human-readable name and factory function.
 	 */
-	DeviceFactory(const std::wstring &name, device_factory &factory);
+	DeviceFactory(const std::string &name, device_factory &factory);
 	DeviceFactory(const DeviceFactory &other);
 	const DeviceFactory &operator=(const DeviceFactory &other);
 	virtual ~DeviceFactory();
@@ -84,7 +84,7 @@ public:
 	/**
 	 * @brief Human-readable name of the created Device.
 	 */
-	std::wstring &name() const;
+	std::string &name() const;
 	/**
 	 * @brief Valid factory is a factory that will create() a Device.
 	 */
