@@ -146,7 +146,6 @@ public:
 	constexpr static const memsize INVALID_ADDRESS = static_cast<memsize>(-1);
 
 	Memory *memory;
-	int shift = 0;
 	memsize mailboxAddress = INVALID_ADDRESS;
 	memsize frameBufferPointerEnd = INVALID_ADDRESS;
 	memobserver_id observerId = 0;
@@ -357,7 +356,6 @@ void Gpu::cycle()
 		mailbox.readReady(true);
 		d->writeMailbox(mailbox);
 	}
-	++d->shift;
 }
 
 void Gpu::draw(Canvas &canvas)
