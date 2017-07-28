@@ -35,7 +35,8 @@ namespace Arm
 constexpr auto NUM_CPU_REGS = 16;
 
 constexpr auto INSTRUCTION_SIZE = 4;
-constexpr auto PREFETCH_SIZE = INSTRUCTION_SIZE * 2;
+constexpr auto PREFETCH_INSTRUCTIONS = 2;
+constexpr auto PREFETCH_SIZE = INSTRUCTION_SIZE * PREFETCH_INSTRUCTIONS;
 
 typedef uint32_t regval;
 constexpr regval REGVAL_MAX = std::numeric_limits<regval>::max();

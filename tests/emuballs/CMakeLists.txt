@@ -25,6 +25,7 @@ function(def_emuballs_module_shared name units)
 	target_link_libraries(${target_name} emuballs)
 endfunction()
 
+def_emuballs_module(emuballs_array_queue array_queue.cpp)
 def_emuballs_module(emuballs_arm_arithmetic_carry_overflow arm_arithmetic_carry_overflow.cpp)
 def_emuballs_module(emuballs_armflags armflags.cpp)
 def_emuballs_module(emuballs_armopcode_branch armopcode_branch.cpp)

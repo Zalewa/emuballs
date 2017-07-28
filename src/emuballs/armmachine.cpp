@@ -20,6 +20,7 @@
 
 #include "emuballs/errors.hpp"
 
+#include "array_queue.hpp"
 #include "memory_impl.hpp"
 #include "opdecoder.hpp"
 
@@ -239,12 +240,17 @@ public:
 		return pop();
 	}
 
+	void flush()
+	{
+		prefetchedInstructions.clear();
+	}
+
 private:
-	std::queue<uint32_t> prefetchedInstructions;
+	ArrayQueue<uint32_t, PREFETCH_INSTRUCTIONS> prefetchedInstructions;
 
 	void collect(Machine &machine)
 	{
-		while (prefetchedInstructions.size() < 2)
+		while (prefetchedInstructions.size() < PREFETCH_INSTRUCTIONS)
 		{
 			regval pc = machine.cpu().regs().pc();
 			uint32_t instruction = machine.untrackedMemory().word(pc);
@@ -255,8 +261,7 @@ private:
 
 	uint32_t pop()
 	{
-		auto instruction = prefetchedInstructions.front();
-		prefetchedInstructions.pop();
+		auto instruction = prefetchedInstructions.pop();
 		return instruction;
 	}
 };
@@ -272,7 +277,7 @@ public:
 
 	void flushPrefetch()
 	{
-		prefetch = Emuballs::Arm::Prefetch();
+		prefetch.flush();
 	}
 };
 
