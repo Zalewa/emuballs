@@ -39,6 +39,16 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/include
 	)
 
+# options
+option(EMUBALLS_FORCE_BIG_ENDIAN "Build as if the builder machine was big endian." OFF)
+
+# detect endianness
+include(TestBigEndian)
+test_big_endian(IS_BIG_ENDIAN)
+if (${IS_BIG_ENDIAN})
+	message(STATUS "Big endian detected.")
+endif()
+
 # static
 add_library(emuballs_static STATIC ${SOURCES})
 
@@ -48,6 +58,12 @@ target_compile_definitions(emuballs PUBLIC EMUBALLS_API_SHARED)
 target_compile_definitions(emuballs PRIVATE EMUBALLS_API_EXPORT)
 
 # common
+if (${IS_BIG_ENDIAN} OR ${EMUBALLS_FORCE_BIG_ENDIAN})
+	message(STATUS "Big endian compilation enabled.")
+	target_compile_definitions(emuballs PRIVATE EMUBALLS_BIG_ENDIAN)
+	target_compile_definitions(emuballs_static PRIVATE EMUBALLS_BIG_ENDIAN)
+endif()
+
 if (WIN32)
 	# remove "lib" prefix
 	SET_TARGET_PROPERTIES(emuballs_static PROPERTIES PREFIX "")

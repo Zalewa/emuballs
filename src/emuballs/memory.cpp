@@ -331,6 +331,9 @@ uint32_t Memory::word(memsize address) const
 	if (offset + WORD_SIZE < p->size())
 	{
 		// We can optimize things a bit if word is all on the same page.
+		#ifdef EMUBALLS_BIG_ENDIAN
+		#error("big endian not supported")
+		#endif
 		auto &memContents = p->contents();
 		std::copy(
 			memContents.begin() + offset,

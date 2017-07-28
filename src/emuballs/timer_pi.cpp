@@ -64,6 +64,9 @@ public:
 
 		// Tragedy will occur if this code will be run
 		// on a big-endian machine.
+		#ifdef EMUBALLS_BIG_ENDIAN
+		#error("big endian not supported")
+		#endif
 		timebox = reinterpret_cast<Timebox*>(memory->ptr(address));
 		isInit = true;
 	}
