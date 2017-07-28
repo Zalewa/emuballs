@@ -54,11 +54,7 @@ public:
 	Timepoint startingPoint;
 	Timebox *timebox;
 	Memory *memory;
-
-	bool isInit() const
-	{
-		return startingPoint.time_since_epoch() != Resolution::zero();
-	}
+	bool isInit = false;
 
 	void init()
 	{
@@ -69,6 +65,7 @@ public:
 		// Tragedy will occur if this code will be run
 		// on a big-endian machine.
 		timebox = reinterpret_cast<Timebox*>(memory->ptr(address));
+		isInit = true;
 	}
 };
 
@@ -83,7 +80,7 @@ Timer::Timer(Memory &memory)
 
 void Timer::cycle()
 {
-	if (!d->isInit())
+	if (!d->isInit)
 		d->init();
 
 	Timepoint now = Clock::now();
@@ -93,7 +90,7 @@ void Timer::cycle()
 
 void Timer::setAddress(memsize address)
 {
-	if (d->isInit())
+	if (d->isInit)
 		throw std::logic_error("cannot change timer address after init");
 	d->address = address;
 }
