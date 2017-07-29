@@ -259,15 +259,24 @@ private:
 	ArrayQueue<uint32_t, PREFETCH_INSTRUCTIONS> prefetchedInstructions;
 	Memory *memory;
 	RegisterSet *regs;
+	uint8_t *memptr = nullptr;
+	memsize membase = -1;
 
 	void collect(Machine &machine)
 	{
 		while (prefetchedInstructions.size() < PREFETCH_INSTRUCTIONS)
 		{
 			regval pc = regs->pc();
-			uint32_t instruction = memory->word(pc);
+			memsize pageOffset = pc - membase;
+			if (memptr == nullptr || pageOffset > memory->pageSize())
+			{
+				membase = pc - (pc % memory->pageSize());
+				memptr = memory->ptr(membase);
+				pageOffset = pc - membase;
+			}
+			uint32_t instruction = *reinterpret_cast<uint32_t*>(memptr + pageOffset);
 			prefetchedInstructions.push(instruction);
-			regs->pc(pc + 4);
+			regs->pc(pc + INSTRUCTION_SIZE);
 		}
 	}
 
