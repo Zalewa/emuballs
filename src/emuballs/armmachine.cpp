@@ -35,36 +35,6 @@ RegisterSet::RegisterSet()
 	resetPcChanged();
 }
 
-auto RegisterSet::sp(const regval &value) -> void
-{
-	return set(13, value);
-}
-
-auto RegisterSet::sp() const -> const regval&
-{
-	return (*this)[13];
-}
-
-auto RegisterSet::lr(const regval &value) -> void
-{
-	return set(14, value);
-}
-
-auto RegisterSet::lr() const -> const regval&
-{
-	return (*this)[14];
-}
-
-auto RegisterSet::pc(const regval &value) -> void
-{
-	return set(15, value);
-}
-
-auto RegisterSet::pc() const -> const regval&
-{
-	return (*this)[15];
-}
-
 auto RegisterSet::set(int idx, const regval &value) -> void
 {
 	if (idx == 15)
@@ -75,16 +45,6 @@ auto RegisterSet::set(int idx, const regval &value) -> void
 auto RegisterSet::operator[](int idx) const -> const regval&
 {
 	return regs[idx];
-}
-
-void RegisterSet::resetPcChanged()
-{
-	pcChanged = false;
-}
-
-bool RegisterSet::wasPcChanged() const
-{
-	return pcChanged;
 }
 
 }}

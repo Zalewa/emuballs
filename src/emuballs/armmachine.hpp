@@ -49,20 +49,46 @@ class RegisterSet
 public:
 	RegisterSet();
 
-	void sp(const regval &value);
-	const regval &sp() const;
+	// Aliases to set() and operator[] should all be inline.
 
-	void lr(const regval &value);
-	const regval &lr() const;
+	inline void sp(const regval &value)
+	{
+		set(13, value);
+	}
+	inline const regval &sp() const
+	{
+		return (*this)[13];
+	}
 
-	void pc(const regval &value);
-	const regval &pc() const;
+	inline void lr(const regval &value)
+	{
+		set(14, value);
+	}
+	inline const regval &lr() const
+	{
+		return (*this)[14];
+	}
+
+	inline void pc(const regval &value)
+	{
+		set(15, value);
+	}
+	inline const regval &pc() const
+	{
+		return (*this)[15];
+	}
 
 	void set(int idx, const regval &value);
 	const regval &operator[](int idx) const;
 
-	void resetPcChanged();
-	bool wasPcChanged() const;
+	inline void resetPcChanged()
+	{
+		pcChanged = false;
+	}
+	inline bool wasPcChanged() const
+	{
+		return pcChanged;
+	}
 
 private:
 	std::vector<regval> regs;
