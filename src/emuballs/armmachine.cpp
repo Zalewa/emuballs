@@ -245,24 +245,35 @@ public:
 		prefetchedInstructions.clear();
 	}
 
+	void setMemoryPtr(Memory *memory)
+	{
+		this->memory = memory;
+	}
+
+	void setCpuPtr(Cpu *cpu)
+	{
+		this->regs = &cpu->regs();
+	}
+
 private:
 	ArrayQueue<uint32_t, PREFETCH_INSTRUCTIONS> prefetchedInstructions;
+	Memory *memory;
+	RegisterSet *regs;
 
 	void collect(Machine &machine)
 	{
 		while (prefetchedInstructions.size() < PREFETCH_INSTRUCTIONS)
 		{
-			regval pc = machine.cpu().regs().pc();
-			uint32_t instruction = machine.untrackedMemory().word(pc);
+			regval pc = regs->pc();
+			uint32_t instruction = memory->word(pc);
 			prefetchedInstructions.push(instruction);
-			machine.cpu().regs().pc(pc + 4);
+			regs->pc(pc + 4);
 		}
 	}
 
 	uint32_t pop()
 	{
-		auto instruction = prefetchedInstructions.pop();
-		return instruction;
+		return prefetchedInstructions.pop();
 	}
 };
 }
@@ -275,9 +286,51 @@ public:
 	Emuballs::Memory memory;
 	Emuballs::Arm::Prefetch prefetch;
 
-	void flushPrefetch()
+	PrivData()
 	{
-		prefetch.flush();
+		adjustPointers();
+	}
+
+	PrivData(PrivData &&other) noexcept
+		: PrivData()
+	{
+		swap(*this, other);
+	}
+
+	PrivData(const PrivData &other)
+	{
+		this->cpu = other.cpu;
+		this->decoder = other.decoder;
+		this->prefetch = other.prefetch;
+		this->memory = other.memory;
+		adjustPointers();
+	}
+
+	friend void swap(
+		PrivData<Emuballs::Arm::Machine> &a,
+		PrivData<Emuballs::Arm::Machine> &b) noexcept
+	{
+		using std::swap;
+
+		swap(a.cpu, b.cpu);
+		swap(a.decoder, b.decoder);
+		swap(a.prefetch, b.prefetch);
+		swap(a.memory, b.memory);
+		a.adjustPointers();
+		b.adjustPointers();
+	}
+
+	PrivData &operator=(PrivData other)
+	{
+		swap(*this, other);
+		return *this;
+	}
+
+private:
+	void adjustPointers() noexcept
+	{
+		prefetch.setCpuPtr(&cpu);
+		prefetch.setMemoryPtr(&memory);
 	}
 };
 
@@ -343,6 +396,6 @@ void Emuballs::Arm::Machine::cycle()
 	// execution.
 	if (pcWasChanged)
 	{
-		d->flushPrefetch();
+		d->prefetch.flush();
 	}
 }

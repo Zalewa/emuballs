@@ -69,10 +69,9 @@ struct ArmProgramFixture
 		machine = snapshot;
 	}
 
-	void runProgram()
+	void runProgram(int limit = STEP_LIMIT)
 	{
 		auto endAddress = machine.cpu().regs().lr();
-		auto limit = STEP_LIMIT;
 		for (; limit > 0 && machine.cpu().regs().pc() < endAddress; --limit)
 		{
 			machine.cycle();
@@ -80,4 +79,25 @@ struct ArmProgramFixture
 		BOOST_WARN_EQUAL(machine.cpu().regs().pc(), endAddress);
 		BOOST_REQUIRE_NE(0, limit);
 	}
+};
+
+constexpr uint32_t fibonacciCode[] = {
+	// 00000000 <fibonacci>:
+	0xe1a03000, // mov	r3, r0
+	0xe3330000, // teq	r3, #0
+	0x03a00000, // moveq	r0, #0
+	0x01a0f00e, // moveq	pc, lr
+	0xe3330001, // teq	r3, #1
+	0x03a00001, // moveq	r0, #1
+	0x01a0f00e, // moveq	pc, lr
+	0xe3a01000, // mov	r1, #0
+	0xe3a02001, // mov	r2, #1
+	// 00000024 <_fib_loop>:
+	0xe3330001, // teq	r3, #1
+	0x01a0f00e, // moveq	pc, lr
+	0xe0810002, // add	r0, r1, r2
+	0xe1a01002, // mov	r1, r2
+	0xe1a02000, // mov	r2, r0
+	0xe2433001, // sub	r3, r3, #1
+	0xeafffff8, // b	24 <_fib_loop>
 };
