@@ -320,7 +320,8 @@ void Emuballs::Arm::Machine::cycle()
 {
 	// Prefetch instructions and get next instruction to execute.
 	auto instruction = d->prefetch.next(*this);
-	regval pc = cpu().regs().pc();
+	RegisterSet &regs = cpu().regs();
+	regval pc = regs.pc();
 	bool pcWasChanged = false;
 	// Decode opcode.
 	OpcodePtr opcode;
@@ -335,9 +336,9 @@ void Emuballs::Arm::Machine::cycle()
 		throw OpDecodeError(ss.str());
 	}
 	// Execute opcode.
-	cpu().regs().resetPcChanged();
+	regs.resetPcChanged();
 	opcode->execute(*this);
-	pcWasChanged = cpu().regs().wasPcChanged();
+	pcWasChanged = regs.wasPcChanged();
 	// Flush prefetched instructions if pc register changed due to opcode
 	// execution.
 	if (pcWasChanged)
