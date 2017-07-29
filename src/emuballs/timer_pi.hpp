@@ -33,6 +33,7 @@ public:
 	Timer(Memory &memory);
 	Timer(const Timer &other) = delete;
 	Timer &operator=(const Timer &other) = delete;
+	~Timer();
 
 	void cycle();
 	void setAddress(memsize address);

@@ -25,8 +25,12 @@ namespace Emuballs
 
 enum class Access : int
 {
+	/** Something was just read. */
 	Read = 0x1,
-	Write = 0x2
+	/** Something was just written. */
+	Write = 0x2,
+	/** Something is about to be read. */
+	PreRead = 0x4,
 };
 
 }

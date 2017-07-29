@@ -21,6 +21,7 @@
 #include "memory_impl.hpp"
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 
 using namespace Emuballs;
 using namespace Emuballs::Pi;
@@ -51,6 +52,7 @@ public:
 	static const memsize INVALID_ADDRESS = -1;
 
 	memsize address = INVALID_ADDRESS;
+	memobserver_id observerId = Memory::NO_OBSERVER;
 	Timepoint startingPoint;
 	Timebox *timebox;
 	Memory *memory;
@@ -68,7 +70,22 @@ public:
 		#error("big endian not supported")
 		#endif
 		timebox = reinterpret_cast<Timebox*>(memory->ptr(address));
+
+		observerId = memory->observe(
+			address + offsetof(Emuballs::Pi::Timebox, counter),
+			sizeof(Timebox::counter),
+			[this](memsize, Access){ writeToMemory(); },
+			Access::PreRead
+			);
+
 		isInit = true;
+	}
+
+	void writeToMemory()
+	{
+		Timepoint now = Clock::now();
+		Resolution duration = std::chrono::duration_cast<Resolution>(now - startingPoint);
+		timebox->counter = duration.count();
 	}
 };
 
@@ -81,14 +98,16 @@ Timer::Timer(Memory &memory)
 	d->memory = &memory;
 }
 
+Timer::~Timer()
+{
+	if (d->observerId != Memory::NO_OBSERVER)
+		d->memory->unobserve(d->observerId);
+}
+
 void Timer::cycle()
 {
 	if (!d->isInit)
 		d->init();
-
-	Timepoint now = Clock::now();
-	Resolution duration = std::chrono::duration_cast<Resolution>(now - d->startingPoint);
-	d->timebox->counter = duration.count();
 }
 
 void Timer::setAddress(memsize address)

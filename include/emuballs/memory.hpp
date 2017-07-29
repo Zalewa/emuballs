@@ -34,6 +34,8 @@ typedef uint32_t memobserver_id;
 class EMUBALLS_API Memory
 {
 public:
+	static const memobserver_id NO_OBSERVER = 0;
+
 	Memory(memsize totalSize = SIZE_MAX, memsize pageSize = 4096);
 	virtual ~Memory();
 

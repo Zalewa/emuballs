@@ -476,6 +476,7 @@ memsize TrackedMemory::putChunk(memsize address, const std::vector<uint8_t> &chu
 
 std::vector<uint8_t> TrackedMemory::chunk(memsize address, memsize length) const
 {
+	memory.execObservers(address, 0, Access::PreRead);
 	auto ret = memory.chunk(address, length);
 	memory.execObservers(address, ret.size(), Access::Read);
 	return ret;
@@ -489,6 +490,7 @@ void TrackedMemory::putByte(memsize address, uint8_t value)
 
 uint8_t TrackedMemory::byte(memsize address) const
 {
+	memory.execObservers(address, 0, Access::PreRead);
 	auto ret = memory.byte(address);
 	memory.execObservers(address, 0, Access::Read);
 	return ret;
@@ -502,6 +504,7 @@ void TrackedMemory::putWord(memsize address, uint32_t value)
 
 uint32_t TrackedMemory::word(memsize address) const
 {
+	memory.execObservers(address, 0, Access::PreRead);
 	auto ret = memory.word(address);
 	memory.execObservers(address, 0, Access::Read);
 	return ret;
@@ -515,6 +518,7 @@ void TrackedMemory::putDword(memsize address, uint64_t value)
 
 uint64_t TrackedMemory::dword(memsize address) const
 {
+	memory.execObservers(address, 0, Access::PreRead);
 	auto ret = memory.dword(address);
 	memory.execObservers(address, 0, Access::Read);
 	return ret;
