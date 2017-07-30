@@ -96,11 +96,6 @@ Opcode::Opcode(uint32_t code)
 	this->m_code = code;
 }
 
-uint32_t Opcode::code() const
-{
-	return m_code;
-}
-
 void Opcode::execute(Machine &machine)
 {
 	auto condition = (m_code >> 28) & 0xf;

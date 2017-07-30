@@ -36,7 +36,11 @@ public:
 	Opcode(uint32_t code);
 	virtual ~Opcode() = default;
 
-	uint32_t code() const;
+	inline uint32_t code() const
+	{
+		return m_code;
+	}
+
 	void execute(Machine &machine);
 	virtual void validate();
 
