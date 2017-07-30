@@ -548,7 +548,8 @@ protected:
 
 	void run(Machine &machine) override
 	{
-		memsize address = machine.cpu().regs()[rn];
+		RegisterSet &regs = machine.cpu().regs();
+		memsize address = regs[rn];
 		memsize offset = 0;
 
 		int start = 0;
@@ -580,18 +581,18 @@ protected:
 			if (load)
 			{
 				auto val = memory.word(address + offset);
-				machine.cpu().regs().set(reg, val);
+				regs.set(reg, val);
 			}
 			else
 			{
-				auto val = machine.cpu().regs()[reg];
+				auto val = regs[reg];
 				memory.putWord(address + offset, val);
 			}
 			if (!preIndexing)
 				offset += offsetIncrement;
 		}
 		if (writeBack)
-			machine.cpu().regs().set(rn, address + offset);
+			regs.set(rn, address + offset);
 	}
 
 private:
