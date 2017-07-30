@@ -529,6 +529,7 @@ public:
 	BlockDataTransfer(uint32_t code)
 		: Opcode(code)
 	{
+		// Values deduced from `code`.
 		rn = (code >> 16) & 0xf;
 		load = code & (1 << 20);
 		writeBack = code & (1 << 21);
@@ -536,7 +537,10 @@ public:
 		// psr = code() & (1 << 22);
 		up = code & (1 << 23);
 		preIndexing = code & (1 << 24);
-		registers = std::bitset<16>(code & 0xffff);
+
+		// Values deduced from values deduced from `code`.
+		this->offsetIncrement = determineOffsetIncrement();
+		this->registers = determineRegisters();
 	}
 
 protected:
@@ -552,30 +556,9 @@ protected:
 		memsize address = regs[rn];
 		memsize offset = 0;
 
-		int start = 0;
-		int end = 0;
-		int increment = 0;
-		int offsetIncrement = 0;
-		if (up)
-		{
-			start = 0;
-			end = 16;
-			increment = 1;
-			offsetIncrement = 4;
-		}
-		else
-		{
-			start = 15;
-			end = -1;
-			increment = -1;
-			offsetIncrement = -4;
-		}
-
 		TrackedMemory memory = machine.memory();
-		for (int reg = start; reg != end; reg += increment)
+		for (int reg : registers)
 		{
-			if (!registers.test(reg))
-				continue;
 			if (preIndexing)
 				offset += offsetIncrement;
 			if (load)
@@ -603,7 +586,41 @@ private:
 	bool up;
 	bool preIndexing;
 	int rn;
-	std::bitset<16> registers;
+
+	std::vector<int> registers;
+	int offsetIncrement;
+
+	int determineOffsetIncrement()
+	{
+		return up ? sizeof(regval) : -sizeof(regval);
+	}
+
+	std::vector<int> determineRegisters()
+	{
+		std::bitset<16> registerBits = std::bitset<16>(code() & 0xffff);
+		int start = 0;
+		int end = 0;
+		int increment = 0;
+		if (up)
+		{
+			start = 0;
+			end = 16;
+			increment = 1;
+		}
+		else
+		{
+			start = 15;
+			end = -1;
+			increment = -1;
+		}
+		std::vector<int> registers;
+		for (int reg = start; reg != end; reg += increment)
+		{
+			if (registerBits.test(reg))
+				registers.push_back(reg);
+		}
+		return registers;
+	}
 };
 
 class Branch : public Opcode
