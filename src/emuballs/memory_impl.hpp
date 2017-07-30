@@ -88,7 +88,10 @@ public:
 	TrackedMemory(Memory &memory);
 
 	memsize putChunk(memsize address, const std::vector<uint8_t> &chunk);
+	memsize putChunk(memsize address, const uint8_t *begin, memsize length);
+
 	std::vector<uint8_t> chunk(memsize address, memsize length) const;
+	memsize chunk(memsize address, memsize length, uint8_t *begin) const;
 
 	void putByte(memsize address, uint8_t value);
 	uint8_t byte(memsize address) const;

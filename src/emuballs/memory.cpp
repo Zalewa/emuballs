@@ -474,11 +474,26 @@ memsize TrackedMemory::putChunk(memsize address, const std::vector<uint8_t> &chu
 	return ret;
 }
 
+memsize TrackedMemory::putChunk(memsize address, const uint8_t *begin, memsize length)
+{
+	auto ret = memory.putChunk(address, begin, length);
+	memory.execObservers(address, ret, Access::Write);
+	return ret;
+}
+
 std::vector<uint8_t> TrackedMemory::chunk(memsize address, memsize length) const
 {
-	memory.execObservers(address, 0, Access::PreRead);
+	memory.execObservers(address, length, Access::PreRead);
 	auto ret = memory.chunk(address, length);
 	memory.execObservers(address, ret.size(), Access::Read);
+	return ret;
+}
+
+memsize TrackedMemory::chunk(memsize address, memsize length, uint8_t *begin) const
+{
+	memory.execObservers(address, length, Access::PreRead);
+	auto ret = memory.chunk(address, length, begin);
+	memory.execObservers(address, ret, Access::Read);
 	return ret;
 }
 

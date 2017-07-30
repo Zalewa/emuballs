@@ -539,8 +539,12 @@ public:
 		preIndexing = code & (1 << 24);
 
 		// Values deduced from values deduced from `code`.
-		this->offsetIncrement = determineOffsetIncrement();
 		this->registers = determineRegisters();
+
+		this->values.resize(this->registers.size());
+		this->length = sizeof(regval) * this->registers.size();
+		this->startOffset = up ? 0 : -this->length;
+		this->startOffset += indexingOffset();
 	}
 
 protected:
@@ -554,54 +558,31 @@ protected:
 	{
 		RegisterSet &regs = machine.cpu().regs();
 		memsize address = regs[rn];
-		memsize offset = 0;
 
 		// While ugly, valgrind callgrind has indiciated
 		// that this is the most efficient version of the code.
+		#ifdef EMUBALLS_BIG_ENDIAN
+		#error("big endian not supported")
+		#endif
 		TrackedMemory memory = machine.memory();
-		if (load && preIndexing)
+		if (load)
 		{
-			// Pre-indexed load.
-			for (int reg : registers)
-			{
-				offset += offsetIncrement;
-				auto val = memory.word(address + offset);
-				regs.set(reg, val);
-			}
-		}
-		else if (load && !preIndexing)
-		{
-			// Post-indexed load.
-			for (int reg : registers)
-			{
-				auto val = memory.word(address + offset);
-				regs.set(reg, val);
-				offset += offsetIncrement;
-			}
-		}
-		else if (!load && preIndexing)
-		{
-			// Pre-indexed save.
-			for (int reg : registers)
-			{
-				offset += offsetIncrement;
-				auto val = regs[reg];
-				memory.putWord(address + offset, val);
-			}
+			memory.chunk(address + startOffset, length,
+				reinterpret_cast<uint8_t*>(values.data()));
+			for (unsigned i = 0; i < registers.size(); ++i)
+				regs.set(registers[i], values[i]);
 		}
 		else
 		{
-			// Post-indexed save.
-			for (int reg : registers)
-			{
-				auto val = regs[reg];
-				memory.putWord(address + offset, val);
-				offset += offsetIncrement;
-			}
+			for (unsigned i = 0; i < registers.size(); ++i)
+				values[i] = regs[registers[i]];
+			memory.putChunk(address + startOffset,
+				reinterpret_cast<uint8_t*>(values.data()),
+				length);
 		}
 
 		if (writeBack)
-			regs.set(rn, address + offset);
+			regs.set(rn, address + (up ? this->length : -this->length));
 	}
 
 private:
@@ -614,33 +595,27 @@ private:
 	int rn;
 
 	std::vector<int> registers;
-	int offsetIncrement;
+	std::vector<uint32_t> values;
+	int startOffset;
+	memsize length;
 
-	int determineOffsetIncrement()
+	int indexingOffset()
 	{
-		return up ? sizeof(regval) : -sizeof(regval);
+		if (up && preIndexing)
+			return sizeof(regval);
+		else if (up && !preIndexing)
+			return 0;
+		else if (!up && preIndexing)
+			return 0;
+		else
+			return sizeof(regval);
 	}
 
 	std::vector<int> determineRegisters()
 	{
 		std::bitset<16> registerBits = std::bitset<16>(code() & 0xffff);
-		int start = 0;
-		int end = 0;
-		int increment = 0;
-		if (up)
-		{
-			start = 0;
-			end = 16;
-			increment = 1;
-		}
-		else
-		{
-			start = 15;
-			end = -1;
-			increment = -1;
-		}
 		std::vector<int> registers;
-		for (int reg = start; reg != end; reg += increment)
+		for (int reg = 0; reg != 16; ++reg)
 		{
 			if (registerBits.test(reg))
 				registers.push_back(reg);

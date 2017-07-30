@@ -169,16 +169,16 @@ BOOST_AUTO_TEST_CASE(ldm_preindex_up_writeback)
 BOOST_AUTO_TEST_CASE(ldm_preindex_down_writeback)
 {
 	auto op = decode(0xe932000a); // ldmdb r2!, {r1, r3}
-	machine.memory().putWord(MEM_BASE, 0x80706050);
-	machine.memory().putWord(MEM_BASE - 4, 0x12345678u);
-	machine.memory().putWord(MEM_BASE - 8, 0x87ab45de);
+	machine.memory().putWord(MEM_BASE, 0x1u);
+	machine.memory().putWord(MEM_BASE - 4, 0x2u);
+	machine.memory().putWord(MEM_BASE - 8, 0x3u);
 	r(1, 0);
 	r(2, MEM_BASE);
 	r(3, 0);
 	op->execute(machine);
-	BOOST_CHECK_EQUAL(r(1), 0x87ab45de);
+	BOOST_CHECK_EQUAL(r(1), 0x3u);
 	BOOST_CHECK_EQUAL(r(2), MEM_BASE - 8);
-	BOOST_CHECK_EQUAL(r(3), 0x12345678u);
+	BOOST_CHECK_EQUAL(r(3), 0x2u);
 }
 
 BOOST_AUTO_TEST_CASE(ldm_postindex_down_writeback)
