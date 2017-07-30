@@ -557,22 +557,29 @@ protected:
 		memsize offset = 0;
 
 		TrackedMemory memory = machine.memory();
-		for (int reg : registers)
+		if (load)
 		{
-			if (preIndexing)
-				offset += offsetIncrement;
-			if (load)
+			for (int reg : registers)
 			{
+				if (preIndexing)
+					offset += offsetIncrement;
 				auto val = memory.word(address + offset);
 				regs.set(reg, val);
+				if (!preIndexing)
+					offset += offsetIncrement;
 			}
-			else
+		}
+		else
+		{
+			for (int reg : registers)
 			{
+				if (preIndexing)
+					offset += offsetIncrement;
 				auto val = regs[reg];
 				memory.putWord(address + offset, val);
+				if (!preIndexing)
+					offset += offsetIncrement;
 			}
-			if (!preIndexing)
-				offset += offsetIncrement;
 		}
 		if (writeBack)
 			regs.set(rn, address + offset);
