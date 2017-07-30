@@ -556,31 +556,50 @@ protected:
 		memsize address = regs[rn];
 		memsize offset = 0;
 
+		// While ugly, valgrind callgrind has indiciated
+		// that this is the most efficient version of the code.
 		TrackedMemory memory = machine.memory();
-		if (load)
+		if (load && preIndexing)
 		{
+			// Pre-indexed load.
 			for (int reg : registers)
 			{
-				if (preIndexing)
-					offset += offsetIncrement;
+				offset += offsetIncrement;
 				auto val = memory.word(address + offset);
 				regs.set(reg, val);
-				if (!preIndexing)
-					offset += offsetIncrement;
+			}
+		}
+		else if (load && !preIndexing)
+		{
+			// Post-indexed load.
+			for (int reg : registers)
+			{
+				auto val = memory.word(address + offset);
+				regs.set(reg, val);
+				offset += offsetIncrement;
+			}
+		}
+		else if (!load && preIndexing)
+		{
+			// Pre-indexed save.
+			for (int reg : registers)
+			{
+				offset += offsetIncrement;
+				auto val = regs[reg];
+				memory.putWord(address + offset, val);
 			}
 		}
 		else
 		{
+			// Post-indexed save.
 			for (int reg : registers)
 			{
-				if (preIndexing)
-					offset += offsetIncrement;
 				auto val = regs[reg];
 				memory.putWord(address + offset, val);
-				if (!preIndexing)
-					offset += offsetIncrement;
+				offset += offsetIncrement;
 			}
 		}
+
 		if (writeBack)
 			regs.set(rn, address + offset);
 	}
