@@ -526,26 +526,29 @@ private:
 class BlockDataTransfer : public Opcode
 {
 public:
-	using Opcode::Opcode;
+	BlockDataTransfer(uint32_t code)
+		: Opcode(code)
+	{
+		rn = (code >> 16) & 0xf;
+		load = code & (1 << 20);
+		writeBack = code & (1 << 21);
+		// TODO: psr when I know what this is.
+		// psr = code() & (1 << 22);
+		up = code & (1 << 23);
+		preIndexing = code & (1 << 24);
+		registers = std::bitset<16>(code & 0xffff);
+	}
+
 protected:
 	void validate() override
 	{
-		if (rn() == 15)
+		if (rn == 15)
 			throw IllegalOpcodeError("ldm/stm: Rn cannot be r15");
 	}
 
 	void run(Machine &machine) override
 	{
-		bool load = code() & (1 << 20);
-		bool writeBack = code() & (1 << 21);
-		// TODO: psr when I know what this is.
-		// bool psr = code() & (1 << 22);
-		bool up = code() & (1 << 23);
-		bool preIndexing = code() & (1 << 24);
-
-		std::bitset<16> regs = registers();
-
-		memsize address = machine.cpu().regs()[rn()];
+		memsize address = machine.cpu().regs()[rn];
 		memsize offset = 0;
 
 		int start = 0;
@@ -570,7 +573,7 @@ protected:
 		TrackedMemory memory = machine.memory();
 		for (int reg = start; reg != end; reg += increment)
 		{
-			if (!regs.test(reg))
+			if (!registers.test(reg))
 				continue;
 			if (preIndexing)
 				offset += offsetIncrement;
@@ -588,19 +591,18 @@ protected:
 				offset += offsetIncrement;
 		}
 		if (writeBack)
-			machine.cpu().regs().set(rn(), address + offset);
+			machine.cpu().regs().set(rn, address + offset);
 	}
 
 private:
-	int rn() const
-	{
-		return (code() >> 16) & 0xf;
-	}
-
-	std::bitset<16> registers() const
-	{
-		return std::bitset<16>(code() & 0xffff);
-	}
+	bool load;
+	bool writeBack;
+	// TODO: psr when I know what this is.
+	// bool psr = code() & (1 << 22);
+	bool up;
+	bool preIndexing;
+	int rn;
+	std::bitset<16> registers;
 };
 
 class Branch : public Opcode
