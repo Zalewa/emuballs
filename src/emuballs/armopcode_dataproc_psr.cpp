@@ -55,31 +55,63 @@ namespace OpcodeImpl
 class DataProcessing : public Opcode
 {
 public:
-	using Opcode::Opcode;
+	DataProcessing(uint32_t code)
+		: Opcode(code)
+	{
+		rn = (code >> 16) & 0xf;
+		rd = (code >> 12) & 0xf;
+		immediate = code & (1 << 25);
+		condition = code & (1 << 20);
+
+		if (immediate)
+		{
+			precalculatedImmediateOp2 = operand2Immediate();
+		}
+		else
+		{
+			rm = code & 0xf;
+			shiftType = static_cast<ShiftType>((code >> 5) & 0b11);
+			shiftFunction = shifter<uint32_t>(static_cast<int>(shiftType));
+			useRegisterToShift = code & (1 << 4);
+			if (useRegisterToShift)
+				rs = (code >> 8) & 0xf;
+			else
+				immediateShiftAmount = (code >> 7) & 0x1f;
+		}
+	}
 
 protected:
+	// Immutable attributes.
 	int rn;
 	int rd;
-	regval rnVal;
-	uint32_t op2;
 	bool condition;
 	bool immediate;
+
+	// Machine-state dependant attributes.
+	regval rnVal;
+	uint32_t op2;
 	bool shiftCarry;
 	bool overflow;
 
+	virtual void validate() override
+	{
+		if (useRegisterToShift)
+		{
+			if (rs == 15)
+				throw IllegalOpcodeError("shift register cannot be r15");
+		}
+	}
+
 	virtual void run(Machine &machine)
 	{
-		shiftCarry = machine.cpu().flags().carry();
-		overflow = machine.cpu().flags().overflow();
-		rn = (code() >> 16) & 0xf;
-		rnVal = machine.cpu().regs()[rn];
-		rd = (code() >> 12) & 0xf;
-		immediate = code() & (1 << 25);
-		condition = code() & (1 << 20);
+		auto &cpu = machine.cpu();
+		shiftCarry = cpu.flags().carry();
+		overflow = cpu.flags().overflow();
+		rnVal = cpu.regs()[rn];
 		calcOperand2(machine);
 		auto endval = calculate();
 		if (writeRd())
-			machine.cpu().regs().set(rd, endval);
+			cpu.regs().set(rd, endval);
 		if (condition)
 			adjustFlags(machine, endval);
 	}
@@ -92,56 +124,57 @@ protected:
 	}
 
 private:
+	// Immediate operand 2.
+	uint32_t precalculatedImmediateOp2;
+
+	// Register operand 2.
+	bool useRegisterToShift;
+	int rm;
+	int rs;
+	int immediateShiftAmount;
+	ShiftType shiftType;
+	bitshift<uint32_t> shiftFunction;
+
 	void calcOperand2(Machine &machine)
 	{
 		if (immediate)
 		{
-			operand2Immediate();
+			op2 = precalculatedImmediateOp2;
 		}
 		else
 		{
-			operand2ByRegisterShift(machine);
+			op2 = operand2ByRegisterShift(machine);
 		}
 	}
 
-	void operand2Immediate()
+	uint32_t operand2Immediate()
 	{
 		uint32_t imm = code() & 0xff;
 		auto rotate = (code() >> 8) & 0xf;
-		op2 = rotateRight<uint32_t>(imm, rotate * 2);
+		return rotateRight<uint32_t>(imm, rotate * 2);
 	}
 
-	void operand2ByRegisterShift(Machine &machine)
+	uint32_t operand2ByRegisterShift(Machine &machine)
 	{
-		auto rm = code() & 0xf;
-		auto value = machine.cpu().regs()[rm];
-		bool useRegister = code() & (1 << 4);
+		regval value = machine.cpu().regs()[rm];
 		int shiftAmount = 0;
-		auto shiftType = static_cast<ShiftType>((code() >> 5) & 0b11);
-		if (useRegister)
+		if (useRegisterToShift)
 		{
-			auto rs = (code() >> 8) & 0xf;
-			if (rs == 15)
-			{
-				throw IllegalOpcodeError("shift register cannot be r15");
-			}
 			shiftAmount = machine.cpu().regs()[rs] & 0xff;
 		}
 		else
 		{
-			shiftAmount = (code() >> 7) & 0x1f;
+			shiftAmount = immediateShiftAmount;
 			if (shiftType == ShiftType::ror && shiftAmount == 0)
 			{
-				op2 = rotateRightExtended(value,
+				return rotateRightExtended(value,
 					machine.cpu().flags().carry(),
 					&shiftCarry);
-				return;
 			}
 			if ((shiftType == ShiftType::lsr || shiftType == ShiftType::asr) && shiftAmount == 0)
 				shiftAmount = 32;
 		}
-		auto shift = shifter<uint32_t>(static_cast<int>(shiftType));
-		op2 = shift(value, shiftAmount, &shiftCarry);
+		return shiftFunction(value, shiftAmount, &shiftCarry);
 	}
 };
 
@@ -166,7 +199,7 @@ public:
 	using DataProcessingLogic::DataProcessingLogic;
 
 protected:
-	bool writeRd() const
+	bool writeRd() const override
 	{
 		return false;
 	}
@@ -221,7 +254,7 @@ public:
 	using DataProcessingArithmetic::DataProcessingArithmetic;
 
 protected:
-	bool writeRd() const
+	bool writeRd() const override
 	{
 		return false;
 	}
