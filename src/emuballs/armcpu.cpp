@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Zalewa <zalewapl@gmail.com>.
+ * Copyright 2017 Zalewa <zalewapl@gmail.com>.
  *
  * This file is part of Emuballs.
  *
@@ -16,38 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
  */
-#pragma once
-
 #include "armcpu.hpp"
-#include "dptr_impl.hpp"
 
-namespace Emuballs
+namespace Emuballs { namespace Arm {
+
+RegisterSet::RegisterSet()
 {
+	regs.resize(16, 0);
+	resetPcChanged();
+}
 
-class Memory;
-class TrackedMemory;
-
-namespace Arm
-{
-
-class Machine
-{
-public:
-	Cpu &cpu();
-	const Cpu &cpu() const;
-
-	TrackedMemory memory();
-	const TrackedMemory memory() const;
-
-	Memory &untrackedMemory();
-	const Memory &untrackedMemory() const;
-
-	void cycle();
-
-private:
-	DPtr<Machine> d;
-};
-
-} // namespace Arm
-
-} // namespace Emuballs
+}}

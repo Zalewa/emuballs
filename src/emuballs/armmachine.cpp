@@ -27,18 +27,6 @@
 #include <queue>
 #include <sstream>
 
-namespace Emuballs { namespace Arm {
-
-RegisterSet::RegisterSet()
-{
-	regs.resize(16, 0);
-	resetPcChanged();
-}
-
-}}
-
-///////////////////////////////////////////////////////////////////////////
-
 namespace Emuballs { namespace Arm
 {
 class Prefetch

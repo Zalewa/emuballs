@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Emuballs.  If not, see <http://www.gnu.org/licenses/>.
 set(SOURCES
+	armcpu.cpp
 	armgpu.cpp
 	armmachine.cpp
 	armopcode.cpp

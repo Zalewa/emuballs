@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE machine_armflags
 #include <boost/test/unit_test.hpp>
 #include <sstream>
-#include "src/emuballs/armmachine.hpp"
+#include "src/emuballs/armcpu.hpp"
 
 using namespace Emuballs::Arm;
 
