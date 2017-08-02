@@ -76,49 +76,15 @@ private:
 	}
 };
 
-
-static const int WORD_SIZE = 4;
-
-Page::Page(memsize size)
-{
-	bytes.resize(size);
-}
-
-const uint8_t &Page::operator[](memsize index) const
-{
-	if (index >= bytes.size())
-	{
-		throw std::out_of_range("index outsize page size");
-	}
-	return bytes[index];
-}
-
-const std::vector<uint8_t> &Page::contents() const
-{
-	return bytes;
-}
-
-std::vector<uint8_t> &Page::contents()
-{
-	return bytes;
-}
-
-void Page::setContents(memsize offset, const std::vector<uint8_t> &bytes)
-{
-	setContents(offset, bytes.begin(), bytes.end());
-}
-
-memsize Page::size() const
-{
-	return bytes.size();
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
 namespace Emuballs
 {
+
+static const int WORD_SIZE = 4;
+
 DClass<Emuballs::Memory>
 {
 public:
@@ -458,85 +424,6 @@ void MemoryStreamWriter::writeUint64(uint64_t val)
 void MemoryStreamWriter::skip(memsize amount)
 {
 	_offset += amount;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-TrackedMemory::TrackedMemory(Memory &memory)
-	: memory(memory)
-{
-}
-
-memsize TrackedMemory::putChunk(memsize address, const std::vector<uint8_t> &chunk)
-{
-	auto ret = memory.putChunk(address, chunk);
-	memory.execObservers(address, ret, Access::Write);
-	return ret;
-}
-
-memsize TrackedMemory::putChunk(memsize address, const uint8_t *begin, memsize length)
-{
-	auto ret = memory.putChunk(address, begin, length);
-	memory.execObservers(address, ret, Access::Write);
-	return ret;
-}
-
-std::vector<uint8_t> TrackedMemory::chunk(memsize address, memsize length) const
-{
-	memory.execObservers(address, length, Access::PreRead);
-	auto ret = memory.chunk(address, length);
-	memory.execObservers(address, ret.size(), Access::Read);
-	return ret;
-}
-
-memsize TrackedMemory::chunk(memsize address, memsize length, uint8_t *begin) const
-{
-	memory.execObservers(address, length, Access::PreRead);
-	auto ret = memory.chunk(address, length, begin);
-	memory.execObservers(address, ret, Access::Read);
-	return ret;
-}
-
-void TrackedMemory::putByte(memsize address, uint8_t value)
-{
-	memory.putByte(address, value);
-	memory.execObservers(address, 0, Access::Write);
-}
-
-uint8_t TrackedMemory::byte(memsize address) const
-{
-	memory.execObservers(address, 0, Access::PreRead);
-	auto ret = memory.byte(address);
-	memory.execObservers(address, 0, Access::Read);
-	return ret;
-}
-
-void TrackedMemory::putWord(memsize address, uint32_t value)
-{
-	memory.putWord(address, value);
-	memory.execObservers(address, 0, Access::Write);
-}
-
-uint32_t TrackedMemory::word(memsize address) const
-{
-	memory.execObservers(address, 0, Access::PreRead);
-	auto ret = memory.word(address);
-	memory.execObservers(address, 0, Access::Read);
-	return ret;
-}
-
-void TrackedMemory::putDword(memsize address, uint64_t value)
-{
-	memory.putDword(address, value);
-	memory.execObservers(address, 0, Access::Write);
-}
-
-uint64_t TrackedMemory::dword(memsize address) const
-{
-	memory.execObservers(address, 0, Access::PreRead);
-	auto ret = memory.dword(address);
-	memory.execObservers(address, 0, Access::Read);
-	return ret;
 }
 
 }

@@ -27,17 +27,37 @@ namespace Emuballs
 class Page
 {
 public:
-	Page(memsize size = 0);
+	Page(memsize size = 0)
+	{
+		bytes.resize(size);
+	}
 
-	const uint8_t &operator[](memsize index) const;
+	const uint8_t &operator[](memsize index) const
+	{
+		if (index >= bytes.size())
+			throw std::out_of_range("index outsize page size");
+		return bytes[index];
+	}
+
 	uint8_t &operator[](memsize index)
 	{
 		return const_cast<uint8_t&>( static_cast<const Page&>(*this)[index] );
 	}
 
-	const std::vector<uint8_t> &contents() const;
-	std::vector<uint8_t> &contents();
-	void setContents(memsize offset, const std::vector<uint8_t> &bytes);
+	const std::vector<uint8_t> &contents() const
+	{
+		return bytes;
+	}
+
+	std::vector<uint8_t> &contents()
+	{
+		return bytes;
+	}
+
+	void setContents(memsize offset, const std::vector<uint8_t> &bytes)
+	{
+		setContents(offset, bytes.begin(), bytes.end());
+	}
 
 	template<class iter>
 	void setContents(memsize offset, iter bytesBegin, iter bytesEnd)
@@ -48,7 +68,10 @@ public:
 		std::copy(bytesBegin, bytesEnd, this->bytes.begin() + offset);
 	}
 
-	memsize size() const;
+	memsize size() const
+	{
+		return bytes.size();
+	}
 
 private:
 	std::vector<uint8_t> bytes;
@@ -85,23 +108,84 @@ private:
 class TrackedMemory
 {
 public:
-	TrackedMemory(Memory &memory);
+	TrackedMemory(Memory &memory)
+		: memory(memory)
+	{
+	}
 
-	memsize putChunk(memsize address, const std::vector<uint8_t> &chunk);
-	memsize putChunk(memsize address, const uint8_t *begin, memsize length);
+	memsize putChunk(memsize address, const std::vector<uint8_t> &chunk)
+	{
+		auto ret = memory.putChunk(address, chunk);
+		memory.execObservers(address, ret, Access::Write);
+		return ret;
+	}
 
-	std::vector<uint8_t> chunk(memsize address, memsize length) const;
-	memsize chunk(memsize address, memsize length, uint8_t *begin) const;
+	memsize putChunk(memsize address, const uint8_t *begin, memsize length)
+	{
+		auto ret = memory.putChunk(address, begin, length);
+		memory.execObservers(address, ret, Access::Write);
+		return ret;
+	}
 
-	void putByte(memsize address, uint8_t value);
-	uint8_t byte(memsize address) const;
+	std::vector<uint8_t> chunk(memsize address, memsize length) const
+	{
+		memory.execObservers(address, length, Access::PreRead);
+		auto ret = memory.chunk(address, length);
+		memory.execObservers(address, ret.size(), Access::Read);
+		return ret;
+	}
 
-	void putWord(memsize address, uint32_t value);
-	uint32_t word(memsize address) const;
+	memsize chunk(memsize address, memsize length, uint8_t *begin) const
+	{
+		memory.execObservers(address, length, Access::PreRead);
+		auto ret = memory.chunk(address, length, begin);
+		memory.execObservers(address, ret, Access::Read);
+		return ret;
+	}
 
-	void putDword(memsize address, uint64_t value);
-	uint64_t dword(memsize address) const;
+	void putByte(memsize address, uint8_t value)
+	{
+		memory.putByte(address, value);
+		memory.execObservers(address, 0, Access::Write);
+	}
 
+	uint8_t byte(memsize address) const
+	{
+		memory.execObservers(address, 0, Access::PreRead);
+		auto ret = memory.byte(address);
+		memory.execObservers(address, 0, Access::Read);
+		return ret;
+	}
+
+	void putWord(memsize address, uint32_t value)
+	{
+		memory.putWord(address, value);
+		memory.execObservers(address, 0, Access::Write);
+	}
+
+	uint32_t word(memsize address) const
+	{
+		memory.execObservers(address, 0, Access::PreRead);
+		auto ret = memory.word(address);
+		memory.execObservers(address, 0, Access::Read);
+		return ret;
+	}
+
+	void putDword(memsize address, uint64_t value)
+	{
+		memory.putDword(address, value);
+		memory.execObservers(address, 0, Access::Write);
+	}
+
+	uint64_t dword(memsize address) const
+	{
+		memory.execObservers(address, 0, Access::PreRead);
+		auto ret = memory.dword(address);
+		memory.execObservers(address, 0, Access::Read);
+		return ret;
+	}
+
+private:
 	Memory &memory;
 };
 
