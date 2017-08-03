@@ -21,7 +21,7 @@
 #include "armmachine.hpp"
 #include "armopcode_dataproc_psr.hpp"
 #include "errors_private.hpp"
-#include "memory_impl.hpp"
+#include "memory.hpp"
 #include "shift.hpp"
 #include <algorithm>
 

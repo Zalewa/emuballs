@@ -18,7 +18,7 @@
  */
 #define BOOST_TEST_MODULE machine_memory
 #include <boost/test/unit_test.hpp>
-#include "src/emuballs/memory_impl.hpp"
+#include "src/emuballs/memory.hpp"
 
 using namespace Emuballs;
 

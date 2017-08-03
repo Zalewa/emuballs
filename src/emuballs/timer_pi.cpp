@@ -18,7 +18,7 @@
  */
 #include "timer_pi.hpp"
 
-#include "memory_impl.hpp"
+#include "memory.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cstddef>

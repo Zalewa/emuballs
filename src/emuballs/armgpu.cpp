@@ -21,7 +21,7 @@
 #include "emuballs/canvas.hpp"
 #include "emuballs/color.hpp"
 
-#include "memory_impl.hpp"
+#include "memory.hpp"
 
 #include <cstddef>
 #include <functional>

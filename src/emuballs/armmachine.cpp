@@ -21,7 +21,7 @@
 #include "emuballs/errors.hpp"
 
 #include "array_queue.hpp"
-#include "memory_impl.hpp"
+#include "memory.hpp"
 #include "opdecoder.hpp"
 
 #include <queue>
