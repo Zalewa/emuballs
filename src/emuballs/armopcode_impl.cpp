@@ -252,25 +252,33 @@ protected:
 class HalfwordDataTransfer : public Opcode
 {
 public:
-	using Opcode::Opcode;
+	HalfwordDataTransfer(uint32_t code)
+		: Opcode(code)
+	{
+		halfword = code & (1 << 5);
+		isSigned = code & (1 << 6);
+		load = code & (1 << 20);
+		writeBack = code & (1 << 21);
+		immediateOffset = code & (1 << 22);
+		up = code & (1 << 23);
+		preIndexing = code & (1 << 24);
+
+		rn = (code >> 16) & 0xf;
+		rd = (code >> 12) & 0xf;
+		rm = code & 0xf;
+	}
+
 protected:
 	void run(Machine &machine) override
 	{
-		bool halfword = code() & (1 << 5);
-		bool isSigned = code() & (1 << 6);
-		bool load = code() & (1 << 20);
-		bool writeBack = code() & (1 << 21);
-		bool immediateOffset = code() & (1 << 22);
-		bool up = code() & (1 << 23);
-		bool preIndexing = code() & (1 << 24);
-
-		memsize address = machine.cpu().regs()[rn()];
+		memsize address = machine.cpu().regs()[rn];
 
 		int offset = 0;
 		if (immediateOffset)
 			offset = (code() & 0xf) | ((code() >> 4) & 0xf0);
 		else
-			offset = machine.cpu().regs()[rm()];
+			offset = machine.cpu().regs()[rm];
+
 		if (!up)
 			offset = -offset;
 
@@ -300,11 +308,11 @@ protected:
 						value |= ~static_cast<regval>(0xff);
 				}
 			}
-			machine.cpu().regs().set(rd(), value);
+			machine.cpu().regs().set(rd, value);
 		}
 		else
 		{
-			regval value = machine.cpu().regs()[rd()];
+			regval value = machine.cpu().regs()[rd];
 			machine.memory().putByte(offsetAddress, value & 0xff);
 			if (halfword)
 			{
@@ -313,29 +321,20 @@ protected:
 		}
 
 		if (!preIndexing || writeBack)
-			machine.cpu().regs().set(rn(), address + offset);
+			machine.cpu().regs().set(rn, address + offset);
 	}
 
 private:
-	int rn() const
-	{
-		return (code() >> 16) & 0xf;
-	}
-
-	int rd() const
-	{
-		return (code() >> 12) & 0xf;
-	}
-
-	int rm() const
-	{
-		return code() & 0xf;
-	}
-
-	bool isPreIndexing() const
-	{
-		return code() & (1 << 24);
-	}
+	bool halfword;
+	bool isSigned;
+	bool load;
+	bool writeBack;
+	bool immediateOffset;
+	bool up;
+	bool preIndexing;
+	int rn;
+	int rd;
+	int rm;
 };
 
 class DoublewordDataTransfer  : public Opcode
