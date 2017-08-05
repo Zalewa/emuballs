@@ -77,12 +77,8 @@ private:
 	static const memsize OP_PAGE_OFFSET_MASK = 0xffff;
 	static const memsize OP_PAGE_MASK = ~OP_PAGE_OFFSET_MASK;
 	static const memsize OP_PAGE_SIZE = (OP_PAGE_OFFSET_MASK) + 1;
-	struct Op
-	{
-		Opcode* opcode = nullptr;
-	};
 
-	typedef std::array<Op, OP_PAGE_SIZE> OpPage;
+	typedef std::array<Opcode*, OP_PAGE_SIZE> OpPage;
 
 	std::map<memsize, OpPage> opPages;
 	memsize currentPageAddress = 0;
@@ -90,7 +86,9 @@ private:
 
 	OpPage *createPage(memsize address)
 	{
-		opPages.emplace(address, OpPage());
+		// Make sure that the OpPage is zero-init
+		// because we rely on nullptrs.
+		opPages.emplace(address, OpPage {});
 		return &opPages.find(0)->second;
 	}
 
@@ -112,7 +110,9 @@ private:
 
 	Opcode *findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
 	{
-		Opcode *op = (*currentPage)[address & OP_PAGE_OFFSET_MASK].opcode;
+		Opcode *op = (*currentPage)[address & OP_PAGE_OFFSET_MASK];
+		// Additional 'code() == instruction' check is in case
+		// of self-modifying code.
 		if (op != nullptr && op->code() == instruction)
 			return op;
 		return nullptr;
@@ -120,9 +120,7 @@ private:
 
 	void saveOpcodeOnCurrentPage(memsize address, Opcode* opcode)
 	{
-		(*currentPage)[address & OP_PAGE_OFFSET_MASK] = Op {
-			.opcode = opcode
-		};
+		(*currentPage)[address & OP_PAGE_OFFSET_MASK] = opcode;
 	}
 };
 
