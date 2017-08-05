@@ -93,7 +93,7 @@ Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 	Opcode *decodedOp = findDecodedOp(instruction);
 	if (decodedOp != nullptr)
 	{
-		saveOpcodeOnCurrentPage(address, instruction, decodedOp);
+		saveOpcodeOnCurrentPage(address, decodedOp);
 		return decodedOp;
 	}
 	// Try to decode using one of the factories.
@@ -105,7 +105,7 @@ Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 		{
 			opcode->validate();
 			decodedOps[decodedMapAddress(instruction)].insert(std::make_pair(instruction, opcode));
-			saveOpcodeOnCurrentPage(address, instruction, opcode.get());
+			saveOpcodeOnCurrentPage(address, opcode.get());
 			return opcode.get();
 		}
 	}

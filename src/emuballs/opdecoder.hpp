@@ -79,7 +79,6 @@ private:
 	static const memsize OP_PAGE_SIZE = (OP_PAGE_OFFSET_MASK) + 1;
 	struct Op
 	{
-		uint32_t instruction = 0;
 		Opcode* opcode = nullptr;
 	};
 
@@ -113,16 +112,15 @@ private:
 
 	Opcode *findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
 	{
-		Op &op = (*currentPage)[address & OP_PAGE_OFFSET_MASK];
-		if (op.instruction == instruction)
-			return op.opcode;
+		Opcode *op = (*currentPage)[address & OP_PAGE_OFFSET_MASK].opcode;
+		if (op != nullptr && op->code() == instruction)
+			return op;
 		return nullptr;
 	}
 
-	void saveOpcodeOnCurrentPage(memsize address, uint32_t instruction, Opcode* opcode)
+	void saveOpcodeOnCurrentPage(memsize address, Opcode* opcode)
 	{
 		(*currentPage)[address & OP_PAGE_OFFSET_MASK] = Op {
-			.instruction = instruction,
 			.opcode = opcode
 		};
 	}
