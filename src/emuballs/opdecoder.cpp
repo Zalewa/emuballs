@@ -39,17 +39,6 @@ OpDecoder::OpDecoder(const OpDecoder &other)
 	adjustPointers();
 }
 
-OpDecoder::OpDecoder(OpDecoder && other) noexcept
-{
-	swap(*this, other);
-}
-
-OpDecoder &OpDecoder::operator=(OpDecoder other)
-{
-	swap(*this, other);
-	return *this;
-}
-
 void swap(OpDecoder &a, OpDecoder &b) noexcept
 {
 	using std::swap;

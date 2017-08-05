@@ -39,8 +39,17 @@ class OpDecoder
 public:
 	OpDecoder();
 	OpDecoder(const OpDecoder &other);
-	OpDecoder(OpDecoder && other) noexcept;
-	OpDecoder &operator=(OpDecoder other);
+	OpDecoder(OpDecoder && other) noexcept
+	{
+		swap(*this, other);
+	}
+
+	OpDecoder &operator=(OpDecoder other)
+	{
+		swap(*this, other);
+		return *this;
+	}
+
 	friend void swap(OpDecoder &a, OpDecoder &b) noexcept;
 
 	Opcode* next(std::istream &);
