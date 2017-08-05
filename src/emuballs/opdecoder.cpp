@@ -26,6 +26,41 @@
 
 namespace Emuballs { namespace Arm {
 
+OpDecoder::OpDecoder()
+{
+	currentPage = createPage(currentPageAddress);
+}
+
+OpDecoder::OpDecoder(const OpDecoder &other)
+{
+	std::copy(std::begin(other.decodedOps), std::end(other.decodedOps), this->decodedOps);
+	this->opPages = other.opPages;
+	this->currentPageAddress = other.currentPageAddress;
+	this->currentPage = &this->opPages.find(this->currentPageAddress)->second;
+}
+
+OpDecoder::OpDecoder(OpDecoder && other) noexcept
+{
+	swap(*this, other);
+}
+
+OpDecoder &OpDecoder::operator=(OpDecoder other)
+{
+	swap(*this, other);
+	return *this;
+}
+
+void swap(OpDecoder &a, OpDecoder &b) noexcept
+{
+	using std::swap;
+
+	swap(a.decodedOps, b.decodedOps);
+	swap(a.opPages, b.opPages);
+	swap(a.currentPageAddress, b.currentPageAddress);
+	a.currentPage = &a.opPages.find(a.currentPageAddress)->second;
+	b.currentPage = &b.opPages.find(b.currentPageAddress)->second;
+}
+
 static OpDecodeError decodeError(const std::string &why, uint32_t code, std::streampos position)
 {
 	std::stringstream ss;
@@ -46,24 +81,46 @@ OpcodePtr OpDecoder::next(std::istream &input)
 	{
 		throw std::istream::failure("buffer read failure");
 	}
-	try
-	{
-		return decode(code);
-	}
-	catch (const OpDecodeError &e)
-	{
-		throw decodeError("unknown opcode", code, position);
-	}
+	return decode(position, code);
 }
 
-OpcodePtr OpDecoder::decode(uint32_t instruction)
+OpcodePtr OpDecoder::decode(memsize address, uint32_t instruction)
 {
+	// If we're still on the current page, try to find decoded instruction on it.
+	if ((address & OP_PAGE_MASK) == currentPageAddress)
+	{
+		OpcodePtr ptr = findOpcodeOnCurrentPage(address, instruction);
+		if (ptr != nullptr)
+			return ptr;
+	}
+	else
+	{
+		// If we're not on the same page anymore, try to see if we have a page.
+		currentPageAddress = address & OP_PAGE_MASK;
+		auto opPageIt = opPages.find(currentPageAddress);
+		if (opPageIt != opPages.end())
+		{
+			currentPage = &opPageIt->second;
+			OpcodePtr ptr = findOpcodeOnCurrentPage(address, instruction);
+			if (ptr != nullptr)
+				return ptr;
+		}
+		else
+		{
+			currentPage = createPage(currentPageAddress);
+		}
+	}
+
+	// The instruction is either from a new page or self-modifying code
+	// changed the instructions. We need to decode a new.
+
 	// Try to find cached opcode - revalidation is not needed.
 	uint32_t decodedMapAddress = (instruction >> OP_ARRAY_SHIFT) & OP_ARRAY_MASK;
 	auto &decodedMap = decodedOps[decodedMapAddress];
 	auto cachedOpIt = decodedMap.find(instruction);
 	if (cachedOpIt != decodedMap.end())
 	{
+		saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second);
 		return cachedOpIt->second;
 	}
 	// Try to decode using one of the factories.
@@ -75,11 +132,12 @@ OpcodePtr OpDecoder::decode(uint32_t instruction)
 		{
 			opcode->validate();
 			decodedOps[decodedMapAddress].insert(std::make_pair(instruction, opcode));
+			saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second);
 			return opcode;
 		}
 	}
 	// Handle bad opcode.
-	throw decodeError("unkown opcode", instruction, 0);
+	throw decodeError("unkown opcode", instruction, address);
 }
 
 }}

@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(misaligned)
 
 BOOST_AUTO_TEST_CASE(badOpcode)
 {
-	BOOST_CHECK_THROW(decoder.decode(0xf6000010), Emuballs::OpDecodeError);
+	BOOST_CHECK_THROW(decoder.decode(0, 0xf6000010), Emuballs::OpDecodeError);
 	io.write("\x10\x00\x00\xf6", 4);
 	io.seekg(0);
 	BOOST_CHECK_THROW(decoder.next(io), Emuballs::OpDecodeError);
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(badOpcode)
 
 BOOST_AUTO_TEST_CASE(goodOpcodeButBadCombination)
 {
-	BOOST_CHECK_THROW(decoder.decode(0xe791008f), Emuballs::IllegalOpcodeError);
+	BOOST_CHECK_THROW(decoder.decode(0, 0xe791008f), Emuballs::IllegalOpcodeError);
 	io.write("\x8f\x00\x91\xe7", 4);
 	io.seekg(0);
 	BOOST_CHECK_THROW(decoder.next(io), Emuballs::IllegalOpcodeError);

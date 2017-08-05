@@ -187,7 +187,7 @@ void Emuballs::Arm::Machine::cycle()
 	OpcodePtr opcode;
 	try
 	{
-		opcode = d->decoder.decode(instruction);
+		opcode = d->decoder.decode(pc - PREFETCH_SIZE, instruction);
 	}
 	catch (const OpDecodeError &error)
 	{
