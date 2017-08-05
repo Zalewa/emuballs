@@ -36,7 +36,7 @@ OpDecoder::OpDecoder(const OpDecoder &other)
 	std::copy(std::begin(other.decodedOps), std::end(other.decodedOps), this->decodedOps);
 	this->opPages = other.opPages;
 	this->currentPageAddress = other.currentPageAddress;
-	this->currentPage = &this->opPages.find(this->currentPageAddress)->second;
+	adjustPointers();
 }
 
 OpDecoder::OpDecoder(OpDecoder && other) noexcept
@@ -57,8 +57,21 @@ void swap(OpDecoder &a, OpDecoder &b) noexcept
 	swap(a.decodedOps, b.decodedOps);
 	swap(a.opPages, b.opPages);
 	swap(a.currentPageAddress, b.currentPageAddress);
-	a.currentPage = &a.opPages.find(a.currentPageAddress)->second;
-	b.currentPage = &b.opPages.find(b.currentPageAddress)->second;
+	a.adjustPointers();
+	b.adjustPointers();
+}
+
+void OpDecoder::adjustPointers()
+{
+	this->currentPage = &this->opPages.find(this->currentPageAddress)->second;
+	for (auto it : opPages)
+	{
+		for (Op &op : it.second)
+		{
+			if (op.opcode != nullptr)
+				op.opcode = findDecodedOp(op.instruction);
+		}
+	}
 }
 
 static OpDecodeError decodeError(const std::string &why, uint32_t code, std::streampos position)
@@ -115,13 +128,11 @@ Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 	// changed the instructions. We need to decode a new.
 
 	// Try to find cached opcode - revalidation is not needed.
-	uint32_t decodedMapAddress = (instruction >> OP_ARRAY_SHIFT) & OP_ARRAY_MASK;
-	auto &decodedMap = decodedOps[decodedMapAddress];
-	auto cachedOpIt = decodedMap.find(instruction);
-	if (cachedOpIt != decodedMap.end())
+	Opcode *decodedOp = findDecodedOp(instruction);
+	if (decodedOp != nullptr)
 	{
-		saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second.get());
-		return cachedOpIt->second.get();
+		saveOpcodeOnCurrentPage(address, instruction, decodedOp);
+		return decodedOp;
 	}
 	// Try to decode using one of the factories.
 	OpcodePtr opcode = nullptr;
@@ -131,8 +142,8 @@ Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 		if (opcode)
 		{
 			opcode->validate();
-			decodedOps[decodedMapAddress].insert(std::make_pair(instruction, opcode));
-			saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second.get());
+			decodedOps[decodedMapAddress(instruction)].insert(std::make_pair(instruction, opcode));
+			saveOpcodeOnCurrentPage(address, instruction, opcode.get());
 			return opcode.get();
 		}
 	}

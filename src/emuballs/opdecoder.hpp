@@ -73,7 +73,23 @@ private:
 		return &opPages.find(0)->second;
 	}
 
-	Opcode* findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
+	Opcode *findDecodedOp(uint32_t instruction)
+	{
+		auto &decodedMap = decodedOps[decodedMapAddress(instruction)];
+		auto cachedOpIt = decodedMap.find(instruction);
+		if (cachedOpIt != decodedMap.end())
+		{
+			return cachedOpIt->second.get();
+		}
+		return nullptr;
+	}
+
+	uint32_t decodedMapAddress(uint32_t instruction) noexcept
+	{
+		return (instruction >> OP_ARRAY_SHIFT) & OP_ARRAY_MASK;
+	}
+
+	Opcode *findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
 	{
 		Op &op = (*currentPage)[address & OP_PAGE_OFFSET_MASK];
 		if (op.instruction == instruction)
@@ -88,6 +104,8 @@ private:
 			.opcode = opcode
 		};
 	}
+
+	void adjustPointers();
 
 };
 
