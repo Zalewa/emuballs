@@ -19,13 +19,11 @@
 #pragma once
 
 #include "armcpu.hpp"
+#include "memory.hpp"
 #include "dptr_impl.hpp"
 
 namespace Emuballs
 {
-
-class Memory;
-class TrackedMemory;
 
 namespace Arm
 {
@@ -33,19 +31,54 @@ namespace Arm
 class Machine
 {
 public:
-	Cpu &cpu();
-	const Cpu &cpu() const;
+	Machine();
+	Machine(const Machine &other);
+	Machine(Machine && other) noexcept;
+	Machine &operator=(Machine other);
+	friend void swap(Emuballs::Arm::Machine &a, Emuballs::Arm::Machine &b) noexcept
+{
+	using std::swap;
 
-	TrackedMemory memory();
-	const TrackedMemory memory() const;
+	swap(a.d, b.d);
+	swap(a._cpu, b._cpu);
+	swap(a._memory, b._memory);
+	a.adjustPointers();
+	b.adjustPointers();
+}
 
-	Memory &untrackedMemory();
-	const Memory &untrackedMemory() const;
+	Cpu &cpu()
+	{
+		return _cpu;
+	}
+
+	const Cpu &cpu() const
+	{
+		return _cpu;
+	}
+
+	TrackedMemory memory()
+	{
+		return TrackedMemory(_memory);
+	}
+
+	Memory &untrackedMemory()
+	{
+		return _memory;
+	}
+
+	const Memory &untrackedMemory() const
+	{
+		return _memory;
+	}
 
 	void cycle();
 
 private:
+	Cpu _cpu;
+	Memory _memory;
 	DPtr<Machine> d;
+
+	void adjustPointers() noexcept;
 };
 
 } // namespace Arm

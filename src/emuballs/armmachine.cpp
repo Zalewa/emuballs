@@ -21,7 +21,6 @@
 #include "emuballs/errors.hpp"
 
 #include "array_queue.hpp"
-#include "memory.hpp"
 #include "opdecoder.hpp"
 
 #include <queue>
@@ -32,9 +31,9 @@ namespace Emuballs { namespace Arm
 class Prefetch
 {
 public:
-	uint32_t next(Machine &machine)
+	uint32_t next()
 	{
-		collect(machine);
+		collect();
 		return pop();
 	}
 
@@ -60,7 +59,7 @@ private:
 	uint8_t *memptr = nullptr;
 	memsize membase = -1;
 
-	void collect(Machine &machine)
+	void collect()
 	{
 		while (prefetchedInstructions.size() < PREFETCH_INSTRUCTIONS)
 		{
@@ -88,98 +87,48 @@ private:
 DClass<Emuballs::Arm::Machine>
 {
 public:
-	Emuballs::Arm::Cpu cpu;
 	Emuballs::Arm::OpDecoder decoder;
-	Emuballs::Memory memory;
 	Emuballs::Arm::Prefetch prefetch;
-
-	PrivData()
-	{
-		adjustPointers();
-	}
-
-	PrivData(PrivData &&other) noexcept
-		: PrivData()
-	{
-		swap(*this, other);
-	}
-
-	PrivData(const PrivData &other)
-	{
-		this->cpu = other.cpu;
-		this->decoder = other.decoder;
-		this->prefetch = other.prefetch;
-		this->memory = other.memory;
-		adjustPointers();
-	}
-
-	friend void swap(
-		PrivData<Emuballs::Arm::Machine> &a,
-		PrivData<Emuballs::Arm::Machine> &b) noexcept
-	{
-		using std::swap;
-
-		swap(a.cpu, b.cpu);
-		swap(a.decoder, b.decoder);
-		swap(a.prefetch, b.prefetch);
-		swap(a.memory, b.memory);
-		a.adjustPointers();
-		b.adjustPointers();
-	}
-
-	PrivData &operator=(PrivData other)
-	{
-		swap(*this, other);
-		return *this;
-	}
-
-private:
-	void adjustPointers() noexcept
-	{
-		prefetch.setCpuPtr(&cpu);
-		prefetch.setMemoryPtr(&memory);
-	}
 };
 
 DPointered(Emuballs::Arm::Machine);
 
 }
 
-
-Emuballs::Arm::Cpu &Emuballs::Arm::Machine::cpu()
+Emuballs::Arm::Machine::Machine()
 {
-	return d->cpu;
+	adjustPointers();
 }
 
-const Emuballs::Arm::Cpu &Emuballs::Arm::Machine::cpu() const
+Emuballs::Arm::Machine::Machine(const Machine &other)
 {
-	return d->cpu;
+	this->_cpu = other._cpu;
+	this->_memory = other._memory;
+	this->d = other.d;
+	adjustPointers();
 }
 
-Emuballs::TrackedMemory Emuballs::Arm::Machine::memory()
+Emuballs::Arm::Machine::Machine(Machine && other) noexcept
 {
-	return TrackedMemory(d->memory);
+	swap(*this, other);
 }
 
-const Emuballs::TrackedMemory Emuballs::Arm::Machine::memory() const
+Emuballs::Arm::Machine &Emuballs::Arm::Machine::operator=(Machine other)
 {
-	return TrackedMemory(d->memory);
+	swap(*this, other);
+	return *this;
 }
 
-Emuballs::Memory &Emuballs::Arm::Machine::untrackedMemory()
+void Emuballs::Arm::Machine::adjustPointers() noexcept
 {
-	return d->memory;
-}
-
-const Emuballs::Memory &Emuballs::Arm::Machine::untrackedMemory() const
-{
-	return d->memory;
+	d->prefetch.setCpuPtr(&_cpu);
+	d->prefetch.setMemoryPtr(&_memory);
 }
 
 void Emuballs::Arm::Machine::cycle()
 {
 	// Prefetch instructions and get next instruction to execute.
-	auto instruction = d->prefetch.next(*this);
+	auto instruction = d->prefetch.next();
 	RegisterSet &regs = cpu().regs();
 	regval pc = regs.pc();
 	bool pcWasChanged = false;
