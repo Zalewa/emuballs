@@ -37,8 +37,21 @@ class Opcode;
 class OpDecoder
 {
 public:
-	OpDecoder();
-	OpDecoder(const OpDecoder &other);
+	OpDecoder()
+	{
+	}
+
+	OpDecoder(const OpDecoder &other)
+	{
+		// All members of this class are cache.
+		//
+		// They need not be copied, because they can be
+		// regenerated under normal operation.
+		//
+		// Copying them might actually be more expensive than
+		// allowing them to be regenerated from scratch.
+	}
+
 	OpDecoder(OpDecoder && other) noexcept
 	{
 		swap(*this, other);
