@@ -32,6 +32,13 @@ OpDecoder::OpDecoder()
 
 OpDecoder::OpDecoder(const OpDecoder &other)
 {
+	// All members of this class are cache.
+	//
+	// They need not be copied, because they can be
+	// regenerated under normal operation.
+	//
+	// Copying them might actually be more expensive than
+	// allowing them to be regenerated from scratch.
 }
 
 void swap(OpDecoder &a, OpDecoder &b) noexcept
