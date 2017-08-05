@@ -33,10 +33,7 @@ OpDecoder::OpDecoder()
 
 OpDecoder::OpDecoder(const OpDecoder &other)
 {
-	std::copy(std::begin(other.decodedOps), std::end(other.decodedOps), this->decodedOps);
-	this->opPages = other.opPages;
-	this->currentPageAddress = other.currentPageAddress;
-	adjustPointers();
+	this->currentPage = createPage(this->currentPageAddress);
 }
 
 void swap(OpDecoder &a, OpDecoder &b) noexcept
@@ -46,21 +43,7 @@ void swap(OpDecoder &a, OpDecoder &b) noexcept
 	swap(a.decodedOps, b.decodedOps);
 	swap(a.opPages, b.opPages);
 	swap(a.currentPageAddress, b.currentPageAddress);
-	a.adjustPointers();
-	b.adjustPointers();
-}
-
-void OpDecoder::adjustPointers()
-{
-	this->currentPage = &this->opPages.find(this->currentPageAddress)->second;
-	for (auto it : opPages)
-	{
-		for (Op &op : it.second)
-		{
-			if (op.opcode != nullptr)
-				op.opcode = findDecodedOp(op.instruction);
-		}
-	}
+	swap(a.currentPage, b.currentPage);
 }
 
 static OpDecodeError decodeError(const std::string &why, uint32_t code, std::streampos position)

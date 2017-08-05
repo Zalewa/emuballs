@@ -70,7 +70,7 @@ private:
 		Opcode* opcode = nullptr;
 	};
 
-	typedef std::array<Op, OP_PAGE_SIZE> OpPage;
+	typedef std::vector<Op> OpPage;
 
 	std::map<memsize, OpPage> opPages;
 	memsize currentPageAddress = 0;
@@ -78,7 +78,7 @@ private:
 
 	OpPage *createPage(memsize address)
 	{
-		opPages.emplace(address, OpPage());
+		opPages.insert(std::make_pair(address, OpPage()));
 		return &opPages.find(0)->second;
 	}
 
@@ -100,7 +100,10 @@ private:
 
 	Opcode *findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
 	{
-		Op &op = (*currentPage)[address & OP_PAGE_OFFSET_MASK];
+		uint32_t offset = address & OP_PAGE_OFFSET_MASK;
+		if (offset >= currentPage->size())
+			return nullptr;
+		Op &op = (*currentPage)[offset];
 		if (op.instruction == instruction)
 			return op.opcode;
 		return nullptr;
@@ -108,14 +111,14 @@ private:
 
 	void saveOpcodeOnCurrentPage(memsize address, uint32_t instruction, Opcode* opcode)
 	{
-		(*currentPage)[address & OP_PAGE_OFFSET_MASK] = Op {
+		uint32_t offset = address & OP_PAGE_OFFSET_MASK;
+		if (currentPage->size() <= offset)
+			currentPage->resize(offset + 1);
+		(*currentPage)[offset] = Op {
 			.instruction = instruction,
 			.opcode = opcode
 		};
 	}
-
-	void adjustPointers();
-
 };
 
 }
