@@ -59,8 +59,10 @@ OpcodePtr OpDecoder::next(std::istream &input)
 OpcodePtr OpDecoder::decode(uint32_t instruction)
 {
 	// Try to find cached opcode - revalidation is not needed.
-	auto cachedOpIt = decodedOps.find(instruction);
-	if (cachedOpIt != decodedOps.end())
+	uint32_t decodedMapAddress = (instruction >> OP_ARRAY_SHIFT) & OP_ARRAY_MASK;
+	auto &decodedMap = decodedOps[decodedMapAddress];
+	auto cachedOpIt = decodedMap.find(instruction);
+	if (cachedOpIt != decodedMap.end())
 	{
 		return cachedOpIt->second;
 	}
@@ -72,7 +74,7 @@ OpcodePtr OpDecoder::decode(uint32_t instruction)
 		if (opcode)
 		{
 			opcode->validate();
-			decodedOps.insert(std::make_pair(instruction, opcode));
+			decodedOps[decodedMapAddress].insert(std::make_pair(instruction, opcode));
 			return opcode;
 		}
 	}

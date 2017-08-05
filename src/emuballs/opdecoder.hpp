@@ -39,7 +39,10 @@ public:
 	OpcodePtr decode(uint32_t instruction);
 
 private:
-	std::map<uint32_t, OpcodePtr> decodedOps;
+	static const int OP_ARRAY_SHIFT = 20;
+	static const int OP_ARRAY_MASK = 0xfff;
+	static const int NUM_OPS_ARRAYS = OP_ARRAY_MASK + 1;
+	std::map<uint32_t, OpcodePtr> decodedOps[NUM_OPS_ARRAYS];
 };
 
 }
