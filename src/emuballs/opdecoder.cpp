@@ -28,12 +28,10 @@ namespace Emuballs { namespace Arm {
 
 OpDecoder::OpDecoder()
 {
-	currentPage = createPage(currentPageAddress);
 }
 
 OpDecoder::OpDecoder(const OpDecoder &other)
 {
-	this->currentPage = createPage(this->currentPageAddress);
 }
 
 void swap(OpDecoder &a, OpDecoder &b) noexcept
@@ -72,7 +70,7 @@ Opcode* OpDecoder::next(std::istream &input)
 Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 {
 	// If we're still on the current page, try to find decoded instruction on it.
-	if ((address & OP_PAGE_MASK) == currentPageAddress)
+	if (currentPage != nullptr && (address & OP_PAGE_MASK) == currentPageAddress)
 	{
 		Opcode* ptr = findOpcodeOnCurrentPage(address, instruction);
 		if (ptr != nullptr)
