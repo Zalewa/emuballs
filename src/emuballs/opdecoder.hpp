@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <istream>
 #include <map>
-#include <vector>
 #include "armopcode.hpp"
 #include "memory.hpp"
 
@@ -61,13 +61,15 @@ private:
 		Opcode* opcode = nullptr;
 	};
 
-	std::map<memsize, std::vector<Op>> opPages;
-	memsize currentPageAddress = 0;
-	std::vector<Op> *currentPage = nullptr;
+	typedef std::array<Op, OP_PAGE_SIZE> OpPage;
 
-	std::vector<Op> *createPage(memsize address)
+	std::map<memsize, OpPage> opPages;
+	memsize currentPageAddress = 0;
+	OpPage *currentPage = nullptr;
+
+	OpPage *createPage(memsize address)
 	{
-		opPages.emplace(address, std::vector<Op>(OP_PAGE_SIZE));
+		opPages.emplace(address, OpPage());
 		return &opPages.find(0)->second;
 	}
 
