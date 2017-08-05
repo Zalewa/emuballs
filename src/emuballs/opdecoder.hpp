@@ -43,8 +43,8 @@ public:
 	OpDecoder &operator=(OpDecoder other);
 	friend void swap(OpDecoder &a, OpDecoder &b) noexcept;
 
-	OpcodePtr next(std::istream &);
-	OpcodePtr decode(memsize address, uint32_t instruction);
+	Opcode* next(std::istream &);
+	Opcode* decode(memsize address, uint32_t instruction);
 
 private:
 	static const int OP_ARRAY_SHIFT = 20;
@@ -58,7 +58,7 @@ private:
 	struct Op
 	{
 		uint32_t instruction = 0;
-		OpcodePtr opcode = nullptr;
+		Opcode* opcode = nullptr;
 	};
 
 	std::map<memsize, std::vector<Op>> opPages;
@@ -71,7 +71,7 @@ private:
 		return &opPages.find(0)->second;
 	}
 
-	OpcodePtr findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
+	Opcode* findOpcodeOnCurrentPage(memsize address, uint32_t instruction)
 	{
 		Op &op = (*currentPage)[address & OP_PAGE_OFFSET_MASK];
 		if (op.instruction == instruction)
@@ -79,7 +79,7 @@ private:
 		return nullptr;
 	}
 
-	void saveOpcodeOnCurrentPage(memsize address, uint32_t instruction, OpcodePtr opcode)
+	void saveOpcodeOnCurrentPage(memsize address, uint32_t instruction, Opcode* opcode)
 	{
 		(*currentPage)[address & OP_PAGE_OFFSET_MASK] = Op {
 			.instruction = instruction,

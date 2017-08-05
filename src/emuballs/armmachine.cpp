@@ -184,7 +184,7 @@ void Emuballs::Arm::Machine::cycle()
 	regval pc = regs.pc();
 	bool pcWasChanged = false;
 	// Decode opcode.
-	OpcodePtr opcode;
+	Opcode* opcode;
 	try
 	{
 		opcode = d->decoder.decode(pc - PREFETCH_SIZE, instruction);

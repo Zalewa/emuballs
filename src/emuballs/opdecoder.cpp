@@ -68,7 +68,7 @@ static OpDecodeError decodeError(const std::string &why, uint32_t code, std::str
 	return OpDecodeError(ss.str());
 }
 
-OpcodePtr OpDecoder::next(std::istream &input)
+Opcode* OpDecoder::next(std::istream &input)
 {
 	auto position = input.tellg();
 	uint32_t code = 0;
@@ -84,12 +84,12 @@ OpcodePtr OpDecoder::next(std::istream &input)
 	return decode(position, code);
 }
 
-OpcodePtr OpDecoder::decode(memsize address, uint32_t instruction)
+Opcode* OpDecoder::decode(memsize address, uint32_t instruction)
 {
 	// If we're still on the current page, try to find decoded instruction on it.
 	if ((address & OP_PAGE_MASK) == currentPageAddress)
 	{
-		OpcodePtr ptr = findOpcodeOnCurrentPage(address, instruction);
+		Opcode* ptr = findOpcodeOnCurrentPage(address, instruction);
 		if (ptr != nullptr)
 			return ptr;
 	}
@@ -101,7 +101,7 @@ OpcodePtr OpDecoder::decode(memsize address, uint32_t instruction)
 		if (opPageIt != opPages.end())
 		{
 			currentPage = &opPageIt->second;
-			OpcodePtr ptr = findOpcodeOnCurrentPage(address, instruction);
+			Opcode* ptr = findOpcodeOnCurrentPage(address, instruction);
 			if (ptr != nullptr)
 				return ptr;
 		}
@@ -120,8 +120,8 @@ OpcodePtr OpDecoder::decode(memsize address, uint32_t instruction)
 	auto cachedOpIt = decodedMap.find(instruction);
 	if (cachedOpIt != decodedMap.end())
 	{
-		saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second);
-		return cachedOpIt->second;
+		saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second.get());
+		return cachedOpIt->second.get();
 	}
 	// Try to decode using one of the factories.
 	OpcodePtr opcode = nullptr;
@@ -132,8 +132,8 @@ OpcodePtr OpDecoder::decode(memsize address, uint32_t instruction)
 		{
 			opcode->validate();
 			decodedOps[decodedMapAddress].insert(std::make_pair(instruction, opcode));
-			saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second);
-			return opcode;
+			saveOpcodeOnCurrentPage(address, instruction, cachedOpIt->second.get());
+			return opcode.get();
 		}
 	}
 	// Handle bad opcode.
