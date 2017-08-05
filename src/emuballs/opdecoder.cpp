@@ -38,6 +38,9 @@ OpcodePtr OpDecoder::next(std::istream &input)
 	auto position = input.tellg();
 	uint32_t code = 0;
 	// TODO FIXME I'll break on big-endian machines:
+	#ifdef EMUBALLS_BIG_ENDIAN
+	#error("big endian not supported")
+	#endif
 	input.read(reinterpret_cast<char*>(&code), sizeof(uint32_t));
 	if (!input)
 	{
