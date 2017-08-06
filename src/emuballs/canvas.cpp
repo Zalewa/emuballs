@@ -35,8 +35,8 @@ public:
 			for (int32_t xPixel = 0; xPixel < width; ++xPixel)
 			{
 				uint8_t rawcolor[2];
-				rawcolor[0] = pixels[pitch];
-				rawcolor[1] = pixels[pitch + 1];
+				rawcolor[1] = pixels[pitch];
+				rawcolor[0] = pixels[pitch + 1];
 
 				canvas.drawPixel(x + xPixel, y + yPixel, Color(
 						(((rawcolor[0] & 0b11111000) >> 3) * 255) / 31,
