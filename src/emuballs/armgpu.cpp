@@ -130,10 +130,6 @@ struct FrameBufferInfo
 	uint32_t size; // out
 };
 
-enum class BitDepth : int
-{
-	HighColor = 16
-};
 }
 }
 
@@ -303,25 +299,8 @@ public:
 	{
 		auto &fbInfo = frameBufferInfo;
 		std::vector<uint8_t> frameBuffer = memory->chunk(fbInfo->pointer, fbInfo->size);
-		size_t pitch = 0;
-		for (size_t y = 0; y < fbInfo->virtualHeight; ++y)
-		{
-			for (size_t x = 0; x < fbInfo->virtualWidth; ++x)
-			{
-				uint8_t rawcolor[2];
-				rawcolor[0] = frameBuffer[pitch];
-				rawcolor[1] = frameBuffer[pitch + 1];
-
-				canvas.drawPixel(x, y, Color(
-						(((rawcolor[0] & 0b11111000) >> 3) * 255) / 31,
-						((((rawcolor[0] & 0b111) << 3) | ((rawcolor[1] & 0b11100000) >> 5)) * 255) / 63,
-						(rawcolor[1] & 0b11111) * 255 / 31
-					)
-				);
-
-				pitch += 2;
-			}
-		}
+		canvas.drawPicture(0, 0, fbInfo->virtualWidth, fbInfo->virtualHeight,
+			16, fbInfo->virtualWidth * 2, frameBuffer);
 	}
 
 };

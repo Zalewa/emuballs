@@ -47,7 +47,7 @@ public:
 		fitView();
 	}
 
-	void drawPixel(int x, int y, const Emuballs::Color &color)
+	void drawPixel(int32_t x, int32_t y, const Emuballs::Color &color) override
 	{
 		image.setPixel(x, y, 0xff000000 |
 			static_cast<uint32_t>(color.r) << 16 |
@@ -55,7 +55,7 @@ public:
 			static_cast<uint32_t>(color.b));
 	}
 
-	void changeSize(int width, int height) override
+	void changeSize(int32_t width, int32_t height) override
 	{
 		image = QImage(width, height, QImage::Format_RGB32);
 	}

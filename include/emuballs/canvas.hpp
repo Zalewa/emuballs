@@ -20,6 +20,7 @@
 
 #include "emuballs/dptr.hpp"
 #include "emuballs/export.h"
+#include <vector>
 
 namespace Emuballs
 {
@@ -36,8 +37,30 @@ public:
 	virtual void begin() = 0;
 	virtual void end() = 0;
 
-	virtual void drawPixel(int x, int y, const Color &color) = 0;
-	virtual void changeSize(int width, int height) = 0;
+	/**
+	 * Draw a whole picture on screen.
+	 *
+	 * The default implementation is inefficient and will just drawPixel() in loops.
+	 *
+	 * @param x
+	 *     Starting x position from top-left corner.
+	 * @param y
+	 *     Starting y position from top-left corner.
+	 * @param width
+	 *     Width of picture in pixels.
+	 * @param height
+	 *     Height of picture in pixels.
+	 * @param bitsPerPixel
+	 *     Bit depth of the picture.
+	 * @param pitch
+	 *     How many bytes are per row of pixels.
+	 * @param pixels
+	 *     Pixel data.
+	 */
+	virtual void drawPicture(int32_t x, int32_t y, int32_t width, int32_t height,
+		int32_t bitsPerPixel, int32_t pitch, const std::vector<uint8_t> &pixels);
+	virtual void drawPixel(int32_t x, int32_t y, const Color &color) = 0;
+	virtual void changeSize(int32_t width, int32_t height) = 0;
 
 private:
 	DPtr<Canvas> d;

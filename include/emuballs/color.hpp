@@ -43,4 +43,9 @@ public:
 	}
 };
 
+enum class BitDepth : int
+{
+	HighColor = 16
+};
+
 }
