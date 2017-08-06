@@ -18,14 +18,13 @@
  */
 #pragma once
 
+#include "emuballs/color.hpp"
 #include "emuballs/dptr.hpp"
 #include "emuballs/export.h"
 #include <vector>
 
 namespace Emuballs
 {
-struct Color;
-
 class EMUBALLS_API Canvas
 {
 public:
@@ -60,7 +59,7 @@ public:
 	virtual void drawPicture(int32_t x, int32_t y, int32_t width, int32_t height,
 		int32_t bitsPerPixel, int32_t pitch, const std::vector<uint8_t> &pixels);
 	virtual void drawPixel(int32_t x, int32_t y, const Color &color) = 0;
-	virtual void changeSize(int32_t width, int32_t height) = 0;
+	virtual void changeSize(int32_t width, int32_t height, BitDepth depth) = 0;
 
 private:
 	DPtr<Canvas> d;

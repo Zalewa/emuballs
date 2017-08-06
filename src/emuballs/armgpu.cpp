@@ -300,7 +300,7 @@ public:
 		auto &fbInfo = frameBufferInfo;
 		std::vector<uint8_t> frameBuffer = memory->chunk(fbInfo->pointer, fbInfo->size);
 		canvas.drawPicture(0, 0, fbInfo->virtualWidth, fbInfo->virtualHeight,
-			16, fbInfo->virtualWidth * 2, frameBuffer);
+			16, fbInfo->pitch, frameBuffer);
 	}
 
 };
@@ -345,7 +345,8 @@ void Gpu::draw(Canvas &canvas)
 	auto &fbInfo = d->frameBufferInfo;
 
 	canvas.begin();
-	canvas.changeSize(fbInfo->virtualWidth, fbInfo->virtualHeight);
+	canvas.changeSize(fbInfo->virtualWidth, fbInfo->virtualHeight,
+		static_cast<BitDepth>(fbInfo->bitDepth));
 	if (fbInfo->bitDepth == static_cast<int>(BitDepth::HighColor))
 	{
 		d->drawRgb16(canvas);

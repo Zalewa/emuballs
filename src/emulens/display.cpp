@@ -55,9 +55,19 @@ public:
 			static_cast<uint32_t>(color.b));
 	}
 
-	void changeSize(int32_t width, int32_t height) override
+	void changeSize(int32_t width, int32_t height, Emuballs::BitDepth depth) override
 	{
-		image = QImage(width, height, QImage::Format_RGB32);
+		auto format = QImage::Format_RGB32;
+		switch (depth)
+		{
+		case Emuballs::BitDepth::HighColor:
+			format = QImage::Format_RGB16;
+			break;
+		default:
+			// Stick with RAII value.
+			break;
+		}
+		image = QImage(width, height, format);
 	}
 
 	void fitView()
