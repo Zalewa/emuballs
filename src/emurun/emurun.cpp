@@ -80,8 +80,11 @@ int execute(const std::string &deviceName, const std::string &programPath,
 	int64_t cycleIdx = 0;
 	while (keepRunning && (maxCycles < 0 || cycleIdx < maxCycles))
 	{
-		device->cycle();
-		++cycleIdx;
+		int cycles = 10000;
+		if (maxCycles > 0 && maxCycles - cycleIdx < cycles)
+			cycles = maxCycles - cycleIdx;
+		device->cycle(cycles);
+		cycleIdx += cycles;
 	}
 
 	// Summary.

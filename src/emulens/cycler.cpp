@@ -46,12 +46,11 @@ void Cycler::cycle()
 	{
 		if (isAutoRun())
 		{
-			for (int i = 0; i < d->deviceCyclesPerAutoRunCycle; ++i)
-				d->device->cycle();
+			d->device->cycle(d->deviceCyclesPerAutoRunCycle);
 		}
 		else
 		{
-			d->device->cycle();
+			d->device->cycle(1);
 		}
 		emit updated();
 	}

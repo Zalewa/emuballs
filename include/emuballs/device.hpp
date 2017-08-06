@@ -41,7 +41,18 @@ public:
 	Device &operator=(const Device &other) = delete;
 	virtual ~Device();
 
-	virtual void cycle() = 0;
+	/**
+	 * Make the machine run.
+	 *
+	 * Each cycle is execution of 1 opcode + 1 cycle of GPU, whereas
+	 * GPU only collects the mailbox.
+	 *
+	 * @param cycles
+	 *     If Device is to be run in an auto-run mode, it will be beneficial
+	 *     from performance's point of view to run many cycles at once, without
+	 *     returning from cycle(). For step-by-step mode this should be 1.
+	 */
+	virtual void cycle(uint32_t cycles) = 0;
 	virtual void draw(Canvas &canvas) = 0;
 	virtual Memory &memory() = 0;
 	virtual void reset() = 0;

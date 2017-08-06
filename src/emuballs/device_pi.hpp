@@ -46,7 +46,7 @@ class PiDevice : public Device
 public:
 	PiDevice(const PiDef &definition);
 
-	void cycle() override;
+	void cycle(uint32_t cycles) override;
 	void draw(Canvas &canvas) override;
 	Memory &memory() override;
 	void reset() override;

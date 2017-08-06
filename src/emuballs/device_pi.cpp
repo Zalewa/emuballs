@@ -64,10 +64,13 @@ PiDevice::PiDevice(const PiDef &definition)
 	reset();
 }
 
-void PiDevice::cycle()
+void PiDevice::cycle(uint32_t cycles)
 {
-	d->machine.cycle();
-	d->gpu->cycle();
+	for (uint32_t i = 0; i < cycles; ++i)
+	{
+		d->machine.cycle();
+		d->gpu->cycle();
+	}
 }
 
 void PiDevice::draw(Canvas &canvas)
