@@ -34,6 +34,7 @@ namespace Emuballs
 namespace Pi
 {
 
+#pragma pack(1)
 struct Timebox
 {
 	static const auto NUM_COMPARES = 4;
@@ -43,6 +44,7 @@ struct Timebox
 	uint64_t counter;
 	uint32_t compare[NUM_COMPARES];
 };
+#pragma pack()
 
 }
 
