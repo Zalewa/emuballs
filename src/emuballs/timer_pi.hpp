@@ -30,13 +30,10 @@ namespace Pi
 class Timer
 {
 public:
-	Timer(Memory &memory);
+	Timer(Memory &memory, memsize address);
 	Timer(const Timer &other) = delete;
 	Timer &operator=(const Timer &other) = delete;
 	~Timer();
-
-	void cycle();
-	void setAddress(memsize address);
 
 private:
 	DPtr<Timer> d;

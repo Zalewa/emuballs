@@ -93,26 +93,16 @@ DPointeredNoCopy(Emuballs::Pi::Timer);
 
 }
 
-Timer::Timer(Memory &memory)
+Timer::Timer(Memory &memory, memsize address)
 {
+	d->address = address;
 	d->memory = &memory;
+
+	d->init();
 }
 
 Timer::~Timer()
 {
 	if (d->observerId != Memory::NO_OBSERVER)
 		d->memory->unobserve(d->observerId);
-}
-
-void Timer::cycle()
-{
-	if (!d->isInit)
-		d->init();
-}
-
-void Timer::setAddress(memsize address)
-{
-	if (d->isInit)
-		throw std::logic_error("cannot change timer address after init");
-	d->address = address;
 }
