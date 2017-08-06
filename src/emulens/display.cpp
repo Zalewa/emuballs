@@ -47,6 +47,12 @@ public:
 		fitView();
 	}
 
+	void drawPicture(int32_t x, int32_t y, int32_t width, int32_t height,
+		int32_t bitsPerPixel, int32_t pitch, const std::vector<uint8_t> &pixels) override
+	{
+		std::copy(pixels.begin(), pixels.end(), image.bits());
+	}
+
 	void drawPixel(int32_t x, int32_t y, const Emuballs::Color &color) override
 	{
 		image.setPixel(x, y, 0xff000000 |

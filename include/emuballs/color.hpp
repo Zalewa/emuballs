@@ -45,7 +45,11 @@ public:
 
 enum class BitDepth : int
 {
-	HighColor = 16
+	Mono = 1,
+	LowColor = 8,
+	HighColor = 16,
+	TrueColor = 24,
+	Rgba32 = 32
 };
 
 }
