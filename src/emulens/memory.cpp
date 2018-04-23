@@ -97,7 +97,7 @@ public:
 	std::shared_ptr<QIODevice> io()
 	{
 		auto io = std::shared_ptr<QIODevice>(new Emulens::MemoryIo(
-				device->memory(), offset, device->memory().pageSize() - 3));
+				device->memory(), offset, device->memory().pageSize()));
 		io->open(QIODevice::ReadWrite);
 		return io;
 	}
