@@ -118,12 +118,11 @@ Memory::Memory(std::shared_ptr<Emuballs::Device> device, QWidget *parent)
 {
 	d->setupUi(this);
 	d->device = device;
+	d->hexEdit->setOverwriteOnly(true);
 }
 
 void Memory::savePage()
 {
-	// TODO: Writing at the end of editor induces a crash
-	// due to an uncaught exception. Resolve this somehow.
 	std::shared_ptr<QIODevice> device = d->io();
 	d->document->saveTo(device.get());
 }
