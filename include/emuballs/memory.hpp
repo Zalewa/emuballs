@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <vector>
 #include "emuballs/access.hpp"
 #include "emuballs/bitmask_enum.hpp"
